@@ -48,3 +48,6 @@
   - `npm run typecheck`: passed
   - `npm run lint`: passed
   - `npm run build`: passed
+- Sites project provisioned:
+  - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
+  - slug: `game-ref-forge`

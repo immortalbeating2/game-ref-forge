@@ -26,6 +26,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
 - Current implementation branch: `codex/sites-foundation`.
+- Sites project has been provisioned:
+  - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
+  - slug: `game-ref-forge`
 - Sites vinext/React starter has been scaffolded.
 - `.openai/hosting.json` declares D1 binding `DB` and no R2 binding.
 - D1 migration exists for the first-version `references` table.
@@ -56,4 +59,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Commit the Sites foundation branch, run a browser preview check, then prepare a Sites version save/deployment flow.
+Prepare the Sites artifact, save a version, then deploy or report the concrete hosting blocker.
