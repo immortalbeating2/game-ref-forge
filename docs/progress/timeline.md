@@ -55,3 +55,12 @@
   - version: `1`
   - deployment status: `succeeded`
   - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+
+### 2026-06-07
+
+- Branch: `codex/sites-foundation`
+- Mode: branch only
+- Action: merged back to `main`
+- Merge commit: local merge completed on `main`
+- Reason: Sites foundation implementation was locally validated and deployed as version 1
+- Worktree cleanup: no extra worktree was used
