@@ -10,7 +10,7 @@ It collects source links from game asset and game design sites, normalizes them 
 - Product name: `RefForge`
 - Chinese name: `灵感锻造台`
 - Git remote: `https://github.com/immortalbeating2/game-ref-forge.git`
-- Current phase: project documentation baseline before Sites implementation
+- Current phase: Sites foundation implementation
 
 ## First-Version Direction
 
@@ -23,6 +23,26 @@ The first version is a private reference and research tool:
 - One `references` table for first-version storage.
 - No file upload, asset hosting, bulk crawling, or public route in v1.
 
+## Local Development
+
+Requirements:
+
+- Node.js 22.13 or newer.
+
+Commands:
+
+```bash
+npm install
+npm run dev
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm run db:generate
+```
+
+The first Sites implementation uses D1 binding `DB` and keeps R2 disabled.
+
 ## Documentation
 
 Start with [docs/README.md](docs/README.md).
@@ -32,8 +52,8 @@ Important project docs:
 - [Product Vision](docs/product/vision.md)
 - [Source Policy](docs/product/source-policy.md)
 - [Taxonomy](docs/product/taxonomy.md)
+- [Frontend Design](docs/product/frontend-design.md)
 - [Architecture](docs/engineering/architecture.md)
 - [Data Model](docs/engineering/data-model.md)
 - [Implementation Plan](docs/engineering/implementation-plan.md)
 - [Deployment Notes](docs/engineering/deployment.md)
-

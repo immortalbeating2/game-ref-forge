@@ -4,9 +4,9 @@ Updated: 2026-06-07
 
 ## Current Stage
 
-`Documentation Baseline / Sites implementation planning`
+`Sites Foundation / Deployed version 1`
 
-The repository has been initialized as `game-ref-forge` and connected to GitHub. The current work is setting up project identity, product documentation, engineering documentation, agent guidance, and progress traceability before starting Sites implementation.
+The repository has been initialized as `game-ref-forge`, connected to GitHub, and moved from documentation baseline into the first Sites foundation implementation branch.
 
 ## Current Product Direction
 
@@ -24,7 +24,20 @@ It helps collect source links from game asset and game design sites, normalize t
 - Historical design spec is archived under `docs/archive/`.
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
-- Sites application code has not been scaffolded yet.
+- Initial documentation baseline commit exists: `538d43d`.
+- Current implementation branch: `codex/sites-foundation`.
+- Sites project has been provisioned:
+  - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
+  - slug: `game-ref-forge`
+- Sites vinext/React starter has been scaffolded.
+- `.openai/hosting.json` declares D1 binding `DB` and no R2 binding.
+- D1 migration exists for the first-version `references` table.
+- CRUD API routes exist for references.
+- Metadata preview API exists.
+- First-version research desk UI exists with filters, gallery, detail panel, add form, metadata preview, and seed fallback.
+- Local validation has passed for tests, typecheck, lint, and production build.
+- Sites version 1 has been saved and deployed.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 
 ## Active Decisions
 
@@ -40,11 +53,13 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Current Risks
 
-- Sites/plugin behavior may change, so current Sites docs should be checked before implementation and deployment.
+- Sites/plugin behavior may change, so current Sites hosting flow should be checked before saving/deploying a version.
 - Metadata preview may fail or be blocked by source websites.
 - Public display of third-party media has copyright risk unless ownership or license is clear.
 - The taxonomy needs validation with real references before it should be treated as stable.
+- D1 persistence still needs live workflow validation with a real saved reference.
+- Browser screenshot QA was not completed because the in-app browser tool was unavailable in this run.
 
 ## Next Suggested Step
 
-Create an initial commit for the documentation baseline, then start the Sites scaffold only after reviewing `docs/product/frontend-design.md` and `docs/engineering/implementation-plan.md`.
+Open the production URL, add one real reference, and verify D1 persistence plus metadata preview behavior against a real source.

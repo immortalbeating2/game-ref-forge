@@ -6,6 +6,9 @@ dist/
 build/
 .vinext/
 .output/
+.next/
+coverage/
+tsconfig.tsbuildinfo
 
 # Cloudflare / Sites local state
 .wrangler/
@@ -27,4 +30,3 @@ yarn-debug.log*
 Thumbs.db
 .idea/
 .vscode/
-

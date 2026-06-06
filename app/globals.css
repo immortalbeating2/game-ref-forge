@@ -1,0 +1,364 @@
+@import "tailwindcss";
+
+:root {
+  --background: #111315;
+  --foreground: #f3f0e8;
+  --muted: #a7ada8;
+  --panel: #181b1e;
+  --panel-soft: #202428;
+  --border: #343a3f;
+  --accent: #67d5b5;
+  --danger: #ff7878;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+button {
+  min-height: 40px;
+  border: 1px solid #77d9bc;
+  border-radius: 6px;
+  background: #72d9bb;
+  color: #10201b;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #121517;
+  color: var(--foreground);
+  padding: 10px 12px;
+}
+
+textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #d8ddd8;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(360px, 1fr) minmax(300px, 380px);
+  min-height: 100vh;
+}
+
+.sidebar,
+.detail-panel {
+  border-color: var(--border);
+  background: #14171a;
+  padding: 22px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-right: 1px solid var(--border);
+}
+
+.brand-block h1,
+.detail-heading h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+.brand-block p,
+.detail-panel p,
+.card-body p,
+.status-message,
+.result-summary {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #7de0c2;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.ghost-button {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--foreground);
+}
+
+.danger-button {
+  width: 100%;
+  border-color: #6f3434;
+  background: #2b1717;
+  color: #ff9c9c;
+}
+
+.gallery-pane {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.search-label {
+  max-width: 720px;
+}
+
+.status-message {
+  margin: 0;
+  border-left: 3px solid #f3c86a;
+  background: #211d12;
+  padding: 10px 12px;
+}
+
+.reference-form {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-actions,
+.result-summary,
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.result-summary {
+  justify-content: space-between;
+  font-size: 0.86rem;
+}
+
+.reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.reference-card {
+  display: grid;
+  overflow: hidden;
+  min-height: 260px;
+  border-color: var(--border);
+  background: var(--panel);
+  color: var(--foreground);
+  padding: 0;
+  text-align: left;
+}
+
+.reference-card.selected {
+  border-color: #7de0c2;
+  box-shadow: 0 0 0 1px #7de0c2;
+}
+
+.thumbnail {
+  display: grid;
+  min-height: 130px;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  background: linear-gradient(135deg, #253131, #17191d);
+  color: #f2f7f4;
+  font-weight: 800;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-body {
+  display: grid;
+  gap: 9px;
+  padding: 13px;
+}
+
+.card-body h2 {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.badge-row span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #121517;
+  color: #dce3dd;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 7px 8px;
+}
+
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-left: 1px solid var(--border);
+}
+
+.detail-heading {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-heading a {
+  color: #7de0c2;
+  font-weight: 700;
+}
+
+.detail-panel section {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.detail-panel h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.detail-panel dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.detail-panel dl div {
+  display: grid;
+  grid-template-columns: 94px 1fr;
+  gap: 10px;
+}
+
+.detail-panel dt {
+  color: var(--muted);
+}
+
+.detail-panel dd {
+  margin: 0;
+}
+
+.detail-panel ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.empty-detail {
+  margin: auto 0;
+}
+
+.accent-character { background: linear-gradient(135deg, #514074, #202428); }
+.accent-environment { background: linear-gradient(135deg, #365d51, #202428); }
+.accent-prop { background: linear-gradient(135deg, #776244, #202428); }
+.accent-ui_hud { background: linear-gradient(135deg, #345d77, #202428); }
+.accent-vfx { background: linear-gradient(135deg, #70527a, #202428); }
+.accent-material_texture { background: linear-gradient(135deg, #5c665a, #202428); }
+.accent-animation { background: linear-gradient(135deg, #6d4d55, #202428); }
+.accent-audio { background: linear-gradient(135deg, #41506f, #202428); }
+
+@media (max-width: 1120px) {
+  .workspace {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .detail-panel {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace,
+  .toolbar,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar,
+  .detail-panel {
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .gallery-pane,
+  .sidebar,
+  .detail-panel {
+    padding: 16px;
+  }
+}
+
