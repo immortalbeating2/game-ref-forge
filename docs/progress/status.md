@@ -4,7 +4,7 @@ Updated: 2026-06-07
 
 ## Current Stage
 
-`Sites Foundation / Local validation complete`
+`Sites Foundation / Deployed version 1`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, and moved from documentation baseline into the first Sites foundation implementation branch.
 
@@ -36,6 +36,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Metadata preview API exists.
 - First-version research desk UI exists with filters, gallery, detail panel, add form, metadata preview, and seed fallback.
 - Local validation has passed for tests, typecheck, lint, and production build.
+- Sites version 1 has been saved and deployed.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 
 ## Active Decisions
 
@@ -55,8 +57,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Metadata preview may fail or be blocked by source websites.
 - Public display of third-party media has copyright risk unless ownership or license is clear.
 - The taxonomy needs validation with real references before it should be treated as stable.
-- D1 persistence still needs hosted/runtime validation after Sites version save or deployment.
+- D1 persistence still needs live workflow validation with a real saved reference.
+- Browser screenshot QA was not completed because the in-app browser tool was unavailable in this run.
 
 ## Next Suggested Step
 
-Prepare the Sites artifact, save a version, then deploy or report the concrete hosting blocker.
+Open the production URL, add one real reference, and verify D1 persistence plus metadata preview behavior against a real source.
