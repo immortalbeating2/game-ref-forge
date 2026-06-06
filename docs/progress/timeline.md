@@ -34,3 +34,17 @@
 - Scope: documentation baseline and agent guidance only
 - Reason: repository is newly initialized and no application code exists yet
 - Worktree: not used
+
+### 2026-06-07
+
+- Branch: `codex/sites-foundation`
+- Mode: branch only
+- Scope: first Sites scaffold, D1 references schema, CRUD APIs, metadata preview, and first-version research desk UI
+- Reason: implementation work affects application code, API, schema, tests, and deployment configuration
+- Worktree: not used because the task can safely proceed in the single active workspace
+- Base commit: `538d43d`
+- Local validation:
+  - `npm test`: passed
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
