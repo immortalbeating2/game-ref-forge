@@ -91,3 +91,38 @@
 - Scope: production live usability validation, metadata preview validation, interaction QA, layout QA, and minimal fixes
 - Reason: second-round implementation affects validation workflow and may require small code, style, and route fixes
 - Worktree: not used because the task can proceed in the single active workspace
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: prepared QA checklist and validated automated baseline
+- Commits:
+  - `1879315` - prepared second-round live validation checklist
+  - `9ae7c09` - recorded automated baseline validation
+- Validation:
+  - `npm test`: passed
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: hardened UI state before production validation
+- Commit:
+  - `efeac5f` - fixed filtered empty-state behavior and added UI-state regression tests
+- Validation:
+  - `npm test`: passed, 3 files / 6 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+  - Local reference CRUD HTTP smoke: passed after applying existing D1 migration to local `.wrangler/state`
+  - Local metadata preview smoke: success and failure feedback passed
+  - Local Playwright smoke: passed for add, preview, save, reload persistence, empty search, clear filters, delete, desktop layout, and mobile no horizontal overflow
+- Production access probe:
+  - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+  - `GET /`: `403 Forbidden`
+  - `GET /api/references`: `403 Forbidden`
+  - Status: production live data validation remains blocked by Sites `custom` access until an authenticated browser session or temporary access-policy change is available.

@@ -4,9 +4,9 @@ Updated: 2026-06-10
 
 ## Current Stage
 
-`Round 2 Plan / Live usability validation`
+`Round 2 Implementation / Live usability validation partial-blocked`
 
-The repository has been initialized as `game-ref-forge`, connected to GitHub, and moved from documentation baseline into the first Sites foundation implementation branch.
+The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and is now on the second-round live usability validation branch.
 
 ## Current Product Direction
 
@@ -41,6 +41,12 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
 - Second-round design spec exists at `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`.
 - Second-round implementation plan exists at `docs/superpowers/plans/2026-06-10-live-usability-validation.md`.
+- Current second-round branch: `codex/round-2-live-validation`.
+- Second-round QA checklist exists at `docs/qa/2026-06-10-live-usability-validation.md`.
+- UI-state hardening exists for zero-result filter states.
+- Local runtime validation passed after applying the existing D1 migration to local `.wrangler/state`.
+- Local browser smoke passed for add, metadata preview, save, refresh persistence, empty search, clear filters, delete, and desktop/mobile layout checks.
+- Production unauthenticated access currently returns `403 Forbidden` because Sites access is configured as `custom`.
 
 ## Active Decisions
 
@@ -62,7 +68,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - The taxonomy needs validation with real references before it should be treated as stable.
 - D1 persistence still needs live workflow validation with a real saved reference.
 - Browser screenshot QA was not completed because the in-app browser tool was unavailable in the Sites foundation run.
+- Production live create/refresh/delete validation is still blocked until an authenticated browser session or temporary access-policy change is available.
+- Current production D1 data state has not been verified with real QA records.
 
 ## Next Suggested Step
 
-Review the second-round implementation plan, then choose subagent-driven or inline execution.
+Complete authenticated production validation for create, refresh persistence, metadata preview, and delete. If production passes, deploy the UI-state hardening as Sites version 2 and merge the branch back to `main`.
