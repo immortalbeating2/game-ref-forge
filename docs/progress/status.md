@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-07
+Updated: 2026-06-10
 
 ## Current Stage
 
-`Sites Foundation / Deployed version 1`
+`Round 2 Design / Live usability validation`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, and moved from documentation baseline into the first Sites foundation implementation branch.
 
@@ -38,6 +38,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local validation has passed for tests, typecheck, lint, and production build.
 - Sites version 1 has been saved and deployed.
 - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Local GitHub CLI is installed and authenticated for `immortalbeating2`.
+- Second-round design spec exists at `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`.
 
 ## Active Decisions
 
@@ -58,8 +60,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Public display of third-party media has copyright risk unless ownership or license is clear.
 - The taxonomy needs validation with real references before it should be treated as stable.
 - D1 persistence still needs live workflow validation with a real saved reference.
-- Browser screenshot QA was not completed because the in-app browser tool was unavailable in this run.
+- Browser screenshot QA was not completed because the in-app browser tool was unavailable in the Sites foundation run.
 
 ## Next Suggested Step
 
-Open the production URL, add one real reference, and verify D1 persistence plus metadata preview behavior against a real source.
+Review the second-round live usability validation spec, then create an implementation plan before changing code.

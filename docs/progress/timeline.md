@@ -64,3 +64,20 @@
 - Merge commit: local merge completed on `main`
 - Reason: Sites foundation implementation was locally validated and deployed as version 1
 - Worktree cleanup: no extra worktree was used
+
+## Environment Events
+
+### 2026-06-10
+
+- Installed GitHub CLI `2.93.0` with `winget`.
+- Authenticated GitHub CLI for `github.com` account `immortalbeating2`.
+- Verified repository access to `immortalbeating2/game-ref-forge` with `ADMIN` permission.
+
+## Design Events
+
+### 2026-06-10
+
+- Confirmed second-round development focus: production live usability validation.
+- Added design spec:
+  - `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`
+- Scope: production D1 persistence, metadata preview success/failure, delete, main interaction QA, desktop/mobile layout QA, and small fixes only.
