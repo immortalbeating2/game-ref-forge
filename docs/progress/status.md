@@ -4,7 +4,7 @@ Updated: 2026-06-10
 
 ## Current Stage
 
-`Round 2 Design / Live usability validation`
+`Round 2 Plan / Live usability validation`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, and moved from documentation baseline into the first Sites foundation implementation branch.
 
@@ -40,6 +40,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
 - Second-round design spec exists at `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`.
+- Second-round implementation plan exists at `docs/superpowers/plans/2026-06-10-live-usability-validation.md`.
 
 ## Active Decisions
 
@@ -64,4 +65,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Review the second-round live usability validation spec, then create an implementation plan before changing code.
+Review the second-round implementation plan, then choose subagent-driven or inline execution.

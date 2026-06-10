@@ -81,3 +81,5 @@
 - Added design spec:
   - `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`
 - Scope: production D1 persistence, metadata preview success/failure, delete, main interaction QA, desktop/mobile layout QA, and small fixes only.
+- Added implementation plan:
+  - `docs/superpowers/plans/2026-06-10-live-usability-validation.md`
