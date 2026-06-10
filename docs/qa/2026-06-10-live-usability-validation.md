@@ -29,10 +29,10 @@ Delete at least one QA record before final completion.
 
 ## Automated Baseline
 
-- [ ] `npm test`
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
-- [ ] `npm run build`
+- [x] `npm test`
+- [x] `npm run typecheck`
+- [x] `npm run lint`
+- [x] `npm run build`
 
 ## Production Data Validation
 
@@ -81,10 +81,16 @@ Delete at least one QA record before final completion.
 | ID | Area | Finding | Severity | Fix Commit | Status |
 | --- | --- | --- | --- | --- | --- |
 
+## Automated Baseline Result
+
+- `npm test`: passed, 2 test files / 4 tests.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed. Routes include `/`, `/api/metadata/preview`, `/api/references`, and `/api/references/:id`.
+
 ## Final Result
 
 - Status: `not-run`
 - Production version:
 - Deployment URL:
 - Notes:
-
