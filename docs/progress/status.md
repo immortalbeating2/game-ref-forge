@@ -44,6 +44,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Current second-round branch: `codex/round-2-live-validation`.
 - Second-round QA checklist exists at `docs/qa/2026-06-10-live-usability-validation.md`.
 - UI-state hardening exists for zero-result filter states.
+- `public/screenshot.jpeg` exists as the current canonical Sites preview screenshot.
+- Sites version 2 has been saved and deployed from commit `20336ca2dbfcc5a0d10ea9424a619abad3090aee`.
 - Local runtime validation passed after applying the existing D1 migration to local `.wrangler/state`.
 - Local browser smoke passed for add, metadata preview, save, refresh persistence, empty search, clear filters, delete, and desktop/mobile layout checks.
 - Production unauthenticated access currently returns `403 Forbidden` because Sites access is configured as `custom`.

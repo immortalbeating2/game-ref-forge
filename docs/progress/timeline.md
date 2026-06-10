@@ -126,3 +126,19 @@
   - `GET /`: `403 Forbidden`
   - `GET /api/references`: `403 Forbidden`
   - Status: production live data validation remains blocked by Sites `custom` access until an authenticated browser session or temporary access-policy change is available.
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: saved and deployed Sites version 2
+- Commit:
+  - `20336ca` - refreshed canonical site preview screenshot
+- Sites version:
+  - version: `2`
+  - deployment status: `succeeded`
+  - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Post-deploy access probe:
+  - `GET /`: `403 Forbidden`
+  - `GET /api/references`: `403 Forbidden`
+  - Status: version 2 is deployed, but unauthenticated production CRUD validation remains blocked by Sites `custom` access.

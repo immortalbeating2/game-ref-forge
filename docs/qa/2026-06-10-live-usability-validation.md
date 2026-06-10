@@ -125,9 +125,18 @@ Result note:
 - Sites project lookup confirms `access_mode: custom` with an allowlist user.
 - Production create/refresh/delete remains unverified until an authenticated browser session or temporary access-policy change is available.
 
+## Deployment Result
+
+- Sites version 2 saved from commit `20336ca2dbfcc5a0d10ea9424a619abad3090aee`.
+- Production deployment succeeded.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Post-deploy unauthenticated probe:
+  - `GET /`: `403 Forbidden`.
+  - `GET /api/references`: `403 Forbidden`.
+
 ## Final Result
 
 - Status: `partial-blocked`
-- Production version: current deployed version remains production version 1 at time of this note.
+- Production version: version 2 deployed.
 - Deployment URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 - Notes: local runtime and browser smoke passed; production live data validation is blocked by Sites custom access in the current unauthenticated tool path.
