@@ -200,6 +200,20 @@ label {
   gap: 14px;
 }
 
+.empty-results {
+  display: grid;
+  gap: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: #15191c;
+  padding: 18px;
+}
+
+.empty-results h2,
+.empty-results p {
+  margin: 0;
+}
+
 .reference-card {
   display: grid;
   overflow: hidden;
@@ -359,6 +373,15 @@ label {
   .sidebar,
   .detail-panel {
     padding: 16px;
+  }
+
+  .reference-card {
+    min-height: 0;
+  }
+
+  .detail-panel dl div {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 }
 
