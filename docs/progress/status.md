@@ -4,7 +4,7 @@ Updated: 2026-06-11
 
 ## Current Stage
 
-`Round 2 Implementation / Live usability validation partial-blocked`
+`Round 2 Implementation / Live usability validation passed-with-notes`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and is now on the second-round live usability validation branch.
 
@@ -50,6 +50,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local browser smoke passed for add, metadata preview, save, refresh persistence, empty search, clear filters, delete, and desktop/mobile layout checks.
 - Production unauthenticated access currently returns `403 Forbidden` because Sites access is configured as `custom`.
 - On 2026-06-11, temporary `workspace_all` access was tested and still returned `403 Forbidden` for unauthenticated command-line probes; access was restored to `custom`.
+- On 2026-06-11, authenticated in-app browser validation passed for production create, metadata preview success, refresh persistence, delete, post-delete refresh, and metadata failure feedback.
 
 ## Active Decisions
 
@@ -69,11 +70,11 @@ It helps collect source links from game asset and game design sites, normalize t
 - Metadata preview may fail or be blocked by source websites.
 - Public display of third-party media has copyright risk unless ownership or license is clear.
 - The taxonomy needs validation with real references before it should be treated as stable.
-- D1 persistence still needs live workflow validation with a real saved reference.
+- Production D1 persistence has been validated with a real saved reference and delete cleanup.
 - Browser screenshot QA was not completed because the in-app browser tool was unavailable in the Sites foundation run.
-- Production live create/refresh/delete validation is still blocked until an authenticated browser session is available or Sites exposes a true anonymous public access mode.
-- Current production D1 data state has not been verified with real QA records.
+- Native browser confirm dialogs may still require user assistance during automation because confirm input translation timed out.
+- Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 
 ## Next Suggested Step
 
-Complete authenticated production validation for create, refresh persistence, metadata preview, and delete. If production passes, deploy the UI-state hardening as Sites version 2 and merge the branch back to `main`.
+Review the branch and merge `codex/round-2-live-validation` back to `main` when ready.

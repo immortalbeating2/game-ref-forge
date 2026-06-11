@@ -169,7 +169,15 @@
   - User had the production URL open and logged in inside the in-app browser.
   - Prior thread `019e9dc0-85c2-71e2-b1b8-f0df1affa3c7` was read to continue from the same blocker.
 - Retest result:
-  - Browser plugin control still did not expose `node_repl js` / `mcp__node_repl__js`.
-  - Browser and Computer Use discovery did not expose click/type/screenshot/current-tab control tools.
-  - No production QA record was created or deleted by the agent.
-  - Status: production live CRUD remains blocked on authenticated browser-control availability or manual checklist confirmation.
+  - Initial retry still did not expose `node_repl js` / `mcp__node_repl__js`.
+  - After user-side fix, Browser plugin control became available.
+  - Connected to the authenticated `iab` tab at the production URL.
+  - Created one production record from `https://example.com/`.
+  - Metadata success feedback appeared and filled `Example Domain` / `example.com`.
+  - Saved reference successfully and confirmed `Example Domain` was visible.
+  - Refreshed production and confirmed `Example Domain` remained visible from D1.
+  - Deleted `Example Domain`; user accepted the native confirm dialog.
+  - Confirmed post-delete state showed `Reference deleted.` and `0 references`.
+  - Refreshed again and confirmed `Example Domain` remained absent; seed fallback appeared because production D1 was empty.
+  - Metadata failure feedback for `not-a-url` appeared as `Invalid URL string.`
+  - Status: production live CRUD and metadata success/failure validation passed with the note that native confirm dialogs may need user assistance.
