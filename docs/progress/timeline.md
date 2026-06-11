@@ -159,3 +159,17 @@
   - `GET /` after temporary `workspace_all`: `403 Forbidden`
   - `GET /api/references` after temporary `workspace_all`: `403 Forbidden`
   - Status: `workspace_all` still requires workspace authentication and does not enable unauthenticated command-line CRUD validation.
+
+### 2026-06-11
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: retried authenticated production CRUD validation through explicit Browser plugin request
+- Context:
+  - User had the production URL open and logged in inside the in-app browser.
+  - Prior thread `019e9dc0-85c2-71e2-b1b8-f0df1affa3c7` was read to continue from the same blocker.
+- Retest result:
+  - Browser plugin control still did not expose `node_repl js` / `mcp__node_repl__js`.
+  - Browser and Computer Use discovery did not expose click/type/screenshot/current-tab control tools.
+  - No production QA record was created or deleted by the agent.
+  - Status: production live CRUD remains blocked on authenticated browser-control availability or manual checklist confirmation.

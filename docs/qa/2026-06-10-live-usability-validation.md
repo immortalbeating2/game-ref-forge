@@ -135,6 +135,17 @@ Result note:
 - Restored access policy revision: `3`.
 - Production create/refresh/delete remains unverified in an authenticated browser context.
 
+## 2026-06-11 Authenticated Browser Automation Retry
+
+- User opened and logged into the production URL in the in-app browser.
+- User explicitly requested `@browser` / Browser plugin automation against the current logged-in page.
+- Prior thread `019e9dc0-85c2-71e2-b1b8-f0df1affa3c7` was read to confirm the previous blocker and continuation point.
+- Browser skill bootstrap requires `node_repl js` / `mcp__node_repl__js` to control the current `iab` tab.
+- Tool discovery for `node_repl js` returned no callable browser execution tool.
+- Additional discovery for browser and computer-control tools did not expose click, type, screenshot, DOM, or current-tab controls.
+- Result: no production CRUD action was performed by the agent; no QA records were created or deleted.
+- Status: production create/refresh/delete remains blocked on authenticated browser automation availability or manual user confirmation.
+
 ## Deployment Result
 
 - Sites version 2 saved from commit `20336ca2dbfcc5a0d10ea9424a619abad3090aee`.
@@ -149,4 +160,4 @@ Result note:
 - Status: `partial-blocked`
 - Production version: version 2 deployed.
 - Deployment URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
-- Notes: local runtime and browser smoke passed; temporary `workspace_all` access still required workspace authentication and did not permit unauthenticated command-line CRUD validation. Production live data validation still needs an authenticated browser session.
+- Notes: local runtime and browser smoke passed; temporary `workspace_all` access still required workspace authentication and did not permit unauthenticated command-line CRUD validation. A later explicit authenticated in-app browser retry still lacked the required browser-control execution tool, so production live data validation still needs manual confirmation or a working authenticated browser automation tool.
