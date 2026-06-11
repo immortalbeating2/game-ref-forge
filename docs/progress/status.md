@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-06-10
+Updated: 2026-06-11
 
 ## Current Stage
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: `codex/sites-foundation`.
+- Current implementation branch: `codex/round-2-live-validation`.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -49,6 +49,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local runtime validation passed after applying the existing D1 migration to local `.wrangler/state`.
 - Local browser smoke passed for add, metadata preview, save, refresh persistence, empty search, clear filters, delete, and desktop/mobile layout checks.
 - Production unauthenticated access currently returns `403 Forbidden` because Sites access is configured as `custom`.
+- On 2026-06-11, temporary `workspace_all` access was tested and still returned `403 Forbidden` for unauthenticated command-line probes; access was restored to `custom`.
 
 ## Active Decisions
 
@@ -70,7 +71,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - The taxonomy needs validation with real references before it should be treated as stable.
 - D1 persistence still needs live workflow validation with a real saved reference.
 - Browser screenshot QA was not completed because the in-app browser tool was unavailable in the Sites foundation run.
-- Production live create/refresh/delete validation is still blocked until an authenticated browser session or temporary access-policy change is available.
+- Production live create/refresh/delete validation is still blocked until an authenticated browser session is available or Sites exposes a true anonymous public access mode.
 - Current production D1 data state has not been verified with real QA records.
 
 ## Next Suggested Step

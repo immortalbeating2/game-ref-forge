@@ -125,6 +125,16 @@ Result note:
 - Sites project lookup confirms `access_mode: custom` with an allowlist user.
 - Production create/refresh/delete remains unverified until an authenticated browser session or temporary access-policy change is available.
 
+## 2026-06-11 Temporary Access Retest
+
+- Temporarily changed Sites access from `custom` to `workspace_all`.
+- Result: unauthenticated command-line probes still returned `403 Forbidden` for `/` and `/api/references`.
+- Interpretation: `workspace_all` allows workspace members, but does not create anonymous public access for command-line HTTP tests.
+- Browser automation blocker: no in-app browser control tool was exposed in this session, so authenticated workspace-browser CRUD could not be driven by the agent.
+- Restored Sites access to `custom` with allowed user `peng819376526@gmail.com`.
+- Restored access policy revision: `3`.
+- Production create/refresh/delete remains unverified in an authenticated browser context.
+
 ## Deployment Result
 
 - Sites version 2 saved from commit `20336ca2dbfcc5a0d10ea9424a619abad3090aee`.
@@ -139,4 +149,4 @@ Result note:
 - Status: `partial-blocked`
 - Production version: version 2 deployed.
 - Deployment URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
-- Notes: local runtime and browser smoke passed; production live data validation is blocked by Sites custom access in the current unauthenticated tool path.
+- Notes: local runtime and browser smoke passed; temporary `workspace_all` access still required workspace authentication and did not permit unauthenticated command-line CRUD validation. Production live data validation still needs an authenticated browser session.

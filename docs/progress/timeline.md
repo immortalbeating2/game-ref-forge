@@ -142,3 +142,20 @@
   - `GET /`: `403 Forbidden`
   - `GET /api/references`: `403 Forbidden`
   - Status: version 2 is deployed, but unauthenticated production CRUD validation remains blocked by Sites `custom` access.
+
+### 2026-06-11
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: temporarily adjusted Sites access for production CRUD retest
+- Access flow:
+  - Original access mode: `custom`
+  - Original allowlist: `peng819376526@gmail.com`
+  - Temporary access mode: `workspace_all`
+  - Restored access mode: `custom`
+  - Restored allowlist: `peng819376526@gmail.com`
+  - Restored policy revision: `3`
+- Retest result:
+  - `GET /` after temporary `workspace_all`: `403 Forbidden`
+  - `GET /api/references` after temporary `workspace_all`: `403 Forbidden`
+  - Status: `workspace_all` still requires workspace authentication and does not enable unauthenticated command-line CRUD validation.
