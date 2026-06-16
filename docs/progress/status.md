@@ -1,12 +1,12 @@
 # Project Status
 
-Updated: 2026-06-10
+Updated: 2026-06-17
 
 ## Current Stage
 
-`Round 2 Plan / Live usability validation`
+`Round 2 Closeout / Ready to merge`
 
-The repository has been initialized as `game-ref-forge`, connected to GitHub, and moved from documentation baseline into the first Sites foundation implementation branch.
+The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and is now on the second-round live usability validation branch.
 
 ## Current Product Direction
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: `codex/sites-foundation`.
+- Current implementation branch: `codex/round-2-live-validation`.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -41,6 +41,17 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
 - Second-round design spec exists at `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`.
 - Second-round implementation plan exists at `docs/superpowers/plans/2026-06-10-live-usability-validation.md`.
+- Current second-round branch: `codex/round-2-live-validation`.
+- Second-round QA checklist exists at `docs/qa/2026-06-10-live-usability-validation.md`.
+- UI-state hardening exists for zero-result filter states.
+- `public/screenshot.jpeg` exists as the current canonical Sites preview screenshot.
+- Sites version 2 has been saved and deployed from commit `20336ca2dbfcc5a0d10ea9424a619abad3090aee`.
+- Local runtime validation passed after applying the existing D1 migration to local `.wrangler/state`.
+- Local browser smoke passed for add, metadata preview, save, refresh persistence, empty search, clear filters, delete, and desktop/mobile layout checks.
+- Production unauthenticated access currently returns `403 Forbidden` because Sites access is configured as `custom`.
+- On 2026-06-11, temporary `workspace_all` access was tested and still returned `403 Forbidden` for unauthenticated command-line probes; access was restored to `custom`.
+- On 2026-06-11, authenticated in-app browser validation passed for production create, metadata preview success, refresh persistence, delete, post-delete refresh, and metadata failure feedback.
+- On 2026-06-17, generated local agent/tooling directories were classified as non-repository state and added to `.gitignore`.
 
 ## Active Decisions
 
@@ -60,9 +71,11 @@ It helps collect source links from game asset and game design sites, normalize t
 - Metadata preview may fail or be blocked by source websites.
 - Public display of third-party media has copyright risk unless ownership or license is clear.
 - The taxonomy needs validation with real references before it should be treated as stable.
-- D1 persistence still needs live workflow validation with a real saved reference.
+- Production D1 persistence has been validated with a real saved reference and delete cleanup.
 - Browser screenshot QA was not completed because the in-app browser tool was unavailable in the Sites foundation run.
+- Native browser confirm dialogs may still require user assistance during automation because confirm input translation timed out.
+- Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 
 ## Next Suggested Step
 
-Review the second-round implementation plan, then choose subagent-driven or inline execution.
+Run final validation, merge `codex/round-2-live-validation` back to `main`, and push `main`.

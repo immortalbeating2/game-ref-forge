@@ -14,6 +14,7 @@ import {
   ReferenceInput,
   ReferenceRecord,
 } from "../lib/reference";
+import { getVisibleDetailReference } from "../lib/ui-state";
 
 const categoryLabels: Record<AssetCategory, string> = {
   character: "Character",
@@ -165,11 +166,11 @@ export default function Home() {
     });
   }, [assetCategory, licenseStatus, publicStatus, query, references]);
 
-  const selectedReference =
-    filteredReferences.find((reference) => reference.id === selectedId) ??
-    filteredReferences[0] ??
-    references[0] ??
-    null;
+  const selectedReference = getVisibleDetailReference(
+    filteredReferences,
+    references,
+    selectedId,
+  );
 
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
@@ -483,7 +484,26 @@ export default function Home() {
           <span>Safety status stays visible before opening details</span>
         </div>
 
-        <div className="reference-grid">
+        {filteredReferences.length === 0 ? (
+          <div className="empty-results">
+            <h2>No references match these filters</h2>
+            <p>Clear filters or add a new private reference to continue validation.</p>
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={() => {
+                setAssetCategory("all");
+                setPublicStatus("all");
+                setLicenseStatus("all");
+                setQuery("");
+              }}
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : null}
+
+        <div className="reference-grid" aria-live="polite">
           {filteredReferences.map((reference) => (
             <button
               type="button"

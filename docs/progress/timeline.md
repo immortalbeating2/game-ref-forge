@@ -83,3 +83,113 @@
 - Scope: production D1 persistence, metadata preview success/failure, delete, main interaction QA, desktop/mobile layout QA, and small fixes only.
 - Added implementation plan:
   - `docs/superpowers/plans/2026-06-10-live-usability-validation.md`
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Scope: production live usability validation, metadata preview validation, interaction QA, layout QA, and minimal fixes
+- Reason: second-round implementation affects validation workflow and may require small code, style, and route fixes
+- Worktree: not used because the task can proceed in the single active workspace
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: prepared QA checklist and validated automated baseline
+- Commits:
+  - `1879315` - prepared second-round live validation checklist
+  - `9ae7c09` - recorded automated baseline validation
+- Validation:
+  - `npm test`: passed
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: hardened UI state before production validation
+- Commit:
+  - `efeac5f` - fixed filtered empty-state behavior and added UI-state regression tests
+- Validation:
+  - `npm test`: passed, 3 files / 6 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+  - Local reference CRUD HTTP smoke: passed after applying existing D1 migration to local `.wrangler/state`
+  - Local metadata preview smoke: success and failure feedback passed
+  - Local Playwright smoke: passed for add, preview, save, reload persistence, empty search, clear filters, delete, desktop layout, and mobile no horizontal overflow
+- Production access probe:
+  - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+  - `GET /`: `403 Forbidden`
+  - `GET /api/references`: `403 Forbidden`
+  - Status: production live data validation remains blocked by Sites `custom` access until an authenticated browser session or temporary access-policy change is available.
+
+### 2026-06-10
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: saved and deployed Sites version 2
+- Commit:
+  - `20336ca` - refreshed canonical site preview screenshot
+- Sites version:
+  - version: `2`
+  - deployment status: `succeeded`
+  - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Post-deploy access probe:
+  - `GET /`: `403 Forbidden`
+  - `GET /api/references`: `403 Forbidden`
+  - Status: version 2 is deployed, but unauthenticated production CRUD validation remains blocked by Sites `custom` access.
+
+### 2026-06-11
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: temporarily adjusted Sites access for production CRUD retest
+- Access flow:
+  - Original access mode: `custom`
+  - Original allowlist: `peng819376526@gmail.com`
+  - Temporary access mode: `workspace_all`
+  - Restored access mode: `custom`
+  - Restored allowlist: `peng819376526@gmail.com`
+  - Restored policy revision: `3`
+- Retest result:
+  - `GET /` after temporary `workspace_all`: `403 Forbidden`
+  - `GET /api/references` after temporary `workspace_all`: `403 Forbidden`
+  - Status: `workspace_all` still requires workspace authentication and does not enable unauthenticated command-line CRUD validation.
+
+### 2026-06-11
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: retried authenticated production CRUD validation through explicit Browser plugin request
+- Context:
+  - User had the production URL open and logged in inside the in-app browser.
+  - Prior thread `019e9dc0-85c2-71e2-b1b8-f0df1affa3c7` was read to continue from the same blocker.
+- Retest result:
+  - Initial retry still did not expose `node_repl js` / `mcp__node_repl__js`.
+  - After user-side fix, Browser plugin control became available.
+  - Connected to the authenticated `iab` tab at the production URL.
+  - Created one production record from `https://example.com/`.
+  - Metadata success feedback appeared and filled `Example Domain` / `example.com`.
+  - Saved reference successfully and confirmed `Example Domain` was visible.
+  - Refreshed production and confirmed `Example Domain` remained visible from D1.
+  - Deleted `Example Domain`; user accepted the native confirm dialog.
+  - Confirmed post-delete state showed `Reference deleted.` and `0 references`.
+  - Refreshed again and confirmed `Example Domain` remained absent; seed fallback appeared because production D1 was empty.
+  - Metadata failure feedback for `not-a-url` appeared as `Invalid URL string.`
+  - Status: production live CRUD and metadata success/failure validation passed with the note that native confirm dialogs may need user assistance.
+
+### 2026-06-17
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: prepared second-round branch closeout
+- Scope:
+  - Classified generated local agent/tooling directories as non-repository state.
+  - Added `.agents/`, `.claude/`, `.codex/`, `.cursor/`, `.gemini/`, and `.opencode/` to `.gitignore`.
+  - Added the same generated local agent/tooling directories to ESLint global ignores.
+  - Added the 2026-06-17 progress log.
+- Reason: clear untracked local tool state before merging the validated second-round branch back to `main`.
