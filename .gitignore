@@ -30,3 +30,11 @@ yarn-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# Local agent/tooling state
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.opencode/

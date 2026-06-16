@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-11
+Updated: 2026-06-17
 
 ## Current Stage
 
-`Round 2 Implementation / Live usability validation passed-with-notes`
+`Round 2 Closeout / Ready to merge`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and is now on the second-round live usability validation branch.
 
@@ -51,6 +51,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Production unauthenticated access currently returns `403 Forbidden` because Sites access is configured as `custom`.
 - On 2026-06-11, temporary `workspace_all` access was tested and still returned `403 Forbidden` for unauthenticated command-line probes; access was restored to `custom`.
 - On 2026-06-11, authenticated in-app browser validation passed for production create, metadata preview success, refresh persistence, delete, post-delete refresh, and metadata failure feedback.
+- On 2026-06-17, generated local agent/tooling directories were classified as non-repository state and added to `.gitignore`.
 
 ## Active Decisions
 
@@ -77,4 +78,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Review the branch and merge `codex/round-2-live-validation` back to `main` when ready.
+Run final validation, merge `codex/round-2-live-validation` back to `main`, and push `main`.

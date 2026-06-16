@@ -181,3 +181,15 @@
   - Refreshed again and confirmed `Example Domain` remained absent; seed fallback appeared because production D1 was empty.
   - Metadata failure feedback for `not-a-url` appeared as `Invalid URL string.`
   - Status: production live CRUD and metadata success/failure validation passed with the note that native confirm dialogs may need user assistance.
+
+### 2026-06-17
+
+- Branch: `codex/round-2-live-validation`
+- Mode: branch only
+- Action: prepared second-round branch closeout
+- Scope:
+  - Classified generated local agent/tooling directories as non-repository state.
+  - Added `.agents/`, `.claude/`, `.codex/`, `.cursor/`, `.gemini/`, and `.opencode/` to `.gitignore`.
+  - Added the same generated local agent/tooling directories to ESLint global ignores.
+  - Added the 2026-06-17 progress log.
+- Reason: clear untracked local tool state before merging the validated second-round branch back to `main`.
