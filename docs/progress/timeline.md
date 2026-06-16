@@ -224,3 +224,19 @@
   - `git push origin --delete codex/round-2-live-validation`: blocked because GitHub refuses deleting the current default branch.
   - `gh repo edit immortalbeating2/game-ref-forge --default-branch main`: blocked with `HTTP 403: Resource not accessible by integration`.
 - Next action: change GitHub default branch to `main` with repository administration permission, then delete the remote second-round branch.
+
+### 2026-06-17
+
+- Branch: `codex/round-3-editing-experience`
+- Mode: branch only
+- Action: started third-round editing-experience design
+- Context:
+  - User selected approach A from the visual companion: inline editing in the right detail panel.
+  - `.superpowers/` was added to `.gitignore` as local visual-companion state.
+- Design spec:
+  - `docs/superpowers/specs/2026-06-17-reference-editing-experience-design.md`
+- Scope:
+  - Add selected-reference edit mode in the detail panel.
+  - Reuse shared draft conversion helpers for add and edit flows.
+  - Preserve form data on save failure.
+  - Keep batch editing, schema expansion, public publishing, and media upload out of scope.

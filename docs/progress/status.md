@@ -4,9 +4,9 @@ Updated: 2026-06-17
 
 ## Current Stage
 
-`Main / Round 2 merged`
+`Round 3 Design / Reference editing experience`
 
-The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and merged the second-round live usability validation branch back to `main`.
+The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, and opened the third-round editing-experience branch.
 
 ## Current Product Direction
 
@@ -55,6 +55,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, `codex/round-2-live-validation` was merged locally into `main` with merge commit `9891498`.
 - On 2026-06-17, `main` was pushed to GitHub and configured as the local tracking branch for `origin/main`.
 - On 2026-06-17, local `codex/round-2-live-validation` was deleted after merge; remote deletion is blocked until GitHub default branch is changed from `codex/round-2-live-validation` to `main`.
+- On 2026-06-17, third-round development started on `codex/round-3-editing-experience`.
+- On 2026-06-17, the approved third-round direction is inline detail-panel editing for selected references.
 
 ## Active Decisions
 
@@ -81,4 +83,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Change the GitHub repository default branch to `main`, then delete the remote `codex/round-2-live-validation` branch.
+Review the third-round design spec, then write the implementation plan for inline detail-panel editing.
