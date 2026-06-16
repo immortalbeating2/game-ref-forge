@@ -240,3 +240,16 @@
   - Reuse shared draft conversion helpers for add and edit flows.
   - Preserve form data on save failure.
   - Keep batch editing, schema expansion, public publishing, and media upload out of scope.
+
+### 2026-06-17
+
+- Branch: `codex/round-3-editing-experience`
+- Mode: branch only
+- Action: wrote third-round implementation plan
+- Plan:
+  - `docs/superpowers/plans/2026-06-17-reference-editing-experience.md`
+- Planned tasks:
+  - Extract and test reference draft helpers.
+  - Add update-input regression coverage.
+  - Implement inline detail-panel edit mode.
+  - Run local/manual QA and update progress trace docs.

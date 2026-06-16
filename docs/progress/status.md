@@ -57,6 +57,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, local `codex/round-2-live-validation` was deleted after merge; remote deletion is blocked until GitHub default branch is changed from `codex/round-2-live-validation` to `main`.
 - On 2026-06-17, third-round development started on `codex/round-3-editing-experience`.
 - On 2026-06-17, the approved third-round direction is inline detail-panel editing for selected references.
+- On 2026-06-17, the third-round design spec and implementation plan were written.
 
 ## Active Decisions
 
@@ -83,4 +84,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Review the third-round design spec, then write the implementation plan for inline detail-panel editing.
+Execute the third-round implementation plan for inline detail-panel editing.
