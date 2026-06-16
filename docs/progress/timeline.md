@@ -193,3 +193,19 @@
   - Added the same generated local agent/tooling directories to ESLint global ignores.
   - Added the 2026-06-17 progress log.
 - Reason: clear untracked local tool state before merging the validated second-round branch back to `main`.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: local merge
+- Action: merged `codex/round-2-live-validation` back to `main`
+- Merge commit:
+  - `9891498` - `merge: 合并第二轮验证 / merge round 2 validation`
+- Validation on merged `main`:
+  - `npm test`: passed, 3 files / 6 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+- Remote sync:
+  - `git pull --ff-only origin main`: blocked by `github.com:443` connection timeout before merge.
+  - `git push`: still pending until network access to GitHub is available.

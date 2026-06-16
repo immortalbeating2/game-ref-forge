@@ -4,9 +4,9 @@ Updated: 2026-06-17
 
 ## Current Stage
 
-`Round 2 Closeout / Ready to merge`
+`Main / Round 2 merged`
 
-The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and is now on the second-round live usability validation branch.
+The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, and merged the second-round live usability validation branch back to `main`.
 
 ## Current Product Direction
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: `codex/round-2-live-validation`.
+- Current implementation branch: none; current stable branch is `main`.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -52,6 +52,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-11, temporary `workspace_all` access was tested and still returned `403 Forbidden` for unauthenticated command-line probes; access was restored to `custom`.
 - On 2026-06-11, authenticated in-app browser validation passed for production create, metadata preview success, refresh persistence, delete, post-delete refresh, and metadata failure feedback.
 - On 2026-06-17, generated local agent/tooling directories were classified as non-repository state and added to `.gitignore`.
+- On 2026-06-17, `codex/round-2-live-validation` was merged locally into `main` with merge commit `9891498`.
 
 ## Active Decisions
 
@@ -78,4 +79,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Run final validation, merge `codex/round-2-live-validation` back to `main`, and push `main`.
+Push local `main` to GitHub when network access to `github.com` is available.
