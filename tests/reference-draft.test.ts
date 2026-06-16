@@ -92,6 +92,11 @@ describe("reference draft helpers", () => {
     });
   });
 
+  it("converts blank draft rating values to null", () => {
+    expect(draftToReferenceInput({ ...recordToReferenceDraft(record), rating: "" }).rating).toBeNull();
+    expect(draftToReferenceInput({ ...recordToReferenceDraft(record), rating: "   " }).rating).toBeNull();
+  });
+
   it("detects changed and unchanged drafts", () => {
     const original = recordToReferenceDraft(record);
     expect(isReferenceDraftDirty(original, record)).toBe(false);
@@ -104,10 +109,12 @@ describe("reference draft helpers", () => {
       title: "New",
       source_url: "https://example.com/new",
       style_tags: ["soft", "cozy"],
+      use_tags: ["inventory", "crafting"],
       inspiration_points: ["Palette"],
     });
 
     expect(draft.style_tags_text).toBe("soft, cozy");
+    expect(draft.use_tags_text).toBe("inventory, crafting");
     expect(draft.inspiration_points_text).toBe("Palette");
   });
 });
