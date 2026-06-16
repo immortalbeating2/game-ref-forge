@@ -41,7 +41,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
 - Second-round design spec exists at `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`.
 - Second-round implementation plan exists at `docs/superpowers/plans/2026-06-10-live-usability-validation.md`.
-- Current second-round branch: `codex/round-2-live-validation`.
+- Current second-round branch: closed locally; remote branch still exists because GitHub currently marks it as the default branch.
 - Second-round QA checklist exists at `docs/qa/2026-06-10-live-usability-validation.md`.
 - UI-state hardening exists for zero-result filter states.
 - `public/screenshot.jpeg` exists as the current canonical Sites preview screenshot.
@@ -53,6 +53,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-11, authenticated in-app browser validation passed for production create, metadata preview success, refresh persistence, delete, post-delete refresh, and metadata failure feedback.
 - On 2026-06-17, generated local agent/tooling directories were classified as non-repository state and added to `.gitignore`.
 - On 2026-06-17, `codex/round-2-live-validation` was merged locally into `main` with merge commit `9891498`.
+- On 2026-06-17, `main` was pushed to GitHub and configured as the local tracking branch for `origin/main`.
+- On 2026-06-17, local `codex/round-2-live-validation` was deleted after merge; remote deletion is blocked until GitHub default branch is changed from `codex/round-2-live-validation` to `main`.
 
 ## Active Decisions
 
@@ -79,4 +81,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Push local `main` to GitHub when network access to `github.com` is available.
+Change the GitHub repository default branch to `main`, then delete the remote `codex/round-2-live-validation` branch.
