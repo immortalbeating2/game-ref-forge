@@ -4,16 +4,19 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ASSET_CATEGORIES,
   AssetCategory,
-  DEFAULT_REFERENCE_INPUT,
   LICENSE_STATUSES,
   LicenseStatus,
   MEDIA_TYPES,
   MediaType,
   PUBLIC_STATUSES,
   PublicStatus,
-  ReferenceInput,
   ReferenceRecord,
 } from "../lib/reference";
+import {
+  createEmptyReferenceDraft,
+  draftToReferenceInput,
+  ReferenceDraft,
+} from "../lib/reference-draft";
 import { getVisibleDetailReference } from "../lib/ui-state";
 
 const categoryLabels: Record<AssetCategory, string> = {
@@ -80,26 +83,6 @@ const seedReferences: ReferenceRecord[] = [
   },
 ];
 
-type Draft = ReferenceInput & {
-  style_tags_text: string;
-  use_tags_text: string;
-  inspiration_points_text: string;
-};
-
-const emptyDraft: Draft = {
-  ...DEFAULT_REFERENCE_INPUT,
-  style_tags_text: "",
-  use_tags_text: "",
-  inspiration_points_text: "",
-};
-
-function splitTags(value: string) {
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function statusLabel(value: string) {
   return value.replaceAll("_", " ");
 }
@@ -111,7 +94,7 @@ export default function Home() {
   const [assetCategory, setAssetCategory] = useState<AssetCategory | "all">("all");
   const [publicStatus, setPublicStatus] = useState<PublicStatus | "all">("all");
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
-  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -213,13 +196,7 @@ export default function Home() {
     event.preventDefault();
     setMessage(null);
 
-    const input: ReferenceInput = {
-      ...draft,
-      style_tags: splitTags(draft.style_tags_text),
-      use_tags: splitTags(draft.use_tags_text),
-      inspiration_points: splitTags(draft.inspiration_points_text),
-      rating: draft.rating ? Number(draft.rating) : null,
-    };
+    const input = draftToReferenceInput(draft);
 
     try {
       const response = await fetch("/api/references", {
@@ -236,7 +213,7 @@ export default function Home() {
       const reference = payload.reference as ReferenceRecord;
       setReferences((current) => [reference, ...current.filter((item) => !item.id.startsWith("seed-"))]);
       setSelectedId(reference.id);
-      setDraft(emptyDraft);
+      setDraft(createEmptyReferenceDraft());
       setIsFormOpen(false);
       setMessage("Reference saved privately by default.");
     } catch (error) {
