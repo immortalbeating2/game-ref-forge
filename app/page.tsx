@@ -11,6 +11,7 @@ import {
   PUBLIC_STATUSES,
   PublicStatus,
   ReferenceRecord,
+  validateReferenceInput,
 } from "../lib/reference";
 import {
   createEmptyReferenceDraft,
@@ -294,6 +295,8 @@ export default function Home() {
       const reference = payload.reference as ReferenceRecord;
       setReferences((current) => [reference, ...current.filter((item) => !item.id.startsWith("seed-"))]);
       setSelectedId(reference.id);
+      setEditingId(null);
+      setEditDraft(null);
       setDraft(createEmptyReferenceDraft());
       setIsFormOpen(false);
       setMessage("Reference saved privately by default.");
@@ -314,10 +317,16 @@ export default function Home() {
       return;
     }
 
+    const input = draftToReferenceInput(editDraft);
+    const validation = validateReferenceInput(input);
+
+    if (!validation.ok) {
+      setMessage(validation.errors.join(", "));
+      return;
+    }
+
     setIsSavingEdit(true);
     setMessage("Saving reference changes...");
-
-    const input = draftToReferenceInput(editDraft);
 
     try {
       let updatedReference: ReferenceRecord;
@@ -672,6 +681,7 @@ export default function Home() {
               key={reference.id}
               onClick={() => selectReference(reference.id)}
               disabled={isSavingEdit}
+              aria-pressed={reference.id === selectedReference?.id}
             >
               <div className={`thumbnail accent-${reference.asset_category}`}>
                 {reference.preview_url ? (
