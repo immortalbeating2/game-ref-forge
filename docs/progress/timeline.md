@@ -407,3 +407,16 @@
   - `git push origin --delete codex/round-2-live-validation`: passed.
   - `git fetch --prune origin`: passed.
   - Remote branches now include `origin/main` and `origin/HEAD -> origin/main`; `origin/codex/round-2-live-validation` is absent.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: local CRUD recheck
+- Action: rechecked local CRUD after branch cleanup against `http://localhost:3000`.
+- Validation:
+  - Created reference `QA Branch Cleanup c36d83df`.
+  - Confirmed the created reference was returned by `GET /api/references`.
+  - Updated title, category, status fields, use tags, inspiration points, transformation idea, and rating with `PUT /api/references/:id`.
+  - Confirmed updated title `QA Branch Cleanup c36d83df Updated`, category `ui_hud`, and rating `5` were returned by `GET /api/references`.
+  - Deleted the QA reference.
+  - Confirmed remaining matches after delete: `0`.

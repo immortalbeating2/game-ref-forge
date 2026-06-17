@@ -73,6 +73,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, `gh auth refresh` device authorization was attempted but token exchange failed on the GitHub network request, so CLI permissions did not change.
 - On 2026-06-17, temporary public Sites access for automated production CRUD was attempted but blocked because public publishing is disabled for the workspace.
 - On 2026-06-17, the GitHub default branch was changed to `main` through the GitHub web UI, and remote branch `codex/round-2-live-validation` was deleted with `git push origin --delete`.
+- On 2026-06-17, local CRUD was rechecked after branch cleanup against `http://localhost:3000` and passed for create, read, update, delete, and post-delete absence.
 
 ## Active Decisions
 

@@ -57,6 +57,30 @@ Status:
 - UI implementation review: completed through spec review, code quality review, typecheck, lint, and production build.
 - Local persistence/edit behavior: validated through API smoke.
 
+## Branch-Cleanup Local CRUD Recheck
+
+After the GitHub default branch was changed to `main` and the stale remote `codex/round-2-live-validation` branch was deleted, local CRUD was rechecked against `http://localhost:3000`.
+
+Result:
+
+```json
+{
+  "createdId": "efa74b80-35fe-458b-904e-81f3defd6fd6",
+  "createdTitle": "QA Branch Cleanup c36d83df",
+  "foundAfterCreate": 1,
+  "updatedTitle": "QA Branch Cleanup c36d83df Updated",
+  "updatedCategory": "ui_hud",
+  "updatedRating": 5,
+  "deleted": true,
+  "remainingAfterDelete": 0
+}
+```
+
+Status:
+
+- Local API CRUD: passed.
+- Authenticated production edit CRUD: still pending because the current session does not expose the required in-app browser control entrypoint.
+
 ## Production Deployment
 
 - Sites version 3 was saved from commit `9a24ed454637c97502043e202b8d7b5450fb4739` but failed deployment because `vite.config.ts` imported the ignored local path `./build/sites-vite-plugin`.
