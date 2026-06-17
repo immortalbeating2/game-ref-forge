@@ -24,6 +24,7 @@ tsconfig.tsbuildinfo
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
+.codex-*.pid
 
 # OS / editor noise
 .DS_Store
@@ -38,3 +39,4 @@ Thumbs.db
 .cursor/
 .gemini/
 .opencode/
+.superpowers/

@@ -224,3 +224,59 @@
   - `git push origin --delete codex/round-2-live-validation`: blocked because GitHub refuses deleting the current default branch.
   - `gh repo edit immortalbeating2/game-ref-forge --default-branch main`: blocked with `HTTP 403: Resource not accessible by integration`.
 - Next action: change GitHub default branch to `main` with repository administration permission, then delete the remote second-round branch.
+
+### 2026-06-17
+
+- Branch: `codex/round-3-editing-experience`
+- Mode: branch only
+- Action: started third-round editing-experience design
+- Context:
+  - User selected approach A from the visual companion: inline editing in the right detail panel.
+  - `.superpowers/` was added to `.gitignore` as local visual-companion state.
+- Design spec:
+  - `docs/superpowers/specs/2026-06-17-reference-editing-experience-design.md`
+- Scope:
+  - Add selected-reference edit mode in the detail panel.
+  - Reuse shared draft conversion helpers for add and edit flows.
+  - Preserve form data on save failure.
+  - Keep batch editing, schema expansion, public publishing, and media upload out of scope.
+
+### 2026-06-17
+
+- Branch: `codex/round-3-editing-experience`
+- Mode: branch only
+- Action: wrote third-round implementation plan
+- Plan:
+  - `docs/superpowers/plans/2026-06-17-reference-editing-experience.md`
+- Planned tasks:
+  - Extract and test reference draft helpers.
+  - Add update-input regression coverage.
+  - Implement inline detail-panel edit mode.
+  - Run local/manual QA and update progress trace docs.
+
+### 2026-06-17
+
+- Branch: `codex/round-3-editing-experience`
+- Mode: subagent-driven implementation
+- Action: implemented third-round inline detail-panel editing
+- Commits:
+  - `d66982c` - `feat: 抽取引用草稿工具 / extract reference draft helpers`
+  - `72c541e` - `test: 补齐引用草稿覆盖 / complete reference draft coverage`
+  - `da33be7` - `fix: 加固引用草稿边界 / harden reference draft boundaries`
+  - `498ec73` - `test: 覆盖引用更新输入 / cover reference update input`
+  - `34dff03` - `test: 补齐预览链接更新覆盖 / cover preview URL update`
+  - `456793b` - `feat: 增加详情面板编辑 / add detail panel editing`
+  - `6c87f27` - `fix: 加固详情编辑状态 / harden detail edit state`
+  - `81e13d7` - `fix: 校验示例编辑保存 / validate starter edit saves`
+- Validation:
+  - `npm test`: passed, 4 files / 15 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+  - Local API smoke passed for create, edit, invalid edit validation, delete, and post-delete absence.
+- QA note:
+  - `docs/qa/2026-06-17-reference-editing-experience.md`
+- Browser automation:
+  - Browser Use `node_repl js` was unavailable in this session.
+  - Chrome/Edge CDP fallback was attempted but blocked by target navigation/context destruction.
+- Next action: run stable browser/manual QA, then deploy and validate production edit persistence.
