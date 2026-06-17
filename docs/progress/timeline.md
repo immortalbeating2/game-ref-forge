@@ -452,3 +452,29 @@
   - Clarify seed fallback/starter examples.
   - Run local and production CRUD QA.
 - Next action: user review and approval, then start `codex/round-4-production-hardening`.
+
+### 2026-06-18
+
+- Branch: `codex/round-4-production-hardening`
+- Mode: implementation
+- Action: implemented fourth-round production interaction hardening locally.
+- Commits:
+  - `c9ca3b9` - `test: 增加交互状态 helper / add interaction state helpers`
+  - `8c53fc8` - `feat: 稳定 metadata preview 反馈 / stabilize metadata preview feedback`
+  - `0d77eb2` - `feat: 使用应用内删除确认 / use app delete confirmation`
+  - `792bee5` - `feat: 标明 starter examples 状态 / label starter examples state`
+- Validation:
+  - `npm test`: passed, 5 files / 18 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+- Local browser QA:
+  - Metadata preview stable failure feedback appeared.
+  - Create and reload persistence passed.
+  - Edit and reload persistence passed.
+  - App delete confirmation appeared and named the reference.
+  - Cancel preserved the reference.
+  - Confirm delete removed the reference and reload confirmed absence.
+- QA note:
+  - `docs/qa/2026-06-18-production-interaction-hardening.md`
+- Next action: merge/deploy and run authenticated production CRUD QA.

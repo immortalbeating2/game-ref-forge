@@ -4,7 +4,7 @@ Updated: 2026-06-18
 
 ## Current Stage
 
-`Main / Round 4 design and planning`
+`Round 4 implementation branch / local validation passed`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, and merged the third-round editing-experience branch into local `main`.
 
@@ -77,6 +77,12 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, in-app browser CRUD was rechecked against `http://localhost:3000` and passed for create, reload persistence, edit, reload persistence, UI delete confirmation, and post-delete reload absence.
 - On 2026-06-18, fourth-round production interaction hardening design and implementation plan were written.
 - On 2026-06-18, the fourth-round scope was set to metadata preview feedback, app-owned delete confirmation, seed fallback messaging, and production CRUD QA.
+- On 2026-06-18, branch `codex/round-4-production-hardening` was created from `main`.
+- On 2026-06-18, interaction state helpers were added and tested.
+- On 2026-06-18, metadata preview received stable success/failure/loading feedback.
+- On 2026-06-18, native delete confirmation was replaced with app-owned confirmation.
+- On 2026-06-18, seed fallback now shows a starter examples message.
+- On 2026-06-18, local automated checks and in-app browser CRUD QA passed on the fourth-round branch.
 
 ## Active Decisions
 
@@ -104,8 +110,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - GitHub default branch is now `main`.
 - Local in-app browser CRUD QA for third-round edit mode has passed after the browser control entrypoint became available.
 - In-app browser control is available again for local validation; authenticated production CRUD still requires the logged-in production URL rather than `localhost`.
-- Fourth-round implementation should avoid broad page rewrites; `app/page.tsx` is already a high-change file.
+- Fourth-round production deployment and authenticated production CRUD QA are still pending.
 
 ## Next Suggested Step
 
-Review and approve the fourth-round design and implementation plan, then start branch `codex/round-4-production-hardening`.
+Merge and deploy `codex/round-4-production-hardening`, then run authenticated production CRUD QA.

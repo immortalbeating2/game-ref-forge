@@ -20,6 +20,12 @@ import {
   recordToReferenceDraft,
   ReferenceDraft,
 } from "../lib/reference-draft";
+import {
+  deleteConfirmationCopy,
+  MetadataPreviewStatus,
+  metadataPreviewMessage,
+  seedFallbackMessage,
+} from "../lib/interaction-state";
 import { getVisibleDetailReference } from "../lib/ui-state";
 
 const categoryLabels: Record<AssetCategory, string> = {
@@ -102,7 +108,11 @@ export default function Home() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<MetadataPreviewStatus>("idle");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUsingSeedReferences, setIsUsingSeedReferences] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   function closeEditIfHiddenByView(nextView: {
@@ -163,9 +173,11 @@ export default function Home() {
         }
 
         const rows = payload.references as ReferenceRecord[];
+        setIsUsingSeedReferences(rows.length === 0);
         setReferences(rows.length > 0 ? rows : seedReferences);
         setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
       } catch (error) {
+        setIsUsingSeedReferences(true);
         setReferences(seedReferences);
         setSelectedId(seedReferences[0]?.id ?? null);
         setMessage(error instanceof Error ? error.message : "Using starter examples until D1 is ready.");
@@ -230,6 +242,7 @@ export default function Home() {
     }
 
     setSelectedId(id);
+    setPendingDeleteId(null);
     if (editingId && editingId !== id) {
       setEditingId(null);
       setEditDraft(null);
@@ -239,11 +252,13 @@ export default function Home() {
 
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
+      setPreviewStatus("failure");
       setMessage("Paste a source URL before previewing metadata.");
       return;
     }
 
     setIsPreviewing(true);
+    setPreviewStatus("loading");
     setMessage(null);
 
     try {
@@ -266,9 +281,11 @@ export default function Home() {
         site_name: metadata.site_name ?? current.site_name,
         preview_url: metadata.preview_url ?? current.preview_url,
       }));
-      setMessage("Metadata preview applied. Review source and safety fields before saving.");
+      setPreviewStatus("success");
+      setMessage("Metadata preview ready. Review the fields before saving.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Preview failed; manual entry is still available.");
+      setPreviewStatus("failure");
+      setMessage(error instanceof Error ? error.message : "Metadata preview failed. You can still save this reference manually.");
     } finally {
       setIsPreviewing(false);
     }
@@ -294,6 +311,7 @@ export default function Home() {
 
       const reference = payload.reference as ReferenceRecord;
       setReferences((current) => [reference, ...current.filter((item) => !item.id.startsWith("seed-"))]);
+      setIsUsingSeedReferences(false);
       setSelectedId(reference.id);
       setEditingId(null);
       setEditDraft(null);
@@ -390,21 +408,35 @@ export default function Home() {
     }
   }
 
-  async function removeReference(reference: ReferenceRecord) {
-    if (!confirm(`Delete "${reference.title}"?`)) {
-      return;
-    }
+  function requestDelete(reference: ReferenceRecord) {
+    setPendingDeleteId(reference.id);
+    setMessage(null);
+  }
 
+  function cancelDelete() {
+    setPendingDeleteId(null);
+  }
+
+  async function confirmDelete(reference: ReferenceRecord) {
+    setIsDeleting(true);
     try {
       if (!reference.id.startsWith("seed-")) {
-        await fetch(`/api/references/${reference.id}`, { method: "DELETE" });
+        const response = await fetch(`/api/references/${reference.id}`, { method: "DELETE" });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Failed to delete reference");
+        }
       }
 
       setReferences((current) => current.filter((item) => item.id !== reference.id));
       setSelectedId(null);
+      setPendingDeleteId(null);
       setMessage("Reference deleted.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Delete failed.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -646,6 +678,11 @@ export default function Home() {
               </button>
               <button type="submit">Save private reference</button>
             </div>
+            {metadataPreviewMessage(previewStatus) ? (
+              <p className={`form-status form-status--${previewStatus}`}>
+                {metadataPreviewMessage(previewStatus)}
+              </p>
+            ) : null}
           </form>
         ) : null}
 
@@ -653,6 +690,10 @@ export default function Home() {
           <span>{filteredReferences.length} references</span>
           <span>Safety status stays visible before opening details</span>
         </div>
+
+        {isUsingSeedReferences ? (
+          <p className="seed-fallback-message">{seedFallbackMessage()}</p>
+        ) : null}
 
         {filteredReferences.length === 0 ? (
           <div className="empty-results">
@@ -954,9 +995,28 @@ export default function Home() {
                   <p>{selectedReference.transformation_ideas}</p>
                 </section>
 
-                <button className="danger-button" type="button" onClick={() => removeReference(selectedReference)}>
+                <button className="danger-button" type="button" onClick={() => requestDelete(selectedReference)}>
                   Delete reference
                 </button>
+                {pendingDeleteId === selectedReference.id ? (
+                  <div className="delete-confirmation" role="alertdialog" aria-labelledby="delete-confirmation-title">
+                    <h3 id="delete-confirmation-title">{deleteConfirmationCopy(selectedReference.title).title}</h3>
+                    <p>{deleteConfirmationCopy(selectedReference.title).body}</p>
+                    <div className="confirmation-actions">
+                      <button type="button" className="ghost-button" onClick={cancelDelete} disabled={isDeleting}>
+                        {deleteConfirmationCopy(selectedReference.title).cancel}
+                      </button>
+                      <button
+                        type="button"
+                        className="danger-button"
+                        onClick={() => confirmDelete(selectedReference)}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? "Deleting..." : deleteConfirmationCopy(selectedReference.title).confirm}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </>
             )}
           </>

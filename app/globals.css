@@ -165,6 +165,31 @@ label {
   padding: 10px 12px;
 }
 
+.form-status {
+  margin: 0;
+  border-left: 3px solid #7de0c2;
+  background: #13221d;
+  color: #dce3dd;
+  padding: 10px 12px;
+}
+
+.form-status--loading {
+  border-left-color: #f3c86a;
+  background: #211d12;
+}
+
+.form-status--failure {
+  border-left-color: #ff9c9c;
+  background: #251616;
+}
+
+.seed-fallback-message {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .reference-form {
   display: grid;
   gap: 14px;
@@ -326,6 +351,32 @@ label {
   border-top: 1px solid var(--border);
   background: #14171a;
   padding-top: 12px;
+}
+
+.delete-confirmation {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.22);
+  padding: 12px;
+}
+
+.delete-confirmation h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.delete-confirmation p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.confirmation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .detail-panel section {
