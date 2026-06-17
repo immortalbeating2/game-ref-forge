@@ -4,9 +4,9 @@ Updated: 2026-06-17
 
 ## Current Stage
 
-`Round 3 Local Implementation / Reference editing experience`
+`Main / Round 3 merged locally`
 
-The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, and implemented the third-round editing-experience branch locally.
+The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, and merged the third-round editing-experience branch into local `main`.
 
 ## Current Product Direction
 
@@ -60,6 +60,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, the third-round design spec and implementation plan were written.
 - On 2026-06-17, inline detail-panel editing was implemented and locally validated with automated checks plus API smoke.
 - On 2026-06-17, full browser click QA remained blocked because Browser Use `node_repl js` was unavailable and local CDP fallback was unstable.
+- On 2026-06-17, `codex/round-3-editing-experience` was merged locally into `main` and full validation passed on merged `main`.
 
 ## Active Decisions
 
@@ -84,8 +85,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Native browser confirm dialogs may still require user assistance during automation because confirm input translation timed out.
 - Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 - Third-round production edit persistence has not yet been deployed or production-validated.
+- Local `main` may still need remote sync depending on GitHub connectivity.
 - Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
 
 ## Next Suggested Step
 
-Run browser/manual QA for third-round edit mode, then deploy and validate production edit persistence.
+Push `main`, deploy a new Sites version, and validate production edit persistence in a browser session.

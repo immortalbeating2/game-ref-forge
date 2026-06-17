@@ -280,3 +280,17 @@
   - Browser Use `node_repl js` was unavailable in this session.
   - Chrome/Edge CDP fallback was attempted but blocked by target navigation/context destruction.
 - Next action: run stable browser/manual QA, then deploy and validate production edit persistence.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: local merge
+- Action: merged `codex/round-3-editing-experience` back to `main`
+- Merge commit:
+  - `merge: 合并第三轮编辑体验 / merge round 3 editing experience`
+- Validation on merged `main`:
+  - `npm test`: passed, 4 files / 15 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+- Next action: push `main`, deploy a new Sites version, and validate production edit persistence.
