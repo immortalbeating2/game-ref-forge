@@ -21,6 +21,7 @@ import {
   ReferenceDraft,
 } from "../lib/reference-draft";
 import {
+  deleteConfirmationCopy,
   MetadataPreviewStatus,
   metadataPreviewMessage,
 } from "../lib/interaction-state";
@@ -108,6 +109,8 @@ export default function Home() {
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewStatus, setPreviewStatus] = useState<MetadataPreviewStatus>("idle");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   function closeEditIfHiddenByView(nextView: {
@@ -235,6 +238,7 @@ export default function Home() {
     }
 
     setSelectedId(id);
+    setPendingDeleteId(null);
     if (editingId && editingId !== id) {
       setEditingId(null);
       setEditDraft(null);
@@ -399,21 +403,35 @@ export default function Home() {
     }
   }
 
-  async function removeReference(reference: ReferenceRecord) {
-    if (!confirm(`Delete "${reference.title}"?`)) {
-      return;
-    }
+  function requestDelete(reference: ReferenceRecord) {
+    setPendingDeleteId(reference.id);
+    setMessage(null);
+  }
 
+  function cancelDelete() {
+    setPendingDeleteId(null);
+  }
+
+  async function confirmDelete(reference: ReferenceRecord) {
+    setIsDeleting(true);
     try {
       if (!reference.id.startsWith("seed-")) {
-        await fetch(`/api/references/${reference.id}`, { method: "DELETE" });
+        const response = await fetch(`/api/references/${reference.id}`, { method: "DELETE" });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Failed to delete reference");
+        }
       }
 
       setReferences((current) => current.filter((item) => item.id !== reference.id));
       setSelectedId(null);
+      setPendingDeleteId(null);
       setMessage("Reference deleted.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Delete failed.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -968,9 +986,28 @@ export default function Home() {
                   <p>{selectedReference.transformation_ideas}</p>
                 </section>
 
-                <button className="danger-button" type="button" onClick={() => removeReference(selectedReference)}>
+                <button className="danger-button" type="button" onClick={() => requestDelete(selectedReference)}>
                   Delete reference
                 </button>
+                {pendingDeleteId === selectedReference.id ? (
+                  <div className="delete-confirmation" role="alertdialog" aria-labelledby="delete-confirmation-title">
+                    <h3 id="delete-confirmation-title">{deleteConfirmationCopy(selectedReference.title).title}</h3>
+                    <p>{deleteConfirmationCopy(selectedReference.title).body}</p>
+                    <div className="confirmation-actions">
+                      <button type="button" className="ghost-button" onClick={cancelDelete} disabled={isDeleting}>
+                        {deleteConfirmationCopy(selectedReference.title).cancel}
+                      </button>
+                      <button
+                        type="button"
+                        className="danger-button"
+                        onClick={() => confirmDelete(selectedReference)}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? "Deleting..." : deleteConfirmationCopy(selectedReference.title).confirm}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </>
             )}
           </>
