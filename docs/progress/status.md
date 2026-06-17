@@ -66,6 +66,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, the Sites Vite plugin was moved to tracked source path `tooling/sites-vite-plugin.ts`, and local tests, typecheck, lint, and build passed.
 - On 2026-06-17, the tracked plugin-path fix was committed as `9382d69`, pushed to the Sites source repository, saved as Sites version 4, and deployed successfully to production.
 - On 2026-06-17, unauthenticated production probes returned `401` for `/` and `/api/references`, matching the current `custom` access policy.
+- On 2026-06-17, GitHub remote sync recovered and `main` was pushed to `origin/main` through commit `a5ffc45`.
 
 ## Active Decisions
 
@@ -90,11 +91,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - Native browser confirm dialogs may still require user assistance during automation because confirm input translation timed out.
 - Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 - Third-round production edit persistence has been deployed but not yet validated through an authenticated browser CRUD pass.
-- Local `main` may still need GitHub remote sync depending on GitHub connectivity.
-- Latest `git push origin main` attempts failed with GitHub connection reset / `github.com:443` timeout.
+- GitHub default branch is still reported as `codex/round-2-live-validation`; changing it to `main` requires repository administration access outside the current integration.
 - Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
 - Browser control for authenticated production CRUD remains unavailable in the current session because the required in-app browser JS control entrypoint was not exposed.
 
 ## Next Suggested Step
 
-Validate production edit persistence in an authenticated browser session, then retry `git push origin main` when GitHub connectivity is available.
+Validate production edit persistence in an authenticated browser session, then change the GitHub default branch to `main` and delete the stale remote `codex/round-2-live-validation` branch when repository administration access is available.
