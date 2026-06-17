@@ -68,6 +68,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, unauthenticated production probes returned `401` for `/` and `/api/references`, matching the current `custom` access policy.
 - On 2026-06-17, GitHub remote sync recovered and `main` was pushed to `origin/main` through commit `a5ffc45`.
 - On 2026-06-17, local `codex/round-3-editing-experience` was deleted after merge, deployment, and remote sync.
+- On 2026-06-17, follow-up attempts to change GitHub default branch, delete the stale remote branch, or align it to `main` were blocked by GitHub integration permissions or intermittent `github.com:443` connectivity.
 
 ## Active Decisions
 
@@ -98,4 +99,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Validate production edit persistence in an authenticated browser session, then change the GitHub default branch to `main` and delete the stale remote `codex/round-2-live-validation` branch when repository administration access is available.
+Validate production edit persistence in an authenticated browser session. In GitHub web settings, change the default branch to `main`, then delete stale remote `codex/round-2-live-validation`.

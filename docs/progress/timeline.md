@@ -363,3 +363,19 @@
   - Local active branch: `main`
   - Remote stale branch: `origin/codex/round-2-live-validation`
   - Cleanup blocker: GitHub still marks `codex/round-2-live-validation` as the default branch.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: blocker confirmation
+- Action: retried the remaining branch cleanup paths.
+- Attempts:
+  - `gh api repos/immortalbeating2/game-ref-forge --method PATCH -f default_branch=main`: failed with `403 Resource not accessible by integration`.
+  - `git push origin --delete codex/round-2-live-validation`: failed with GitHub HTTPS connection reset.
+  - `gh api repos/immortalbeating2/game-ref-forge/git/refs/heads/codex/round-2-live-validation --method DELETE`: failed with `403 Resource not accessible by integration`.
+  - GitHub connector `_update_ref` for `codex/round-2-live-validation`: failed with `403 Resource not accessible by integration`.
+  - `git push origin main:codex/round-2-live-validation`: failed with `github.com:443` connection timeout.
+- Result:
+  - Local repository remains clean on `main`.
+  - Remote `main` is current.
+  - Stale remote branch cleanup requires GitHub web/admin action or a different credential with repo administration/ref write permissions.
