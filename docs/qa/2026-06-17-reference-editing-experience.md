@@ -81,6 +81,43 @@ Status:
 - Local API CRUD: passed.
 - Authenticated production edit CRUD: still pending because the current session does not expose the required in-app browser control entrypoint.
 
+## In-App Browser CRUD Recheck
+
+After the in-app browser control entrypoint became available, browser-level CRUD was rechecked against `http://localhost:3000`.
+
+Create and edit result:
+
+```json
+{
+  "createdTitle": "Browser CRUD QA 40014abb",
+  "visibleAfterCreateReload": true,
+  "updatedTitle": "Browser CRUD QA 40014abb Updated",
+  "visibleAfterEditReload": true,
+  "uiHudAfterReload": true,
+  "reviewAfterReload": true,
+  "sourceLinkOnlyAfterReload": true
+}
+```
+
+Delete result:
+
+```json
+{
+  "deletedTitle": "Browser Delete UI QA deluiecd481",
+  "dialogType": "confirm",
+  "accepted": true,
+  "deletedMessageVisible": true,
+  "visibleAfterDeleteReload": false,
+  "countLineAfterDeleteReload": "2 references"
+}
+```
+
+Notes:
+
+- Metadata preview was invoked during create, but the observed page text did not match the expected success phrases used by the script.
+- The first QA record's delete click left the record present after the confirmation flow; it was cleaned up via `DELETE /api/references/:id`.
+- A second dedicated QA record completed the browser UI delete path successfully, including confirm accept, `Reference deleted.`, reload, and absence check.
+
 ## Production Deployment
 
 - Sites version 3 was saved from commit `9a24ed454637c97502043e202b8d7b5450fb4739` but failed deployment because `vite.config.ts` imported the ignored local path `./build/sites-vite-plugin`.

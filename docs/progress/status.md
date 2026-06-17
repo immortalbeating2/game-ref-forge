@@ -74,6 +74,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, temporary public Sites access for automated production CRUD was attempted but blocked because public publishing is disabled for the workspace.
 - On 2026-06-17, the GitHub default branch was changed to `main` through the GitHub web UI, and remote branch `codex/round-2-live-validation` was deleted with `git push origin --delete`.
 - On 2026-06-17, local CRUD was rechecked after branch cleanup against `http://localhost:3000` and passed for create, read, update, delete, and post-delete absence.
+- On 2026-06-17, in-app browser CRUD was rechecked against `http://localhost:3000` and passed for create, reload persistence, edit, reload persistence, UI delete confirmation, and post-delete reload absence.
 
 ## Active Decisions
 
@@ -99,8 +100,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 - Third-round production edit persistence has been deployed but not yet validated through an authenticated browser CRUD pass.
 - GitHub default branch is now `main`.
-- Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
-- Browser control for authenticated production CRUD remains unavailable in the current session because the required in-app browser JS control entrypoint was not exposed; temporary public access is also unavailable for this workspace.
+- Local in-app browser CRUD QA for third-round edit mode has passed after the browser control entrypoint became available.
+- In-app browser control is available again for local validation; authenticated production CRUD still requires the logged-in production URL rather than `localhost`.
 
 ## Next Suggested Step
 

@@ -420,3 +420,17 @@
   - Confirmed updated title `QA Branch Cleanup c36d83df Updated`, category `ui_hud`, and rating `5` were returned by `GET /api/references`.
   - Deleted the QA reference.
   - Confirmed remaining matches after delete: `0`.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: in-app browser CRUD recheck
+- Action: rechecked CRUD through the in-app browser against `http://localhost:3000`.
+- Validation:
+  - Created `Browser CRUD QA 40014abb` through the add form.
+  - Reloaded and confirmed the created reference remained visible.
+  - Edited the selected reference to `Browser CRUD QA 40014abb Updated`.
+  - Reloaded and confirmed updated title, `UI/HUD`, `review`, and `source link only` remained visible.
+  - First delete attempt on that QA record left the record present; it was cleaned up through the API.
+  - Created a dedicated delete-test record `Browser Delete UI QA deluiecd481`.
+  - Selected it in the browser, clicked `Delete reference`, accepted the native confirm dialog, saw `Reference deleted.`, reloaded, and confirmed the title was absent.
