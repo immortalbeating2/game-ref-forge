@@ -319,3 +319,25 @@
   - `npm run lint`: passed
   - `npm run build`: passed
 - Next action: commit this fix, push the new HEAD to the Sites source repository, save and deploy a new Sites version.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: Sites deployment
+- Action: committed and deployed the tracked plugin-path fix.
+- Commit:
+  - `9382d69` - `fix: 修复 Sites 构建插件路径 / fix Sites build plugin path`
+- Sites version:
+  - version: `4`
+  - source commit: `9382d6973199a17c37bafebf5843b2058edb8651`
+  - deployment id: `appgdep_6a328652c474819184d09735f06e1bc3`
+  - deployment status: `succeeded`
+  - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Production access probe:
+  - `GET /`: `401`
+  - `GET /api/references`: `401`
+  - Interpretation: production is behind the configured `custom` access policy and still needs authenticated browser CRUD validation.
+- Browser-control status:
+  - Required in-app browser JS control entrypoint was not available through tool discovery.
+  - Automated authenticated CRUD validation remains pending.
+- Next action: validate production edit persistence in a logged-in browser session.

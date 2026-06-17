@@ -57,9 +57,23 @@ Status:
 - UI implementation review: completed through spec review, code quality review, typecheck, lint, and production build.
 - Local persistence/edit behavior: validated through API smoke.
 
+## Production Deployment
+
+- Sites version 3 was saved from commit `9a24ed454637c97502043e202b8d7b5450fb4739` but failed deployment because `vite.config.ts` imported the ignored local path `./build/sites-vite-plugin`.
+- The plugin source was moved to tracked path `tooling/sites-vite-plugin.ts`.
+- Sites version 4 was saved from commit `9382d6973199a17c37bafebf5843b2058edb8651` and deployed successfully.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`.
+- Unauthenticated `GET /` returned `401`.
+- Unauthenticated `GET /api/references` returned `401`.
+
+Status:
+
+- Production deployment: passed.
+- Authenticated production edit CRUD: pending because the current session does not expose the required in-app browser control entrypoint.
+
 ## Manual QA Items Still Recommended
 
-Before production deployment, use the in-app browser or a normal browser session to confirm:
+After production deployment, use the in-app browser or a normal browser session to confirm:
 
 - `Edit` opens inside the right detail panel.
 - Invalid edit save preserves draft and shows validation feedback.

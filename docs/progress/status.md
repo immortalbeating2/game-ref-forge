@@ -4,7 +4,7 @@ Updated: 2026-06-17
 
 ## Current Stage
 
-`Main / Round 3 deployment fix prepared`
+`Main / Round 3 deployed, production browser QA pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, and merged the third-round editing-experience branch into local `main`.
 
@@ -64,6 +64,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, local `main` was pushed to the Sites source repository with commit `9a24ed454637c97502043e202b8d7b5450fb4739` and Sites version 3 was saved.
 - On 2026-06-17, Sites version 3 deployment failed because `vite.config.ts` imported `./build/sites-vite-plugin` while `build/` is ignored and absent from the Sites source checkout.
 - On 2026-06-17, the Sites Vite plugin was moved to tracked source path `tooling/sites-vite-plugin.ts`, and local tests, typecheck, lint, and build passed.
+- On 2026-06-17, the tracked plugin-path fix was committed as `9382d69`, pushed to the Sites source repository, saved as Sites version 4, and deployed successfully to production.
+- On 2026-06-17, unauthenticated production probes returned `401` for `/` and `/api/references`, matching the current `custom` access policy.
 
 ## Active Decisions
 
@@ -87,12 +89,12 @@ It helps collect source links from game asset and game design sites, normalize t
 - Browser screenshot QA was not completed because the in-app browser tool was unavailable in the Sites foundation run.
 - Native browser confirm dialogs may still require user assistance during automation because confirm input translation timed out.
 - Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
-- Third-round production edit persistence has not yet been successfully deployed or production-validated.
+- Third-round production edit persistence has been deployed but not yet validated through an authenticated browser CRUD pass.
 - Local `main` may still need GitHub remote sync depending on GitHub connectivity.
 - Latest `git push origin main` attempts failed with GitHub connection reset / `github.com:443` timeout.
 - Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
-- A new Sites version needs to be saved and deployed after the tracked plugin-path fix is committed and pushed to the Sites source repository.
+- Browser control for authenticated production CRUD remains unavailable in the current session because the required in-app browser JS control entrypoint was not exposed.
 
 ## Next Suggested Step
 
-Commit the tracked plugin-path fix, push the resulting HEAD to the Sites source repository, deploy a new Sites version, then validate production edit persistence in an authenticated browser session. Retry `git push origin main` when GitHub connectivity is available.
+Validate production edit persistence in an authenticated browser session, then retry `git push origin main` when GitHub connectivity is available.
