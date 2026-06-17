@@ -297,3 +297,25 @@
   - `git push origin main`: failed with `Recv failure: Connection was reset`.
   - Retry failed with `Failed to connect to github.com port 443`.
 - Next action: retry `git push origin main`, deploy a new Sites version, and validate production edit persistence.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: deployment fix
+- Action: saved Sites version 3 from commit `9a24ed454637c97502043e202b8d7b5450fb4739`, then investigated the failed production deployment.
+- Sites version:
+  - version: `3`
+  - deployment id: `appgdep_6a328561ed248191a25786d4abd9ebf0`
+  - deployment status: `failed`
+- Failure:
+  - Production build could not resolve `./build/sites-vite-plugin` from `vite.config.ts`.
+  - Root cause: `build/` is ignored and the local Vite plugin source was not present in the Sites source checkout.
+- Fix:
+  - Moved the Sites Vite plugin source to tracked path `tooling/sites-vite-plugin.ts`.
+  - Updated `vite.config.ts` to import from `./tooling/sites-vite-plugin`.
+- Validation:
+  - `npm test`: passed, 4 files / 15 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+- Next action: commit this fix, push the new HEAD to the Sites source repository, save and deploy a new Sites version.
