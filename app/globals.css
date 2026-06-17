@@ -183,6 +183,13 @@ label {
   background: #251616;
 }
 
+.seed-fallback-message {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .reference-form {
   display: grid;
   gap: 14px;

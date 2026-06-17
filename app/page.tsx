@@ -24,6 +24,7 @@ import {
   deleteConfirmationCopy,
   MetadataPreviewStatus,
   metadataPreviewMessage,
+  seedFallbackMessage,
 } from "../lib/interaction-state";
 import { getVisibleDetailReference } from "../lib/ui-state";
 
@@ -111,6 +112,7 @@ export default function Home() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUsingSeedReferences, setIsUsingSeedReferences] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   function closeEditIfHiddenByView(nextView: {
@@ -171,9 +173,11 @@ export default function Home() {
         }
 
         const rows = payload.references as ReferenceRecord[];
+        setIsUsingSeedReferences(rows.length === 0);
         setReferences(rows.length > 0 ? rows : seedReferences);
         setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
       } catch (error) {
+        setIsUsingSeedReferences(true);
         setReferences(seedReferences);
         setSelectedId(seedReferences[0]?.id ?? null);
         setMessage(error instanceof Error ? error.message : "Using starter examples until D1 is ready.");
@@ -307,6 +311,7 @@ export default function Home() {
 
       const reference = payload.reference as ReferenceRecord;
       setReferences((current) => [reference, ...current.filter((item) => !item.id.startsWith("seed-"))]);
+      setIsUsingSeedReferences(false);
       setSelectedId(reference.id);
       setEditingId(null);
       setEditDraft(null);
@@ -685,6 +690,10 @@ export default function Home() {
           <span>{filteredReferences.length} references</span>
           <span>Safety status stays visible before opening details</span>
         </div>
+
+        {isUsingSeedReferences ? (
+          <p className="seed-fallback-message">{seedFallbackMessage()}</p>
+        ) : null}
 
         {filteredReferences.length === 0 ? (
           <div className="empty-results">
