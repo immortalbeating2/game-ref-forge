@@ -396,3 +396,14 @@
 - Result:
   - Branch cleanup still requires GitHub web settings or a working higher-permission token.
   - Authenticated production CRUD still requires a controllable logged-in browser session.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: branch cleanup
+- Action: completed stale remote branch cleanup after the user changed the GitHub default branch to `main` in the web UI.
+- Verification:
+  - `gh repo view immortalbeating2/game-ref-forge --json defaultBranchRef`: reported `main`.
+  - `git push origin --delete codex/round-2-live-validation`: passed.
+  - `git fetch --prune origin`: passed.
+  - Remote branches now include `origin/main` and `origin/HEAD -> origin/main`; `origin/codex/round-2-live-validation` is absent.

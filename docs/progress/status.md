@@ -72,6 +72,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, another branch-cleanup retry confirmed GitHub refuses deleting `codex/round-2-live-validation` while it remains the default branch.
 - On 2026-06-17, `gh auth refresh` device authorization was attempted but token exchange failed on the GitHub network request, so CLI permissions did not change.
 - On 2026-06-17, temporary public Sites access for automated production CRUD was attempted but blocked because public publishing is disabled for the workspace.
+- On 2026-06-17, the GitHub default branch was changed to `main` through the GitHub web UI, and remote branch `codex/round-2-live-validation` was deleted with `git push origin --delete`.
 
 ## Active Decisions
 
@@ -96,10 +97,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - Native browser confirm dialogs may still require user assistance during automation because confirm input translation timed out.
 - Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 - Third-round production edit persistence has been deployed but not yet validated through an authenticated browser CRUD pass.
-- GitHub default branch is still reported as `codex/round-2-live-validation`; changing it to `main` requires repository administration access outside the current integration.
+- GitHub default branch is now `main`.
 - Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
 - Browser control for authenticated production CRUD remains unavailable in the current session because the required in-app browser JS control entrypoint was not exposed; temporary public access is also unavailable for this workspace.
 
 ## Next Suggested Step
 
-Validate production edit persistence in an authenticated browser session. In GitHub web settings, change the default branch to `main`, then delete stale remote `codex/round-2-live-validation`.
+Validate production edit persistence in an authenticated browser session.
