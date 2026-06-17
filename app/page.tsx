@@ -104,6 +104,53 @@ export default function Home() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  function closeEditIfHiddenByView(nextView: {
+    query?: string;
+    assetCategory?: AssetCategory | "all";
+    publicStatus?: PublicStatus | "all";
+    licenseStatus?: LicenseStatus | "all";
+  }) {
+    if (!editingId || isSavingEdit) {
+      return;
+    }
+
+    const editingReference = references.find((reference) => reference.id === editingId);
+    if (!editingReference) {
+      return;
+    }
+
+    const nextQuery = nextView.query ?? query;
+    const nextAssetCategory = nextView.assetCategory ?? assetCategory;
+    const nextPublicStatus = nextView.publicStatus ?? publicStatus;
+    const nextLicenseStatus = nextView.licenseStatus ?? licenseStatus;
+    const normalizedQuery = nextQuery.trim().toLowerCase();
+    const searchable = [
+      editingReference.title,
+      editingReference.site_name,
+      editingReference.author,
+      editingReference.asset_category,
+      editingReference.media_type,
+      ...editingReference.style_tags,
+      ...editingReference.use_tags,
+      ...editingReference.inspiration_points,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const remainsVisible =
+      (!normalizedQuery || searchable.includes(normalizedQuery)) &&
+      (nextAssetCategory === "all" || editingReference.asset_category === nextAssetCategory) &&
+      (nextPublicStatus === "all" || editingReference.public_status === nextPublicStatus) &&
+      (nextLicenseStatus === "all" || editingReference.license_status === nextLicenseStatus);
+
+    if (!remainsVisible) {
+      setEditingId(null);
+      setEditDraft(null);
+      setMessage("Selection no longer visible; edit draft was closed.");
+    }
+  }
+
   useEffect(() => {
     async function loadReferences() {
       try {
@@ -176,6 +223,11 @@ export default function Home() {
   }
 
   function selectReference(id: string) {
+    if (isSavingEdit) {
+      setMessage("Finish saving before changing selection.");
+      return;
+    }
+
     setSelectedId(id);
     if (editingId && editingId !== id) {
       setEditingId(null);
@@ -274,8 +326,8 @@ export default function Home() {
         const now = new Date().toISOString();
         updatedReference = {
           ...selectedReference,
-          title: input.title,
-          source_url: input.source_url,
+          title: input.title.trim(),
+          source_url: input.source_url.trim(),
           canonical_url: input.canonical_url ?? null,
           site_name: input.site_name ?? null,
           author: input.author ?? null,
@@ -358,7 +410,14 @@ export default function Home() {
 
         <label>
           Asset category
-          <select value={assetCategory} onChange={(event) => setAssetCategory(event.target.value as AssetCategory | "all")}>
+          <select
+            value={assetCategory}
+            onChange={(event) => {
+              const nextAssetCategory = event.target.value as AssetCategory | "all";
+              closeEditIfHiddenByView({ assetCategory: nextAssetCategory });
+              setAssetCategory(nextAssetCategory);
+            }}
+          >
             <option value="all">All categories</option>
             {ASSET_CATEGORIES.map((category) => (
               <option key={category} value={category}>
@@ -370,7 +429,14 @@ export default function Home() {
 
         <label>
           Public status
-          <select value={publicStatus} onChange={(event) => setPublicStatus(event.target.value as PublicStatus | "all")}>
+          <select
+            value={publicStatus}
+            onChange={(event) => {
+              const nextPublicStatus = event.target.value as PublicStatus | "all";
+              closeEditIfHiddenByView({ publicStatus: nextPublicStatus });
+              setPublicStatus(nextPublicStatus);
+            }}
+          >
             <option value="all">All statuses</option>
             {PUBLIC_STATUSES.map((status) => (
               <option key={status} value={status}>
@@ -382,7 +448,14 @@ export default function Home() {
 
         <label>
           License status
-          <select value={licenseStatus} onChange={(event) => setLicenseStatus(event.target.value as LicenseStatus | "all")}>
+          <select
+            value={licenseStatus}
+            onChange={(event) => {
+              const nextLicenseStatus = event.target.value as LicenseStatus | "all";
+              closeEditIfHiddenByView({ licenseStatus: nextLicenseStatus });
+              setLicenseStatus(nextLicenseStatus);
+            }}
+          >
             <option value="all">All licenses</option>
             {LICENSE_STATUSES.map((status) => (
               <option key={status} value={status}>
@@ -412,7 +485,10 @@ export default function Home() {
             Search
             <input
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                closeEditIfHiddenByView({ query: event.target.value });
+                setQuery(event.target.value);
+              }}
               placeholder="Title, source, tag, note..."
             />
           </label>
@@ -595,6 +671,7 @@ export default function Home() {
               className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
               key={reference.id}
               onClick={() => selectReference(reference.id)}
+              disabled={isSavingEdit}
             >
               <div className={`thumbnail accent-${reference.asset_category}`}>
                 {reference.preview_url ? (
@@ -684,6 +761,13 @@ export default function Home() {
                       onChange={(event) => setEditDraft({ ...editDraft, preview_url: event.target.value })}
                     />
                   </label>
+                  <label>
+                    Source category
+                    <input
+                      value={editDraft.source_category}
+                      onChange={(event) => setEditDraft({ ...editDraft, source_category: event.target.value })}
+                    />
+                  </label>
                 </section>
 
                 <section>
@@ -747,6 +831,13 @@ export default function Home() {
                     </select>
                   </label>
                   <label>
+                    Attribution text
+                    <textarea
+                      value={editDraft.attribution_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, attribution_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
                     Avoid copying
                     <textarea
                       value={editDraft.avoid_copying_notes}
@@ -776,6 +867,16 @@ export default function Home() {
                     <textarea
                       value={editDraft.inspiration_points_text}
                       onChange={(event) => setEditDraft({ ...editDraft, inspiration_points_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Rating
+                    <input
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={editDraft.rating}
+                      onChange={(event) => setEditDraft({ ...editDraft, rating: event.target.value })}
                     />
                   </label>
                   <label>
