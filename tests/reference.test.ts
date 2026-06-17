@@ -45,6 +45,7 @@ describe("reference validation", () => {
       canonical_url: "https://example.com/canonical",
       site_name: "Example",
       author: "Example Author",
+      preview_url: "https://example.com/preview.png",
       media_type: "article",
       asset_category: "environment",
       source_category: "Article",
