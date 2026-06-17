@@ -20,6 +20,10 @@ import {
   recordToReferenceDraft,
   ReferenceDraft,
 } from "../lib/reference-draft";
+import {
+  MetadataPreviewStatus,
+  metadataPreviewMessage,
+} from "../lib/interaction-state";
 import { getVisibleDetailReference } from "../lib/ui-state";
 
 const categoryLabels: Record<AssetCategory, string> = {
@@ -102,6 +106,7 @@ export default function Home() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<MetadataPreviewStatus>("idle");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -239,11 +244,13 @@ export default function Home() {
 
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
+      setPreviewStatus("failure");
       setMessage("Paste a source URL before previewing metadata.");
       return;
     }
 
     setIsPreviewing(true);
+    setPreviewStatus("loading");
     setMessage(null);
 
     try {
@@ -266,9 +273,11 @@ export default function Home() {
         site_name: metadata.site_name ?? current.site_name,
         preview_url: metadata.preview_url ?? current.preview_url,
       }));
-      setMessage("Metadata preview applied. Review source and safety fields before saving.");
+      setPreviewStatus("success");
+      setMessage("Metadata preview ready. Review the fields before saving.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Preview failed; manual entry is still available.");
+      setPreviewStatus("failure");
+      setMessage(error instanceof Error ? error.message : "Metadata preview failed. You can still save this reference manually.");
     } finally {
       setIsPreviewing(false);
     }
@@ -646,6 +655,11 @@ export default function Home() {
               </button>
               <button type="submit">Save private reference</button>
             </div>
+            {metadataPreviewMessage(previewStatus) ? (
+              <p className={`form-status form-status--${previewStatus}`}>
+                {metadataPreviewMessage(previewStatus)}
+              </p>
+            ) : null}
           </form>
         ) : null}
 

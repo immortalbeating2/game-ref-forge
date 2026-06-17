@@ -165,6 +165,24 @@ label {
   padding: 10px 12px;
 }
 
+.form-status {
+  margin: 0;
+  border-left: 3px solid #7de0c2;
+  background: #13221d;
+  color: #dce3dd;
+  padding: 10px 12px;
+}
+
+.form-status--loading {
+  border-left-color: #f3c86a;
+  background: #211d12;
+}
+
+.form-status--failure {
+  border-left-color: #ff9c9c;
+  background: #251616;
+}
+
 .reference-form {
   display: grid;
   gap: 14px;
