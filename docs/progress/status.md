@@ -69,6 +69,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, GitHub remote sync recovered and `main` was pushed to `origin/main` through commit `a5ffc45`.
 - On 2026-06-17, local `codex/round-3-editing-experience` was deleted after merge, deployment, and remote sync.
 - On 2026-06-17, follow-up attempts to change GitHub default branch, delete the stale remote branch, or align it to `main` were blocked by GitHub integration permissions or intermittent `github.com:443` connectivity.
+- On 2026-06-17, another branch-cleanup retry confirmed GitHub refuses deleting `codex/round-2-live-validation` while it remains the default branch.
+- On 2026-06-17, `gh auth refresh` device authorization was attempted but token exchange failed on the GitHub network request, so CLI permissions did not change.
+- On 2026-06-17, temporary public Sites access for automated production CRUD was attempted but blocked because public publishing is disabled for the workspace.
 
 ## Active Decisions
 
@@ -95,7 +98,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Third-round production edit persistence has been deployed but not yet validated through an authenticated browser CRUD pass.
 - GitHub default branch is still reported as `codex/round-2-live-validation`; changing it to `main` requires repository administration access outside the current integration.
 - Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
-- Browser control for authenticated production CRUD remains unavailable in the current session because the required in-app browser JS control entrypoint was not exposed.
+- Browser control for authenticated production CRUD remains unavailable in the current session because the required in-app browser JS control entrypoint was not exposed; temporary public access is also unavailable for this workspace.
 
 ## Next Suggested Step
 

@@ -379,3 +379,20 @@
   - Local repository remains clean on `main`.
   - Remote `main` is current.
   - Stale remote branch cleanup requires GitHub web/admin action or a different credential with repo administration/ref write permissions.
+
+### 2026-06-17
+
+- Branch: `main`
+- Mode: blocker confirmation
+- Action: retried the branch cleanup and production browser-test paths after user requested one more pass.
+- Branch cleanup attempts:
+  - `git push origin --delete codex/round-2-live-validation`: reached GitHub and was rejected because GitHub refuses deleting the current default branch.
+  - `gh repo edit immortalbeating2/game-ref-forge --default-branch main`: still failed with `403 Resource not accessible by integration`.
+  - `gh auth refresh -h github.com -s repo --clipboard`: started device authorization, but token exchange failed on the GitHub network request and permissions did not change.
+- Browser / production test attempts:
+  - Required in-app browser JS control entrypoint remained unavailable through tool discovery.
+  - Local Chrome executable was found at `C:\Program Files\Google\Chrome\Application\chrome.exe`.
+  - Temporary Sites `public` access was attempted but failed because public publishing is not enabled for the workspace.
+- Result:
+  - Branch cleanup still requires GitHub web settings or a working higher-permission token.
+  - Authenticated production CRUD still requires a controllable logged-in browser session.
