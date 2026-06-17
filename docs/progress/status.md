@@ -67,6 +67,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, the tracked plugin-path fix was committed as `9382d69`, pushed to the Sites source repository, saved as Sites version 4, and deployed successfully to production.
 - On 2026-06-17, unauthenticated production probes returned `401` for `/` and `/api/references`, matching the current `custom` access policy.
 - On 2026-06-17, GitHub remote sync recovered and `main` was pushed to `origin/main` through commit `a5ffc45`.
+- On 2026-06-17, local `codex/round-3-editing-experience` was deleted after merge, deployment, and remote sync.
 
 ## Active Decisions
 
