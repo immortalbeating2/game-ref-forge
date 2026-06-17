@@ -294,6 +294,40 @@ label {
   font-weight: 700;
 }
 
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.detail-actions a,
+.detail-actions button {
+  flex: 1 1 auto;
+}
+
+.detail-edit-form {
+  display: grid;
+  gap: 18px;
+}
+
+.detail-edit-form section {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.detail-edit-form label {
+  margin-top: 10px;
+}
+
+.sticky-actions {
+  position: sticky;
+  bottom: 0;
+  border-top: 1px solid var(--border);
+  background: #14171a;
+  padding-top: 12px;
+}
+
 .detail-panel section {
   display: grid;
   gap: 10px;

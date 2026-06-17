@@ -15,6 +15,8 @@ import {
 import {
   createEmptyReferenceDraft,
   draftToReferenceInput,
+  isReferenceDraftDirty,
+  recordToReferenceDraft,
   ReferenceDraft,
 } from "../lib/reference-draft";
 import { getVisibleDetailReference } from "../lib/ui-state";
@@ -95,8 +97,11 @@ export default function Home() {
   const [publicStatus, setPublicStatus] = useState<PublicStatus | "all">("all");
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
   const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
+  const [editDraft, setEditDraft] = useState<ReferenceDraft | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -154,6 +159,30 @@ export default function Home() {
     references,
     selectedId,
   );
+  const isEditingSelected = Boolean(
+    selectedReference && editingId === selectedReference.id && editDraft,
+  );
+
+  function startEditing(reference: ReferenceRecord) {
+    setEditingId(reference.id);
+    setEditDraft(recordToReferenceDraft(reference));
+    setMessage("Editing selected reference.");
+  }
+
+  function cancelEditing() {
+    setEditingId(null);
+    setEditDraft(null);
+    setMessage("Edit canceled; no changes saved.");
+  }
+
+  function selectReference(id: string) {
+    setSelectedId(id);
+    if (editingId && editingId !== id) {
+      setEditingId(null);
+      setEditDraft(null);
+      setMessage("Selection changed; edit draft was closed.");
+    }
+  }
 
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
@@ -218,6 +247,85 @@ export default function Home() {
       setMessage("Reference saved privately by default.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Save failed. Form contents were preserved.");
+    }
+  }
+
+  async function saveReferenceEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedReference || !editDraft) {
+      return;
+    }
+
+    if (!isReferenceDraftDirty(editDraft, selectedReference)) {
+      setMessage("No changes to save.");
+      return;
+    }
+
+    setIsSavingEdit(true);
+    setMessage("Saving reference changes...");
+
+    const input = draftToReferenceInput(editDraft);
+
+    try {
+      let updatedReference: ReferenceRecord;
+
+      if (selectedReference.id.startsWith("seed-")) {
+        const now = new Date().toISOString();
+        updatedReference = {
+          ...selectedReference,
+          title: input.title,
+          source_url: input.source_url,
+          canonical_url: input.canonical_url ?? null,
+          site_name: input.site_name ?? null,
+          author: input.author ?? null,
+          preview_url: input.preview_url ?? null,
+          media_type: input.media_type,
+          asset_category: input.asset_category,
+          source_category: input.source_category ?? null,
+          style_tags: input.style_tags ?? [],
+          use_tags: input.use_tags ?? [],
+          license_status: input.license_status ?? "private_reference",
+          attribution_text: input.attribution_text ?? null,
+          public_status: input.public_status ?? "private",
+          rating: input.rating ?? null,
+          inspiration_points: input.inspiration_points ?? [],
+          deconstruction_notes: input.deconstruction_notes ?? null,
+          transformation_ideas: input.transformation_ideas ?? null,
+          avoid_copying_notes: input.avoid_copying_notes ?? null,
+          related_original_asset: input.related_original_asset ?? null,
+          updated_at: now,
+        };
+      } else {
+        const response = await fetch(`/api/references/${selectedReference.id}`, {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(input),
+        });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.errors?.join(", ") ?? payload.error ?? "Update failed.");
+        }
+
+        updatedReference = payload.reference as ReferenceRecord;
+      }
+
+      setReferences((current) =>
+        current.map((item) => (item.id === selectedReference.id ? updatedReference : item)),
+      );
+      setSelectedId(updatedReference.id);
+      setEditingId(null);
+      setEditDraft(null);
+      setMessage(
+        selectedReference.id.startsWith("seed-")
+          ? "Starter example updated locally; D1 was not changed."
+          : "Reference changes saved.",
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Update failed. Edit contents were preserved.");
+    } finally {
+      setIsSavingEdit(false);
     }
   }
 
@@ -486,7 +594,7 @@ export default function Home() {
               type="button"
               className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
               key={reference.id}
-              onClick={() => setSelectedId(reference.id)}
+              onClick={() => selectReference(reference.id)}
             >
               <div className={`thumbnail accent-${reference.asset_category}`}>
                 {reference.preview_url ? (
@@ -516,45 +624,230 @@ export default function Home() {
             <div className="detail-heading">
               <p className="eyebrow">Selected reference</p>
               <h2>{selectedReference.title}</h2>
-              <a href={selectedReference.source_url} target="_blank" rel="noreferrer">
-                Open source
-              </a>
+              {!isEditingSelected ? (
+                <div className="detail-actions">
+                  <a href={selectedReference.source_url} target="_blank" rel="noreferrer">
+                    Open source
+                  </a>
+                  <button className="ghost-button" type="button" onClick={() => startEditing(selectedReference)}>
+                    Edit
+                  </button>
+                </div>
+              ) : null}
             </div>
 
-            <section>
-              <h3>Source</h3>
-              <dl>
-                <div><dt>Site</dt><dd>{selectedReference.site_name ?? "Unknown"}</dd></div>
-                <div><dt>Author</dt><dd>{selectedReference.author ?? "Unknown"}</dd></div>
-                <div><dt>Media</dt><dd>{statusLabel(selectedReference.media_type)}</dd></div>
-              </dl>
-            </section>
+            {isEditingSelected && editDraft ? (
+              <form className="detail-edit-form" onSubmit={saveReferenceEdit}>
+                <section>
+                  <h3>Source</h3>
+                  <label>
+                    Title
+                    <input
+                      required
+                      value={editDraft.title}
+                      onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Source URL
+                    <input
+                      required
+                      value={editDraft.source_url}
+                      onChange={(event) => setEditDraft({ ...editDraft, source_url: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Canonical URL
+                    <input
+                      value={editDraft.canonical_url}
+                      onChange={(event) => setEditDraft({ ...editDraft, canonical_url: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Site
+                    <input
+                      value={editDraft.site_name}
+                      onChange={(event) => setEditDraft({ ...editDraft, site_name: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Author
+                    <input
+                      value={editDraft.author}
+                      onChange={(event) => setEditDraft({ ...editDraft, author: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Preview URL
+                    <input
+                      value={editDraft.preview_url}
+                      onChange={(event) => setEditDraft({ ...editDraft, preview_url: event.target.value })}
+                    />
+                  </label>
+                </section>
 
-            <section>
-              <h3>Safety</h3>
-              <dl>
-                <div><dt>License</dt><dd>{statusLabel(selectedReference.license_status)}</dd></div>
-                <div><dt>Public</dt><dd>{statusLabel(selectedReference.public_status)}</dd></div>
-              </dl>
-              <p>{selectedReference.avoid_copying_notes ?? "Record what exact expression should not be copied."}</p>
-            </section>
+                <section>
+                  <h3>Classification and safety</h3>
+                  <label>
+                    Media type
+                    <select
+                      value={editDraft.media_type}
+                      onChange={(event) => setEditDraft({ ...editDraft, media_type: event.target.value as MediaType })}
+                    >
+                      {MEDIA_TYPES.map((type) => (
+                        <option key={type} value={type}>
+                          {statusLabel(type)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Asset category
+                    <select
+                      value={editDraft.asset_category}
+                      onChange={(event) =>
+                        setEditDraft({ ...editDraft, asset_category: event.target.value as AssetCategory })
+                      }
+                    >
+                      {ASSET_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {categoryLabels[category]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    License status
+                    <select
+                      value={editDraft.license_status}
+                      onChange={(event) =>
+                        setEditDraft({ ...editDraft, license_status: event.target.value as LicenseStatus })
+                      }
+                    >
+                      {LICENSE_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {statusLabel(status)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Public status
+                    <select
+                      value={editDraft.public_status}
+                      onChange={(event) =>
+                        setEditDraft({ ...editDraft, public_status: event.target.value as PublicStatus })
+                      }
+                    >
+                      {PUBLIC_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {statusLabel(status)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Avoid copying
+                    <textarea
+                      value={editDraft.avoid_copying_notes}
+                      onChange={(event) => setEditDraft({ ...editDraft, avoid_copying_notes: event.target.value })}
+                    />
+                  </label>
+                </section>
 
-            <section>
-              <h3>Inspiration</h3>
-              <ul>
-                {selectedReference.inspiration_points.length > 0 ? (
-                  selectedReference.inspiration_points.map((point) => <li key={point}>{point}</li>)
-                ) : (
-                  <li>Add concrete principles this reference teaches.</li>
-                )}
-              </ul>
-              <p>{selectedReference.deconstruction_notes}</p>
-              <p>{selectedReference.transformation_ideas}</p>
-            </section>
+                <section>
+                  <h3>Inspiration</h3>
+                  <label>
+                    Style tags
+                    <input
+                      value={editDraft.style_tags_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, style_tags_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Use tags
+                    <input
+                      value={editDraft.use_tags_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, use_tags_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Inspiration points
+                    <textarea
+                      value={editDraft.inspiration_points_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, inspiration_points_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Deconstruction notes
+                    <textarea
+                      value={editDraft.deconstruction_notes}
+                      onChange={(event) => setEditDraft({ ...editDraft, deconstruction_notes: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Transformation ideas
+                    <textarea
+                      value={editDraft.transformation_ideas}
+                      onChange={(event) => setEditDraft({ ...editDraft, transformation_ideas: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Related original asset
+                    <input
+                      value={editDraft.related_original_asset}
+                      onChange={(event) => setEditDraft({ ...editDraft, related_original_asset: event.target.value })}
+                    />
+                  </label>
+                </section>
 
-            <button className="danger-button" type="button" onClick={() => removeReference(selectedReference)}>
-              Delete reference
-            </button>
+                <div className="form-actions sticky-actions">
+                  <button type="submit" disabled={isSavingEdit}>
+                    {isSavingEdit ? "Saving..." : "Save changes"}
+                  </button>
+                  <button className="ghost-button" type="button" onClick={cancelEditing} disabled={isSavingEdit}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <section>
+                  <h3>Source</h3>
+                  <dl>
+                    <div><dt>Site</dt><dd>{selectedReference.site_name ?? "Unknown"}</dd></div>
+                    <div><dt>Author</dt><dd>{selectedReference.author ?? "Unknown"}</dd></div>
+                    <div><dt>Media</dt><dd>{statusLabel(selectedReference.media_type)}</dd></div>
+                  </dl>
+                </section>
+
+                <section>
+                  <h3>Safety</h3>
+                  <dl>
+                    <div><dt>License</dt><dd>{statusLabel(selectedReference.license_status)}</dd></div>
+                    <div><dt>Public</dt><dd>{statusLabel(selectedReference.public_status)}</dd></div>
+                  </dl>
+                  <p>{selectedReference.avoid_copying_notes ?? "Record what exact expression should not be copied."}</p>
+                </section>
+
+                <section>
+                  <h3>Inspiration</h3>
+                  <ul>
+                    {selectedReference.inspiration_points.length > 0 ? (
+                      selectedReference.inspiration_points.map((point) => <li key={point}>{point}</li>)
+                    ) : (
+                      <li>Add concrete principles this reference teaches.</li>
+                    )}
+                  </ul>
+                  <p>{selectedReference.deconstruction_notes}</p>
+                  <p>{selectedReference.transformation_ideas}</p>
+                </section>
+
+                <button className="danger-button" type="button" onClick={() => removeReference(selectedReference)}>
+                  Delete reference
+                </button>
+              </>
+            )}
           </>
         ) : (
           <div className="empty-detail">
