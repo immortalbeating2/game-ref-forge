@@ -253,3 +253,30 @@
   - Add update-input regression coverage.
   - Implement inline detail-panel edit mode.
   - Run local/manual QA and update progress trace docs.
+
+### 2026-06-17
+
+- Branch: `codex/round-3-editing-experience`
+- Mode: subagent-driven implementation
+- Action: implemented third-round inline detail-panel editing
+- Commits:
+  - `d66982c` - `feat: 抽取引用草稿工具 / extract reference draft helpers`
+  - `72c541e` - `test: 补齐引用草稿覆盖 / complete reference draft coverage`
+  - `da33be7` - `fix: 加固引用草稿边界 / harden reference draft boundaries`
+  - `498ec73` - `test: 覆盖引用更新输入 / cover reference update input`
+  - `34dff03` - `test: 补齐预览链接更新覆盖 / cover preview URL update`
+  - `456793b` - `feat: 增加详情面板编辑 / add detail panel editing`
+  - `6c87f27` - `fix: 加固详情编辑状态 / harden detail edit state`
+  - `81e13d7` - `fix: 校验示例编辑保存 / validate starter edit saves`
+- Validation:
+  - `npm test`: passed, 4 files / 15 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+  - Local API smoke passed for create, edit, invalid edit validation, delete, and post-delete absence.
+- QA note:
+  - `docs/qa/2026-06-17-reference-editing-experience.md`
+- Browser automation:
+  - Browser Use `node_repl js` was unavailable in this session.
+  - Chrome/Edge CDP fallback was attempted but blocked by target navigation/context destruction.
+- Next action: run stable browser/manual QA, then deploy and validate production edit persistence.
