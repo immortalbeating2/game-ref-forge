@@ -36,6 +36,33 @@ describe("reference validation", () => {
       "source_url must be an absolute URL",
     ]);
   });
+
+  it("accepts valid update payloads for editable fields", () => {
+    const result = validateReferenceInput({
+      ...DEFAULT_REFERENCE_INPUT,
+      title: "Updated Ref",
+      source_url: "https://example.com/updated",
+      canonical_url: "https://example.com/canonical",
+      site_name: "Example",
+      author: "Example Author",
+      media_type: "article",
+      asset_category: "environment",
+      source_category: "Article",
+      style_tags: ["moody"],
+      use_tags: ["lighting"],
+      license_status: "source_link_only",
+      attribution_text: "Attribution required on source.",
+      public_status: "review",
+      rating: 3,
+      inspiration_points: ["Composition"],
+      deconstruction_notes: "Layered focal points.",
+      transformation_ideas: "Original layout with similar hierarchy.",
+      avoid_copying_notes: "Do not copy the composition exactly.",
+      related_original_asset: "Forest arena",
+    });
+
+    expect(result).toEqual({ ok: true, errors: [] });
+  });
 });
 
 describe("reference JSON fields", () => {
