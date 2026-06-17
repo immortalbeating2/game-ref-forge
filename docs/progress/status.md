@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-17
+Updated: 2026-06-18
 
 ## Current Stage
 
-`Main / Round 3 deployed, production browser QA pending`
+`Main / Round 4 design and planning`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, and merged the third-round editing-experience branch into local `main`.
 
@@ -75,6 +75,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-17, the GitHub default branch was changed to `main` through the GitHub web UI, and remote branch `codex/round-2-live-validation` was deleted with `git push origin --delete`.
 - On 2026-06-17, local CRUD was rechecked after branch cleanup against `http://localhost:3000` and passed for create, read, update, delete, and post-delete absence.
 - On 2026-06-17, in-app browser CRUD was rechecked against `http://localhost:3000` and passed for create, reload persistence, edit, reload persistence, UI delete confirmation, and post-delete reload absence.
+- On 2026-06-18, fourth-round production interaction hardening design and implementation plan were written.
+- On 2026-06-18, the fourth-round scope was set to metadata preview feedback, app-owned delete confirmation, seed fallback messaging, and production CRUD QA.
 
 ## Active Decisions
 
@@ -102,7 +104,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - GitHub default branch is now `main`.
 - Local in-app browser CRUD QA for third-round edit mode has passed after the browser control entrypoint became available.
 - In-app browser control is available again for local validation; authenticated production CRUD still requires the logged-in production URL rather than `localhost`.
+- Fourth-round implementation should avoid broad page rewrites; `app/page.tsx` is already a high-change file.
 
 ## Next Suggested Step
 
-Validate production edit persistence in an authenticated browser session.
+Review and approve the fourth-round design and implementation plan, then start branch `codex/round-4-production-hardening`.

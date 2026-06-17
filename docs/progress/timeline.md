@@ -434,3 +434,21 @@
   - First delete attempt on that QA record left the record present; it was cleaned up through the API.
   - Created a dedicated delete-test record `Browser Delete UI QA deluiecd481`.
   - Selected it in the browser, clicked `Delete reference`, accepted the native confirm dialog, saw `Reference deleted.`, reloaded, and confirmed the title was absent.
+
+## 2026-06-18
+
+### 2026-06-18
+
+- Branch: `main`
+- Mode: design and planning
+- Action: prepared fourth-round production interaction hardening documents.
+- Design spec:
+  - `docs/superpowers/specs/2026-06-18-production-interaction-hardening-design.md`
+- Implementation plan:
+  - `docs/superpowers/plans/2026-06-18-production-interaction-hardening.md`
+- Scope:
+  - Stabilize metadata preview feedback.
+  - Replace native delete confirm with app-owned confirmation.
+  - Clarify seed fallback/starter examples.
+  - Run local and production CRUD QA.
+- Next action: user review and approval, then start `codex/round-4-production-hardening`.
