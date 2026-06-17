@@ -86,8 +86,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Direct unauthenticated command-line access remains `403 Forbidden` by private Sites access design.
 - Third-round production edit persistence has not yet been deployed or production-validated.
 - Local `main` may still need remote sync depending on GitHub connectivity.
+- Latest `git push origin main` attempts failed with GitHub connection reset / `github.com:443` timeout.
 - Full local browser click QA for third-round edit mode still needs a stable browser-control session or manual browser pass.
 
 ## Next Suggested Step
 
-Push `main`, deploy a new Sites version, and validate production edit persistence in a browser session.
+Retry `git push origin main` when GitHub connectivity is available, then deploy a new Sites version and validate production edit persistence in a browser session.

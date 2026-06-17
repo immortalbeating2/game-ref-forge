@@ -293,4 +293,7 @@
   - `npm run typecheck`: passed
   - `npm run lint`: passed
   - `npm run build`: passed
-- Next action: push `main`, deploy a new Sites version, and validate production edit persistence.
+- Remote sync:
+  - `git push origin main`: failed with `Recv failure: Connection was reset`.
+  - Retry failed with `Failed to connect to github.com port 443`.
+- Next action: retry `git push origin main`, deploy a new Sites version, and validate production edit persistence.
