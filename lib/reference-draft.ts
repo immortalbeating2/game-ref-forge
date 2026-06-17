@@ -53,6 +53,29 @@ function nullableText(value: string) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+const referenceDraftFields = [
+  "title",
+  "source_url",
+  "canonical_url",
+  "site_name",
+  "author",
+  "preview_url",
+  "media_type",
+  "asset_category",
+  "source_category",
+  "license_status",
+  "attribution_text",
+  "public_status",
+  "rating",
+  "deconstruction_notes",
+  "transformation_ideas",
+  "avoid_copying_notes",
+  "related_original_asset",
+  "style_tags_text",
+  "use_tags_text",
+  "inspiration_points_text",
+] as const satisfies readonly (keyof ReferenceDraft)[];
+
 export function splitDraftList(value: string) {
   return value
     .split(",")
@@ -64,14 +87,19 @@ export function inputToReferenceDraft(
   input: Partial<ReferenceInput> = DEFAULT_REFERENCE_INPUT,
 ): ReferenceDraft {
   return {
-    ...DEFAULT_REFERENCE_INPUT,
-    ...input,
+    title: input.title ?? DEFAULT_REFERENCE_INPUT.title,
+    source_url: input.source_url ?? DEFAULT_REFERENCE_INPUT.source_url,
     canonical_url: textValue(input.canonical_url),
     site_name: textValue(input.site_name),
     author: textValue(input.author),
     preview_url: textValue(input.preview_url),
+    media_type: input.media_type ?? DEFAULT_REFERENCE_INPUT.media_type,
+    asset_category: input.asset_category ?? DEFAULT_REFERENCE_INPUT.asset_category,
     source_category: textValue(input.source_category),
+    license_status:
+      input.license_status ?? DEFAULT_REFERENCE_INPUT.license_status,
     attribution_text: textValue(input.attribution_text),
+    public_status: input.public_status ?? DEFAULT_REFERENCE_INPUT.public_status,
     rating: input.rating ? String(input.rating) : "",
     deconstruction_notes: textValue(input.deconstruction_notes),
     transformation_ideas: textValue(input.transformation_ideas),
@@ -122,31 +150,9 @@ export function isReferenceDraftDirty(
   draft: ReferenceDraft,
   record: ReferenceRecord,
 ) {
-  const input = draftToReferenceInput(draft);
-  const styleTags = input.style_tags ?? [];
-  const useTags = input.use_tags ?? [];
-  const inspirationPoints = input.inspiration_points ?? [];
+  const originalDraft = recordToReferenceDraft(record);
 
-  return (
-    input.title !== record.title ||
-    input.source_url !== record.source_url ||
-    input.canonical_url !== record.canonical_url ||
-    input.site_name !== record.site_name ||
-    input.author !== record.author ||
-    input.preview_url !== record.preview_url ||
-    input.media_type !== record.media_type ||
-    input.asset_category !== record.asset_category ||
-    input.source_category !== record.source_category ||
-    input.license_status !== record.license_status ||
-    input.attribution_text !== record.attribution_text ||
-    input.public_status !== record.public_status ||
-    input.rating !== record.rating ||
-    input.deconstruction_notes !== record.deconstruction_notes ||
-    input.transformation_ideas !== record.transformation_ideas ||
-    input.avoid_copying_notes !== record.avoid_copying_notes ||
-    input.related_original_asset !== record.related_original_asset ||
-    styleTags.join("\n") !== record.style_tags.join("\n") ||
-    useTags.join("\n") !== record.use_tags.join("\n") ||
-    inspirationPoints.join("\n") !== record.inspiration_points.join("\n")
+  return referenceDraftFields.some(
+    (field) => draft[field] !== originalDraft[field],
   );
 }

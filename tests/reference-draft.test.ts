@@ -37,13 +37,18 @@ const record = {
 describe("reference draft helpers", () => {
   it("creates an empty draft from default input values", () => {
     expect(createEmptyReferenceDraft()).toEqual({
-      ...DEFAULT_REFERENCE_INPUT,
+      title: "",
+      source_url: "",
       canonical_url: "",
       site_name: "",
       author: "",
       preview_url: "",
+      media_type: DEFAULT_REFERENCE_INPUT.media_type,
+      asset_category: DEFAULT_REFERENCE_INPUT.asset_category,
       source_category: "",
+      license_status: DEFAULT_REFERENCE_INPUT.license_status,
       attribution_text: "",
+      public_status: DEFAULT_REFERENCE_INPUT.public_status,
       rating: "",
       deconstruction_notes: "",
       transformation_ideas: "",
@@ -101,6 +106,25 @@ describe("reference draft helpers", () => {
     const original = recordToReferenceDraft(record);
     expect(isReferenceDraftDirty(original, record)).toBe(false);
     expect(isReferenceDraftDirty({ ...original, title: "Changed" }, record)).toBe(true);
+  });
+
+  it("does not mark untouched records with comma-containing list items as dirty", () => {
+    const recordWithComma = {
+      ...record,
+      inspiration_points: ["Strong shape, readable silhouette"],
+    } satisfies ReferenceRecord;
+
+    const draft = recordToReferenceDraft(recordWithComma);
+
+    expect(isReferenceDraftDirty(draft, recordWithComma)).toBe(false);
+  });
+
+  it("does not expose runtime record fields on drafts", () => {
+    const draft = recordToReferenceDraft(record);
+
+    expect("id" in draft).toBe(false);
+    expect("created_at" in draft).toBe(false);
+    expect("updated_at" in draft).toBe(false);
   });
 
   it("creates drafts from partial input without leaking arrays into text controls", () => {
