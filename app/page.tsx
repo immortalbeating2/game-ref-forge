@@ -26,18 +26,15 @@ import {
   metadataPreviewMessage,
   seedFallbackMessage,
 } from "../lib/interaction-state";
+import {
+  labelForAssetCategory,
+  labelForLicenseStatus,
+  labelForMediaType,
+  labelForPublicStatus,
+  Language,
+  uiCopy,
+} from "../lib/localization";
 import { getVisibleDetailReference } from "../lib/ui-state";
-
-const categoryLabels: Record<AssetCategory, string> = {
-  character: "Character",
-  environment: "Environment",
-  prop: "Prop",
-  ui_hud: "UI/HUD",
-  vfx: "VFX",
-  material_texture: "Material",
-  animation: "Animation",
-  audio: "Audio",
-};
 
 const seedReferences: ReferenceRecord[] = [
   {
@@ -92,11 +89,8 @@ const seedReferences: ReferenceRecord[] = [
   },
 ];
 
-function statusLabel(value: string) {
-  return value.replaceAll("_", " ");
-}
-
 export default function Home() {
+  const [language, setLanguage] = useState<Language>("zh");
   const [references, setReferences] = useState<ReferenceRecord[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -114,6 +108,7 @@ export default function Home() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUsingSeedReferences, setIsUsingSeedReferences] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const copy = uiCopy(language);
 
   function closeEditIfHiddenByView(nextView: {
     query?: string;
@@ -158,7 +153,7 @@ export default function Home() {
     if (!remainsVisible) {
       setEditingId(null);
       setEditDraft(null);
-      setMessage("Selection no longer visible; edit draft was closed.");
+      setMessage(copy.selectionHidden);
     }
   }
 
@@ -180,7 +175,7 @@ export default function Home() {
         setIsUsingSeedReferences(true);
         setReferences(seedReferences);
         setSelectedId(seedReferences[0]?.id ?? null);
-        setMessage(error instanceof Error ? error.message : "Using starter examples until D1 is ready.");
+        setMessage(error instanceof Error ? error.message : null);
       }
     }
 
@@ -226,18 +221,18 @@ export default function Home() {
   function startEditing(reference: ReferenceRecord) {
     setEditingId(reference.id);
     setEditDraft(recordToReferenceDraft(reference));
-    setMessage("Editing selected reference.");
+    setMessage(copy.editingSelected);
   }
 
   function cancelEditing() {
     setEditingId(null);
     setEditDraft(null);
-    setMessage("Edit canceled; no changes saved.");
+    setMessage(copy.editCanceled);
   }
 
   function selectReference(id: string) {
     if (isSavingEdit) {
-      setMessage("Finish saving before changing selection.");
+      setMessage(copy.finishSaving);
       return;
     }
 
@@ -246,14 +241,14 @@ export default function Home() {
     if (editingId && editingId !== id) {
       setEditingId(null);
       setEditDraft(null);
-      setMessage("Selection changed; edit draft was closed.");
+      setMessage(copy.selectionChanged);
     }
   }
 
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
       setPreviewStatus("failure");
-      setMessage("Paste a source URL before previewing metadata.");
+      setMessage(copy.pasteSourceUrl);
       return;
     }
 
@@ -282,10 +277,10 @@ export default function Home() {
         preview_url: metadata.preview_url ?? current.preview_url,
       }));
       setPreviewStatus("success");
-      setMessage("Metadata preview ready. Review the fields before saving.");
+      setMessage(copy.metadataPreviewSuccess);
     } catch (error) {
       setPreviewStatus("failure");
-      setMessage(error instanceof Error ? error.message : "Metadata preview failed. You can still save this reference manually.");
+      setMessage(error instanceof Error ? error.message : copy.metadataPreviewFailedFallback);
     } finally {
       setIsPreviewing(false);
     }
@@ -317,9 +312,9 @@ export default function Home() {
       setEditDraft(null);
       setDraft(createEmptyReferenceDraft());
       setIsFormOpen(false);
-      setMessage("Reference saved privately by default.");
+      setMessage(copy.savedPrivate);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Save failed. Form contents were preserved.");
+      setMessage(error instanceof Error ? error.message : copy.saveFailed);
     }
   }
 
@@ -331,7 +326,7 @@ export default function Home() {
     }
 
     if (!isReferenceDraftDirty(editDraft, selectedReference)) {
-      setMessage("No changes to save.");
+      setMessage(copy.noChanges);
       return;
     }
 
@@ -344,7 +339,7 @@ export default function Home() {
     }
 
     setIsSavingEdit(true);
-    setMessage("Saving reference changes...");
+    setMessage(copy.savingChanges);
 
     try {
       let updatedReference: ReferenceRecord;
@@ -398,11 +393,11 @@ export default function Home() {
       setEditDraft(null);
       setMessage(
         selectedReference.id.startsWith("seed-")
-          ? "Starter example updated locally; D1 was not changed."
-          : "Reference changes saved.",
+          ? copy.starterUpdatedLocally
+          : copy.changesSaved,
       );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Update failed. Edit contents were preserved.");
+      setMessage(error instanceof Error ? error.message : copy.updateFailed);
     } finally {
       setIsSavingEdit(false);
     }
@@ -432,9 +427,9 @@ export default function Home() {
       setReferences((current) => current.filter((item) => item.id !== reference.id));
       setSelectedId(null);
       setPendingDeleteId(null);
-      setMessage("Reference deleted.");
+      setMessage(copy.deleted);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Delete failed.");
+      setMessage(error instanceof Error ? error.message : copy.deleteFailed);
     } finally {
       setIsDeleting(false);
     }
@@ -442,15 +437,25 @@ export default function Home() {
 
   return (
     <main className="workspace">
-      <aside className="sidebar" aria-label="Reference filters">
+      <aside className="sidebar" aria-label={copy.filtersLabel}>
         <div className="brand-block">
           <p className="eyebrow">RefForge</p>
           <h1>灵感锻造台</h1>
-          <p>Private research desk for turning game asset references into original creative principles.</p>
+          <p>{copy.productDescription}</p>
+          <label className="language-switcher">
+            {copy.languageLabel}
+            <select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value as Language)}
+            >
+              <option value="zh">{copy.chinese}</option>
+              <option value="en">{copy.english}</option>
+            </select>
+          </label>
         </div>
 
         <label>
-          Asset category
+          {copy.assetCategory}
           <select
             value={assetCategory}
             onChange={(event) => {
@@ -459,17 +464,17 @@ export default function Home() {
               setAssetCategory(nextAssetCategory);
             }}
           >
-            <option value="all">All categories</option>
+            <option value="all">{copy.allCategories}</option>
             {ASSET_CATEGORIES.map((category) => (
               <option key={category} value={category}>
-                {categoryLabels[category]}
+                {labelForAssetCategory(category, language)}
               </option>
             ))}
           </select>
         </label>
 
         <label>
-          Public status
+          {copy.publicStatus}
           <select
             value={publicStatus}
             onChange={(event) => {
@@ -478,17 +483,17 @@ export default function Home() {
               setPublicStatus(nextPublicStatus);
             }}
           >
-            <option value="all">All statuses</option>
+            <option value="all">{copy.allStatuses}</option>
             {PUBLIC_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {statusLabel(status)}
+                {labelForPublicStatus(status, language)}
               </option>
             ))}
           </select>
         </label>
 
         <label>
-          License status
+          {copy.licenseStatus}
           <select
             value={licenseStatus}
             onChange={(event) => {
@@ -497,10 +502,10 @@ export default function Home() {
               setLicenseStatus(nextLicenseStatus);
             }}
           >
-            <option value="all">All licenses</option>
+            <option value="all">{copy.allLicenses}</option>
             {LICENSE_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {statusLabel(status)}
+                {labelForLicenseStatus(status, language)}
               </option>
             ))}
           </select>
@@ -516,25 +521,25 @@ export default function Home() {
             setQuery("");
           }}
         >
-          Clear filters
+          {copy.clearFilters}
         </button>
       </aside>
 
       <section className="gallery-pane">
         <header className="toolbar">
           <label className="search-label">
-            Search
+            {copy.search}
             <input
               value={query}
               onChange={(event) => {
                 closeEditIfHiddenByView({ query: event.target.value });
                 setQuery(event.target.value);
               }}
-              placeholder="Title, source, tag, note..."
+              placeholder={copy.searchPlaceholder}
             />
           </label>
           <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
-            + Add reference
+            {copy.addReference}
           </button>
         </header>
 
@@ -544,7 +549,7 @@ export default function Home() {
           <form className="reference-form" onSubmit={saveReference}>
             <div className="form-grid">
               <label>
-                Source URL
+                {copy.sourceUrl}
                 <input
                   required
                   value={draft.source_url}
@@ -553,7 +558,7 @@ export default function Home() {
                 />
               </label>
               <label>
-                Title
+                {copy.title}
                 <input
                   required
                   value={draft.title}
@@ -561,112 +566,112 @@ export default function Home() {
                 />
               </label>
               <label>
-                Site
+                {copy.site}
                 <input
                   value={draft.site_name ?? ""}
                   onChange={(event) => setDraft({ ...draft, site_name: event.target.value })}
                 />
               </label>
               <label>
-                Author
+                {copy.author}
                 <input
                   value={draft.author ?? ""}
                   onChange={(event) => setDraft({ ...draft, author: event.target.value })}
                 />
               </label>
               <label>
-                Media type
+                {copy.mediaType}
                 <select
                   value={draft.media_type}
                   onChange={(event) => setDraft({ ...draft, media_type: event.target.value as MediaType })}
                 >
                   {MEDIA_TYPES.map((type) => (
                     <option key={type} value={type}>
-                      {statusLabel(type)}
+                      {labelForMediaType(type, language)}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Asset category
+                {copy.assetCategory}
                 <select
                   value={draft.asset_category}
                   onChange={(event) => setDraft({ ...draft, asset_category: event.target.value as AssetCategory })}
                 >
                   {ASSET_CATEGORIES.map((category) => (
                     <option key={category} value={category}>
-                      {categoryLabels[category]}
+                      {labelForAssetCategory(category, language)}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                License status
+                {copy.licenseStatus}
                 <select
                   value={draft.license_status}
                   onChange={(event) => setDraft({ ...draft, license_status: event.target.value as LicenseStatus })}
                 >
                   {LICENSE_STATUSES.map((status) => (
                     <option key={status} value={status}>
-                      {statusLabel(status)}
+                      {labelForLicenseStatus(status, language)}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Public status
+                {copy.publicStatus}
                 <select
                   value={draft.public_status}
                   onChange={(event) => setDraft({ ...draft, public_status: event.target.value as PublicStatus })}
                 >
                   {PUBLIC_STATUSES.map((status) => (
                     <option key={status} value={status}>
-                      {statusLabel(status)}
+                      {labelForPublicStatus(status, language)}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Style tags
+                {copy.styleTags}
                 <input
                   value={draft.style_tags_text}
                   onChange={(event) => setDraft({ ...draft, style_tags_text: event.target.value })}
-                  placeholder="pixel, cozy, sci-fi"
+                  placeholder={copy.styleTagsPlaceholder}
                 />
               </label>
               <label>
-                Use tags
+                {copy.useTags}
                 <input
                   value={draft.use_tags_text}
                   onChange={(event) => setDraft({ ...draft, use_tags_text: event.target.value })}
-                  placeholder="combat feedback, inventory"
+                  placeholder={copy.useTagsPlaceholder}
                 />
               </label>
             </div>
             <label>
-              Inspiration points
+              {copy.inspirationPoints}
               <textarea
                 value={draft.inspiration_points_text}
                 onChange={(event) => setDraft({ ...draft, inspiration_points_text: event.target.value })}
-                placeholder="Comma-separated useful ideas"
+                placeholder={copy.inspirationPointsPlaceholder}
               />
             </label>
             <label>
-              Deconstruction notes
+              {copy.deconstructionNotes}
               <textarea
                 value={draft.deconstruction_notes ?? ""}
                 onChange={(event) => setDraft({ ...draft, deconstruction_notes: event.target.value })}
               />
             </label>
             <label>
-              Transformation ideas
+              {copy.transformationIdeas}
               <textarea
                 value={draft.transformation_ideas ?? ""}
                 onChange={(event) => setDraft({ ...draft, transformation_ideas: event.target.value })}
               />
             </label>
             <label>
-              Avoid copying
+              {copy.avoidCopying}
               <textarea
                 value={draft.avoid_copying_notes ?? ""}
                 onChange={(event) => setDraft({ ...draft, avoid_copying_notes: event.target.value })}
@@ -674,31 +679,31 @@ export default function Home() {
             </label>
             <div className="form-actions">
               <button type="button" className="ghost-button" onClick={previewMetadata} disabled={isPreviewing}>
-                {isPreviewing ? "Previewing..." : "Preview metadata"}
+                {isPreviewing ? copy.previewingMetadata : copy.previewMetadata}
               </button>
-              <button type="submit">Save private reference</button>
+              <button type="submit">{copy.savePrivateReference}</button>
             </div>
             {metadataPreviewMessage(previewStatus) ? (
               <p className={`form-status form-status--${previewStatus}`}>
-                {metadataPreviewMessage(previewStatus)}
+                {metadataPreviewMessage(previewStatus, language)}
               </p>
             ) : null}
           </form>
         ) : null}
 
         <div className="result-summary">
-          <span>{filteredReferences.length} references</span>
-          <span>Safety status stays visible before opening details</span>
+          <span>{filteredReferences.length} {copy.references}</span>
+          <span>{copy.safetySummary}</span>
         </div>
 
         {isUsingSeedReferences ? (
-          <p className="seed-fallback-message">{seedFallbackMessage()}</p>
+          <p className="seed-fallback-message">{seedFallbackMessage(language)}</p>
         ) : null}
 
         {filteredReferences.length === 0 ? (
           <div className="empty-results">
-            <h2>No references match these filters</h2>
-            <p>Clear filters or add a new private reference to continue validation.</p>
+            <h2>{copy.noReferencesMatch}</h2>
+            <p>{copy.noReferencesHint}</p>
             <button
               type="button"
               className="ghost-button"
@@ -709,7 +714,7 @@ export default function Home() {
                 setQuery("");
               }}
             >
-              Clear filters
+              {copy.clearFilters}
             </button>
           </div>
         ) : null}
@@ -729,16 +734,16 @@ export default function Home() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={reference.preview_url} alt={reference.title} />
                 ) : (
-                  <span>{categoryLabels[reference.asset_category]}</span>
+                  <span>{labelForAssetCategory(reference.asset_category, language)}</span>
                 )}
               </div>
               <div className="card-body">
                 <h2>{reference.title}</h2>
-                <p>{reference.site_name ?? "Unknown source"}</p>
+                <p>{reference.site_name ?? copy.unknownSource}</p>
                 <div className="badge-row">
-                  <span>{categoryLabels[reference.asset_category]}</span>
-                  <span>{statusLabel(reference.license_status)}</span>
-                  <span>{statusLabel(reference.public_status)}</span>
+                  <span>{labelForAssetCategory(reference.asset_category, language)}</span>
+                  <span>{labelForLicenseStatus(reference.license_status, language)}</span>
+                  <span>{labelForPublicStatus(reference.public_status, language)}</span>
                 </div>
               </div>
             </button>
@@ -746,19 +751,19 @@ export default function Home() {
         </div>
       </section>
 
-      <aside className="detail-panel" aria-label="Selected reference detail">
+      <aside className="detail-panel" aria-label={copy.selectedReference}>
         {selectedReference ? (
           <>
             <div className="detail-heading">
-              <p className="eyebrow">Selected reference</p>
+              <p className="eyebrow">{copy.selectedReference}</p>
               <h2>{selectedReference.title}</h2>
               {!isEditingSelected ? (
                 <div className="detail-actions">
                   <a href={selectedReference.source_url} target="_blank" rel="noreferrer">
-                    Open source
+                    {copy.openSource}
                   </a>
                   <button className="ghost-button" type="button" onClick={() => startEditing(selectedReference)}>
-                    Edit
+                    {copy.edit}
                   </button>
                 </div>
               ) : null}
@@ -767,9 +772,9 @@ export default function Home() {
             {isEditingSelected && editDraft ? (
               <form className="detail-edit-form" onSubmit={saveReferenceEdit}>
                 <section>
-                  <h3>Source</h3>
+                  <h3>{copy.source}</h3>
                   <label>
-                    Title
+                    {copy.title}
                     <input
                       required
                       value={editDraft.title}
@@ -777,7 +782,7 @@ export default function Home() {
                     />
                   </label>
                   <label>
-                    Source URL
+                    {copy.sourceUrl}
                     <input
                       required
                       value={editDraft.source_url}
@@ -785,35 +790,35 @@ export default function Home() {
                     />
                   </label>
                   <label>
-                    Canonical URL
+                    {copy.canonicalUrl}
                     <input
                       value={editDraft.canonical_url}
                       onChange={(event) => setEditDraft({ ...editDraft, canonical_url: event.target.value })}
                     />
                   </label>
                   <label>
-                    Site
+                    {copy.site}
                     <input
                       value={editDraft.site_name}
                       onChange={(event) => setEditDraft({ ...editDraft, site_name: event.target.value })}
                     />
                   </label>
                   <label>
-                    Author
+                    {copy.author}
                     <input
                       value={editDraft.author}
                       onChange={(event) => setEditDraft({ ...editDraft, author: event.target.value })}
                     />
                   </label>
                   <label>
-                    Preview URL
+                    {copy.previewUrl}
                     <input
                       value={editDraft.preview_url}
                       onChange={(event) => setEditDraft({ ...editDraft, preview_url: event.target.value })}
                     />
                   </label>
                   <label>
-                    Source category
+                    {copy.sourceCategory}
                     <input
                       value={editDraft.source_category}
                       onChange={(event) => setEditDraft({ ...editDraft, source_category: event.target.value })}
@@ -822,22 +827,22 @@ export default function Home() {
                 </section>
 
                 <section>
-                  <h3>Classification and safety</h3>
+                  <h3>{copy.classificationAndSafety}</h3>
                   <label>
-                    Media type
+                    {copy.mediaType}
                     <select
                       value={editDraft.media_type}
                       onChange={(event) => setEditDraft({ ...editDraft, media_type: event.target.value as MediaType })}
                     >
                       {MEDIA_TYPES.map((type) => (
                         <option key={type} value={type}>
-                          {statusLabel(type)}
+                          {labelForMediaType(type, language)}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label>
-                    Asset category
+                    {copy.assetCategory}
                     <select
                       value={editDraft.asset_category}
                       onChange={(event) =>
@@ -846,13 +851,13 @@ export default function Home() {
                     >
                       {ASSET_CATEGORIES.map((category) => (
                         <option key={category} value={category}>
-                          {categoryLabels[category]}
+                          {labelForAssetCategory(category, language)}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label>
-                    License status
+                    {copy.licenseStatus}
                     <select
                       value={editDraft.license_status}
                       onChange={(event) =>
@@ -861,13 +866,13 @@ export default function Home() {
                     >
                       {LICENSE_STATUSES.map((status) => (
                         <option key={status} value={status}>
-                          {statusLabel(status)}
+                          {labelForLicenseStatus(status, language)}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label>
-                    Public status
+                    {copy.publicStatus}
                     <select
                       value={editDraft.public_status}
                       onChange={(event) =>
@@ -876,20 +881,20 @@ export default function Home() {
                     >
                       {PUBLIC_STATUSES.map((status) => (
                         <option key={status} value={status}>
-                          {statusLabel(status)}
+                          {labelForPublicStatus(status, language)}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label>
-                    Attribution text
+                    {copy.attributionText}
                     <textarea
                       value={editDraft.attribution_text}
                       onChange={(event) => setEditDraft({ ...editDraft, attribution_text: event.target.value })}
                     />
                   </label>
                   <label>
-                    Avoid copying
+                    {copy.avoidCopying}
                     <textarea
                       value={editDraft.avoid_copying_notes}
                       onChange={(event) => setEditDraft({ ...editDraft, avoid_copying_notes: event.target.value })}
@@ -898,30 +903,30 @@ export default function Home() {
                 </section>
 
                 <section>
-                  <h3>Inspiration</h3>
+                  <h3>{copy.inspiration}</h3>
                   <label>
-                    Style tags
+                    {copy.styleTags}
                     <input
                       value={editDraft.style_tags_text}
                       onChange={(event) => setEditDraft({ ...editDraft, style_tags_text: event.target.value })}
                     />
                   </label>
                   <label>
-                    Use tags
+                    {copy.useTags}
                     <input
                       value={editDraft.use_tags_text}
                       onChange={(event) => setEditDraft({ ...editDraft, use_tags_text: event.target.value })}
                     />
                   </label>
                   <label>
-                    Inspiration points
+                    {copy.inspirationPoints}
                     <textarea
                       value={editDraft.inspiration_points_text}
                       onChange={(event) => setEditDraft({ ...editDraft, inspiration_points_text: event.target.value })}
                     />
                   </label>
                   <label>
-                    Rating
+                    {copy.rating}
                     <input
                       type="number"
                       min="1"
@@ -931,21 +936,21 @@ export default function Home() {
                     />
                   </label>
                   <label>
-                    Deconstruction notes
+                    {copy.deconstructionNotes}
                     <textarea
                       value={editDraft.deconstruction_notes}
                       onChange={(event) => setEditDraft({ ...editDraft, deconstruction_notes: event.target.value })}
                     />
                   </label>
                   <label>
-                    Transformation ideas
+                    {copy.transformationIdeas}
                     <textarea
                       value={editDraft.transformation_ideas}
                       onChange={(event) => setEditDraft({ ...editDraft, transformation_ideas: event.target.value })}
                     />
                   </label>
                   <label>
-                    Related original asset
+                    {copy.relatedOriginalAsset}
                     <input
                       value={editDraft.related_original_asset}
                       onChange={(event) => setEditDraft({ ...editDraft, related_original_asset: event.target.value })}
@@ -955,40 +960,40 @@ export default function Home() {
 
                 <div className="form-actions sticky-actions">
                   <button type="submit" disabled={isSavingEdit}>
-                    {isSavingEdit ? "Saving..." : "Save changes"}
+                    {isSavingEdit ? copy.saving : copy.saveChanges}
                   </button>
                   <button className="ghost-button" type="button" onClick={cancelEditing} disabled={isSavingEdit}>
-                    Cancel
+                    {copy.cancel}
                   </button>
                 </div>
               </form>
             ) : (
               <>
                 <section>
-                  <h3>Source</h3>
+                  <h3>{copy.source}</h3>
                   <dl>
-                    <div><dt>Site</dt><dd>{selectedReference.site_name ?? "Unknown"}</dd></div>
-                    <div><dt>Author</dt><dd>{selectedReference.author ?? "Unknown"}</dd></div>
-                    <div><dt>Media</dt><dd>{statusLabel(selectedReference.media_type)}</dd></div>
+                    <div><dt>{copy.site}</dt><dd>{selectedReference.site_name ?? copy.unknown}</dd></div>
+                    <div><dt>{copy.author}</dt><dd>{selectedReference.author ?? copy.unknown}</dd></div>
+                    <div><dt>{copy.media}</dt><dd>{labelForMediaType(selectedReference.media_type, language)}</dd></div>
                   </dl>
                 </section>
 
                 <section>
-                  <h3>Safety</h3>
+                  <h3>{copy.classificationAndSafety}</h3>
                   <dl>
-                    <div><dt>License</dt><dd>{statusLabel(selectedReference.license_status)}</dd></div>
-                    <div><dt>Public</dt><dd>{statusLabel(selectedReference.public_status)}</dd></div>
+                    <div><dt>{copy.license}</dt><dd>{labelForLicenseStatus(selectedReference.license_status, language)}</dd></div>
+                    <div><dt>{copy.public}</dt><dd>{labelForPublicStatus(selectedReference.public_status, language)}</dd></div>
                   </dl>
-                  <p>{selectedReference.avoid_copying_notes ?? "Record what exact expression should not be copied."}</p>
+                  <p>{selectedReference.avoid_copying_notes ?? copy.defaultAvoidCopying}</p>
                 </section>
 
                 <section>
-                  <h3>Inspiration</h3>
+                  <h3>{copy.inspiration}</h3>
                   <ul>
                     {selectedReference.inspiration_points.length > 0 ? (
                       selectedReference.inspiration_points.map((point) => <li key={point}>{point}</li>)
                     ) : (
-                      <li>Add concrete principles this reference teaches.</li>
+                      <li>{copy.defaultInspiration}</li>
                     )}
                   </ul>
                   <p>{selectedReference.deconstruction_notes}</p>
@@ -996,15 +1001,15 @@ export default function Home() {
                 </section>
 
                 <button className="danger-button" type="button" onClick={() => requestDelete(selectedReference)}>
-                  Delete reference
+                  {copy.deleteReference}
                 </button>
                 {pendingDeleteId === selectedReference.id ? (
                   <div className="delete-confirmation" role="alertdialog" aria-labelledby="delete-confirmation-title">
-                    <h3 id="delete-confirmation-title">{deleteConfirmationCopy(selectedReference.title).title}</h3>
-                    <p>{deleteConfirmationCopy(selectedReference.title).body}</p>
+                    <h3 id="delete-confirmation-title">{deleteConfirmationCopy(selectedReference.title, language).title}</h3>
+                    <p>{deleteConfirmationCopy(selectedReference.title, language).body}</p>
                     <div className="confirmation-actions">
                       <button type="button" className="ghost-button" onClick={cancelDelete} disabled={isDeleting}>
-                        {deleteConfirmationCopy(selectedReference.title).cancel}
+                        {deleteConfirmationCopy(selectedReference.title, language).cancel}
                       </button>
                       <button
                         type="button"
@@ -1012,7 +1017,7 @@ export default function Home() {
                         onClick={() => confirmDelete(selectedReference)}
                         disabled={isDeleting}
                       >
-                        {isDeleting ? "Deleting..." : deleteConfirmationCopy(selectedReference.title).confirm}
+                        {isDeleting ? copy.deleting : deleteConfirmationCopy(selectedReference.title, language).confirm}
                       </button>
                     </div>
                   </div>
@@ -1022,8 +1027,8 @@ export default function Home() {
           </>
         ) : (
           <div className="empty-detail">
-            <h2>No reference selected</h2>
-            <p>Add or select a reference to review source, safety, and inspiration fields.</p>
+            <h2>{copy.noReferenceSelected}</h2>
+            <p>{copy.noReferenceHint}</p>
           </div>
         )}
       </aside>
