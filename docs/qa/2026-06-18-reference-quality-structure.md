@@ -25,15 +25,17 @@ Current branch validation:
 
 ## Local Browser QA
 
-Pending after final local server smoke:
+Passed on `http://localhost:3000` with in-app browser control:
 
-- Create one reference with scores, tag axes, quality status, and structured inspiration.
-- Reload and confirm persistence.
-- Edit at least one score, one tag, quality status, and one structured inspiration field.
-- Reload and confirm edit persistence.
-- Search by new tag and structured inspiration text.
-- Switch Chinese/English and confirm labels.
-- Delete the QA reference and reload to confirm absence.
+- Created `浏览器质量 QA 670053dd` with scores, tag axes, quality status, and structured inspiration.
+- Confirmed score summary, richer tag axes, and structured inspiration appeared in the detail panel.
+- Reloaded and confirmed the record persisted.
+- Searched by `crafting qa browser` and confirmed the record remained visible.
+- Edited the record to `浏览器质量 QA 已更新`.
+- Changed `quality_status` to `ready_for_use`, `reference_value_score` to `3`, `mechanic_tags` to `crafting qa browser updated`, and structured observation to `Browser observation updated`.
+- Reloaded and confirmed the edited fields persisted.
+- Deleted the QA record through the app-owned confirmation UI.
+- Reloaded and confirmed the edited title was absent and starter/empty state returned.
 
 ## Production QA
 
@@ -51,3 +53,4 @@ Pending after Sites deployment:
 - Production remains behind authenticated Sites access.
 - The in-app browser automation channel may time out; fresh state checks should be used after timeouts.
 - The current UI supports multiple structured inspiration entries, but the form remains compact and non-wizard.
+- Local `wrangler d1 execute DB --local` could not find a traditional Wrangler D1 binding because this project uses Sites `.openai/hosting.json`; local QA applied `drizzle/0001_massive_zodiak.sql` directly to the Miniflare sqlite state after verifying the missing columns.

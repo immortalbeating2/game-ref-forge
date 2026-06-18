@@ -97,6 +97,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - The planned next subtask covers multi-dimensional scores, richer tag axes, structured inspiration entries, and quality review status.
 - On 2026-06-18, branch `codex/round-5-reference-quality` was created to implement the planned reference-quality structure.
 - On 2026-06-18, fifth-round reference quality model, storage, draft conversion, localization, workspace UI, search coverage, and docs were implemented on `codex/round-5-reference-quality`.
+- On 2026-06-18, local API CRUD and local in-app browser CRUD passed for the fifth-round reference-quality fields.
 
 ## Active Decisions
 
@@ -129,4 +130,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Finish local browser QA, merge/deploy the fifth-round reference-quality structure, and run authenticated production CRUD smoke.
+Merge/deploy the fifth-round reference-quality structure and run authenticated production CRUD smoke.

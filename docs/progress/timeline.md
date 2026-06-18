@@ -636,5 +636,8 @@
   - `npm run typecheck`: passed.
   - `npm run lint`: passed.
   - `npm run build`: passed.
+- Local QA:
+  - API CRUD with scores, richer tags, quality status, and structured inspiration passed.
+  - In-app browser CRUD passed for create, reload persistence, search by new tag, edit, reload persistence, app delete confirmation, delete, and post-delete reload absence.
 - Next action:
-  - Run local browser QA, merge to `main`, deploy Sites, and run authenticated production CRUD smoke.
+  - Merge to `main`, deploy Sites, and run authenticated production CRUD smoke.
