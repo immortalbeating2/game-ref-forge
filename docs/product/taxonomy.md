@@ -57,6 +57,49 @@ Each reference detail should guide the user through four layers:
 3. Principle layer: what design rule or pattern can be learned.
 4. Transformation layer: how to apply the rule to an original asset without copying expression.
 
+## Quality Structure
+
+Round 5 adds a richer quality layer so references can be judged by why they are useful, not only whether they look interesting.
+
+Use these optional 1-5 scores:
+
+| Field | Meaning |
+| --- | --- |
+| `reference_value_score` | Learning or problem-solving value for game asset work. |
+| `transformability_score` | How easily the useful principle can become original work. |
+| `copyright_risk_score` | Copyright/source risk; higher means riskier. |
+| `production_readiness_score` | How directly the reference can guide production decisions. |
+
+Use `quality_status` to describe review maturity:
+
+- `captured`: saved but not deeply analyzed.
+- `needs_analysis`: useful source, incomplete extraction.
+- `analyzed`: at least one usable structured idea exists.
+- `ready_for_use`: suitable to inform original asset work.
+- `blocked`: do not use further until source or rights uncertainty is resolved.
+
+## Expanded Tag Axes
+
+Keep `style_tags` and `use_tags`, and add:
+
+- `mechanic_tags`: gameplay, interaction, combat, economy, crafting, navigation, feedback.
+- `mood_tags`: fantasy, emotion, atmosphere, tension, comfort, danger, mystery.
+- `visual_language_tags`: shape language, composition, material logic, contrast, scale, rhythm, icon metaphor.
+
+Search should include all tag axes.
+
+## Structured Inspiration Entries
+
+Use `inspiration_entries` for reusable idea extraction:
+
+- `observation`: concrete fact seen or heard in the source.
+- `principle`: reusable rule learned from that observation.
+- `transferable_idea`: abstract idea that can travel to another asset or genre.
+- `original_application`: specific original use in the user's work.
+- `avoid_copying`: exact expression, layout, sample, silhouette, or IP element to avoid.
+
+The older fields remain useful as summaries, but structured entries should become the preferred extraction format for serious references.
+
 ## Field Guidance
 
 `inspiration_points` should capture what is useful:
@@ -103,4 +146,3 @@ Reference: warm-lit fantasy forest gate.
 - Principle: contrast and framing direct the player's eye toward the path forward.
 - Transformation: use cold blue light inside an ice cave entrance with different geometry and props.
 - Avoid copying: do not reuse the exact gate silhouette, root arrangement, color palette, or composition.
-

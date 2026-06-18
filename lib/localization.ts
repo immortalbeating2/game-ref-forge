@@ -3,6 +3,7 @@ import {
   LicenseStatus,
   MediaType,
   PublicStatus,
+  QualityStatus,
 } from "./reference";
 
 export const LANGUAGES = ["zh", "en"] as const;
@@ -89,6 +90,23 @@ const publicStatusLabels: Record<Language, Record<PublicStatus, string>> = {
   },
 };
 
+const qualityStatusLabels: Record<Language, Record<QualityStatus, string>> = {
+  zh: {
+    captured: "已捕获",
+    needs_analysis: "待分析",
+    analyzed: "已分析",
+    ready_for_use: "可用于创作",
+    blocked: "已阻塞",
+  },
+  en: {
+    captured: "captured",
+    needs_analysis: "needs analysis",
+    analyzed: "analyzed",
+    ready_for_use: "ready for use",
+    blocked: "blocked",
+  },
+};
+
 const copy = {
   zh: {
     languageLabel: "语言",
@@ -100,6 +118,8 @@ const copy = {
     allCategories: "全部分类",
     publicStatus: "公开状态",
     allStatuses: "全部状态",
+    qualityStatus: "质量状态",
+    allQualityStatuses: "全部质量状态",
     licenseStatus: "授权状态",
     allLicenses: "全部授权",
     clearFilters: "清除筛选",
@@ -115,6 +135,12 @@ const copy = {
     styleTagsPlaceholder: "像素、舒适、科幻",
     useTags: "用途标签",
     useTagsPlaceholder: "战斗反馈、背包界面",
+    mechanicTags: "机制标签",
+    mechanicTagsPlaceholder: "制作、战斗、导航",
+    moodTags: "情绪标签",
+    moodTagsPlaceholder: "温暖、紧张、神秘",
+    visualLanguageTags: "视觉语言标签",
+    visualLanguageTagsPlaceholder: "轮廓、对比、材质逻辑",
     inspirationPoints: "灵感要点",
     inspirationPointsPlaceholder: "用逗号分隔可复用想法",
     deconstructionNotes: "拆解笔记",
@@ -139,6 +165,20 @@ const copy = {
     attributionText: "署名文本",
     inspiration: "灵感",
     rating: "评分",
+    scoreSummary: "评分摘要",
+    referenceValueScore: "参考价值",
+    transformabilityScore: "可转化性",
+    copyrightRiskScore: "版权风险",
+    productionReadinessScore: "制作就绪度",
+    structuredInspiration: "结构化灵感",
+    addInspirationEntry: "+ 添加灵感条目",
+    removeInspirationEntry: "移除条目",
+    inspirationObservation: "观察",
+    inspirationPrinciple: "原则",
+    inspirationTransferableIdea: "可迁移想法",
+    inspirationOriginalApplication: "原创应用",
+    inspirationAvoidCopying: "避免复制",
+    emptyInspirationEntries: "还没有结构化灵感条目。",
     relatedOriginalAsset: "关联原创资产",
     saveChanges: "保存修改",
     saving: "保存中...",
@@ -185,6 +225,8 @@ const copy = {
     allCategories: "All categories",
     publicStatus: "Public status",
     allStatuses: "All statuses",
+    qualityStatus: "Quality status",
+    allQualityStatuses: "All quality statuses",
     licenseStatus: "License status",
     allLicenses: "All licenses",
     clearFilters: "Clear filters",
@@ -200,6 +242,12 @@ const copy = {
     styleTagsPlaceholder: "pixel, cozy, sci-fi",
     useTags: "Use tags",
     useTagsPlaceholder: "combat feedback, inventory",
+    mechanicTags: "Mechanic tags",
+    mechanicTagsPlaceholder: "crafting, combat, navigation",
+    moodTags: "Mood tags",
+    moodTagsPlaceholder: "warm, tense, mysterious",
+    visualLanguageTags: "Visual language tags",
+    visualLanguageTagsPlaceholder: "silhouette, contrast, material logic",
     inspirationPoints: "Inspiration points",
     inspirationPointsPlaceholder: "Comma-separated useful ideas",
     deconstructionNotes: "Deconstruction notes",
@@ -224,6 +272,20 @@ const copy = {
     attributionText: "Attribution text",
     inspiration: "Inspiration",
     rating: "Rating",
+    scoreSummary: "Score summary",
+    referenceValueScore: "Reference value",
+    transformabilityScore: "Transformability",
+    copyrightRiskScore: "Copyright risk",
+    productionReadinessScore: "Production readiness",
+    structuredInspiration: "Structured inspiration",
+    addInspirationEntry: "+ Add inspiration entry",
+    removeInspirationEntry: "Remove entry",
+    inspirationObservation: "Observation",
+    inspirationPrinciple: "Principle",
+    inspirationTransferableIdea: "Transferable idea",
+    inspirationOriginalApplication: "Original application",
+    inspirationAvoidCopying: "Avoid copying",
+    emptyInspirationEntries: "No structured inspiration entries yet.",
     relatedOriginalAsset: "Related original asset",
     saveChanges: "Save changes",
     saving: "Saving...",
@@ -280,4 +342,8 @@ export function labelForLicenseStatus(value: LicenseStatus, language: Language =
 
 export function labelForPublicStatus(value: PublicStatus, language: Language = "zh") {
   return publicStatusLabels[language][value];
+}
+
+export function labelForQualityStatus(value: QualityStatus, language: Language = "zh") {
+  return qualityStatusLabels[language][value];
 }

@@ -213,6 +213,60 @@ label {
   gap: 14px;
 }
 
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.section-heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-heading-row h3 {
+  margin: 0;
+}
+
+.inspiration-entry-editor,
+.inspiration-entry-fields,
+.structured-inspiration-list,
+.tag-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.inspiration-entry-fields,
+.structured-inspiration-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #15191c;
+  padding: 12px;
+}
+
+.structured-inspiration-item p,
+.tag-groups p {
+  margin: 0;
+}
+
+.score-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.score-summary span {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #121517;
+  color: #dce3dd;
+  font-size: 0.78rem;
+  padding: 8px;
+}
+
 .form-actions,
 .result-summary,
 .badge-row {
@@ -452,7 +506,9 @@ label {
 @media (max-width: 760px) {
   .workspace,
   .toolbar,
-  .form-grid {
+  .form-grid,
+  .score-grid,
+  .score-summary {
     grid-template-columns: 1fr;
   }
 
