@@ -36,10 +36,30 @@ export const PUBLIC_STATUSES = [
   "public_link_only",
 ] as const;
 
+export const QUALITY_STATUSES = [
+  "captured",
+  "needs_analysis",
+  "analyzed",
+  "ready_for_use",
+  "blocked",
+] as const;
+
 export type MediaType = (typeof MEDIA_TYPES)[number];
 export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
 export type LicenseStatus = (typeof LICENSE_STATUSES)[number];
 export type PublicStatus = (typeof PUBLIC_STATUSES)[number];
+export type QualityStatus = (typeof QUALITY_STATUSES)[number];
+
+export type InspirationEntry = {
+  id?: string;
+  observation: string;
+  principle: string;
+  transferable_idea: string;
+  original_application: string;
+  avoid_copying: string;
+};
+
+export type NormalizedInspirationEntry = Required<InspirationEntry>;
 
 export type ReferenceInput = {
   title: string;
@@ -53,15 +73,24 @@ export type ReferenceInput = {
   source_category?: string | null;
   style_tags?: string[];
   use_tags?: string[];
+  mechanic_tags?: string[];
+  mood_tags?: string[];
+  visual_language_tags?: string[];
   license_status?: LicenseStatus;
   attribution_text?: string | null;
   public_status?: PublicStatus;
   rating?: number | null;
+  reference_value_score?: number | null;
+  transformability_score?: number | null;
+  copyright_risk_score?: number | null;
+  production_readiness_score?: number | null;
   inspiration_points?: string[];
+  inspiration_entries?: InspirationEntry[];
   deconstruction_notes?: string | null;
   transformation_ideas?: string | null;
   avoid_copying_notes?: string | null;
   related_original_asset?: string | null;
+  quality_status?: QualityStatus;
 };
 
 export type ReferenceRecord = Required<
@@ -74,10 +103,15 @@ export type ReferenceRecord = Required<
     | "source_category"
     | "attribution_text"
     | "rating"
+    | "reference_value_score"
+    | "transformability_score"
+    | "copyright_risk_score"
+    | "production_readiness_score"
     | "deconstruction_notes"
     | "transformation_ideas"
     | "avoid_copying_notes"
     | "related_original_asset"
+    | "inspiration_entries"
   >
 > & {
   id: string;
@@ -88,6 +122,11 @@ export type ReferenceRecord = Required<
   source_category: string | null;
   attribution_text: string | null;
   rating: number | null;
+  reference_value_score: number | null;
+  transformability_score: number | null;
+  copyright_risk_score: number | null;
+  production_readiness_score: number | null;
+  inspiration_entries: NormalizedInspirationEntry[];
   deconstruction_notes: string | null;
   transformation_ideas: string | null;
   avoid_copying_notes: string | null;
@@ -103,9 +142,14 @@ export const DEFAULT_REFERENCE_INPUT: ReferenceInput = {
   asset_category: "prop",
   style_tags: [],
   use_tags: [],
+  mechanic_tags: [],
+  mood_tags: [],
+  visual_language_tags: [],
   license_status: "private_reference",
   public_status: "private",
+  quality_status: "captured",
   inspiration_points: [],
+  inspiration_entries: [],
 };
 
 export type ValidationResult =
@@ -155,6 +199,10 @@ export function validateReferenceInput(input: ReferenceInput): ValidationResult 
     errors.push("public_status is invalid");
   }
 
+  if (input.quality_status && !includesValue(QUALITY_STATUSES, input.quality_status)) {
+    errors.push("quality_status is invalid");
+  }
+
   if (
     input.rating !== undefined &&
     input.rating !== null &&
@@ -162,6 +210,11 @@ export function validateReferenceInput(input: ReferenceInput): ValidationResult 
   ) {
     errors.push("rating must be between 1 and 5");
   }
+
+  validateScore(input.reference_value_score, "reference_value_score", errors);
+  validateScore(input.transformability_score, "transformability_score", errors);
+  validateScore(input.copyright_risk_score, "copyright_risk_score", errors);
+  validateScore(input.production_readiness_score, "production_readiness_score", errors);
 
   return errors.length > 0 ? { ok: false, errors } : { ok: true, errors: [] };
 }
@@ -175,6 +228,48 @@ function cleanArray(value: string[] | undefined) {
   return (value ?? [])
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
+}
+
+function validateScore(value: number | null | undefined, field: string, errors: string[]) {
+  if (value === undefined || value === null) {
+    return;
+  }
+
+  if (!Number.isInteger(value)) {
+    errors.push(`${field} must be an integer between 1 and 5`);
+    return;
+  }
+
+  if (value < 1 || value > 5) {
+    errors.push(`${field} must be between 1 and 5`);
+  }
+}
+
+function cleanScore(value: number | null | undefined) {
+  return value ?? null;
+}
+
+function cleanInspirationEntries(
+  value: InspirationEntry[] | undefined,
+): NormalizedInspirationEntry[] {
+  return (value ?? [])
+    .map((entry) => ({
+      id: cleanString(entry.id) ?? crypto.randomUUID(),
+      observation: entry.observation.trim(),
+      principle: entry.principle.trim(),
+      transferable_idea: entry.transferable_idea.trim(),
+      original_application: entry.original_application.trim(),
+      avoid_copying: entry.avoid_copying.trim(),
+    }))
+    .filter((entry) =>
+      [
+        entry.observation,
+        entry.principle,
+        entry.transferable_idea,
+        entry.original_application,
+        entry.avoid_copying,
+      ].some((item) => item.length > 0),
+    );
 }
 
 export function createReferenceRecord(input: ReferenceInput): ReferenceRecord {
@@ -193,11 +288,20 @@ export function createReferenceRecord(input: ReferenceInput): ReferenceRecord {
     source_category: cleanString(input.source_category),
     style_tags: cleanArray(input.style_tags),
     use_tags: cleanArray(input.use_tags),
+    mechanic_tags: cleanArray(input.mechanic_tags),
+    mood_tags: cleanArray(input.mood_tags),
+    visual_language_tags: cleanArray(input.visual_language_tags),
     license_status: input.license_status ?? "private_reference",
     attribution_text: cleanString(input.attribution_text),
     public_status: input.public_status ?? "private",
+    quality_status: input.quality_status ?? "captured",
     rating: input.rating ?? null,
+    reference_value_score: cleanScore(input.reference_value_score),
+    transformability_score: cleanScore(input.transformability_score),
+    copyright_risk_score: cleanScore(input.copyright_risk_score),
+    production_readiness_score: cleanScore(input.production_readiness_score),
     inspiration_points: cleanArray(input.inspiration_points),
+    inspiration_entries: cleanInspirationEntries(input.inspiration_entries),
     deconstruction_notes: cleanString(input.deconstruction_notes),
     transformation_ideas: cleanString(input.transformation_ideas),
     avoid_copying_notes: cleanString(input.avoid_copying_notes),
@@ -224,5 +328,38 @@ export function parseJsonArray(value: string | null): string[] {
 
 export function serializeJsonArray(value: string[] | undefined) {
   return JSON.stringify(cleanArray(value));
+}
+
+export function parseInspirationEntries(value: string | null): NormalizedInspirationEntry[] {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return cleanInspirationEntries(
+      parsed.filter((item): item is InspirationEntry => {
+        return (
+          item &&
+          typeof item === "object" &&
+          typeof item.observation === "string" &&
+          typeof item.principle === "string" &&
+          typeof item.transferable_idea === "string" &&
+          typeof item.original_application === "string" &&
+          typeof item.avoid_copying === "string"
+        );
+      }),
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function serializeInspirationEntries(value: InspirationEntry[] | undefined) {
+  return JSON.stringify(cleanInspirationEntries(value));
 }
 

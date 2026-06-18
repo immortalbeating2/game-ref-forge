@@ -601,3 +601,13 @@
 - Status:
   - Planning only; no source implementation has started.
   - Next implementation branch should be `codex/round-5-reference-quality`.
+
+### 2026-06-18
+
+- Branch: `codex/round-5-reference-quality`
+- Mode: branch only
+- Action: started fifth-round reference-quality implementation.
+- Reason:
+  - The work changes schema, typed models, API response shape, draft conversion, localization, workspace UI, tests, documentation, and production QA.
+- Baseline validation:
+  - `npm test`: passed, 6 files / 25 tests.
