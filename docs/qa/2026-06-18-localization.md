@@ -30,4 +30,5 @@ Result:
 
 - Stored reference data and seed titles remain in their original language.
 - Internal enum values and API payloads are unchanged.
-- Production deployment remains pending until the branch is merged and saved as a Sites version.
+- Sites version 6 was deployed successfully from commit `7663f6f1af089ad798d1eaf80446dd4876537eda`.
+- Production smoke confirmed Chinese default and English switching at `https://game-ref-forge.yeep-6613.chatgpt-team.site/`.

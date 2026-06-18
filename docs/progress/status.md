@@ -4,7 +4,7 @@ Updated: 2026-06-18
 
 ## Current Stage
 
-`Round 5 localization branch / local QA passed`
+`Round 5 localization deployed / production smoke passed`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -90,6 +90,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, local branch `codex/round-4-production-hardening` was deleted after merge, deployment, and production QA.
 - On 2026-06-18, fifth-round localization started on `codex/round-5-localization`.
 - On 2026-06-18, Chinese-first bilingual UI helpers, interaction copy, enum labels, and language switching were implemented and locally validated.
+- On 2026-06-18, fifth-round localization was merged into `main`, pushed to GitHub, saved as Sites version 6, and deployed successfully.
+- On 2026-06-18, production smoke confirmed Chinese default UI and English language switching.
+- On 2026-06-18, local branch `codex/round-5-localization` was deleted after merge, deployment, and production smoke.
 
 ## Active Decisions
 
@@ -122,4 +125,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Merge, push, save, and deploy the fifth-round localization branch, then run a production language-switch smoke test.
+Choose the next fifth-round reference-quality subtask after localization, such as richer inspiration fields or review-quality scoring.

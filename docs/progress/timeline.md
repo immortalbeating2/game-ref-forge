@@ -555,3 +555,30 @@
 - QA note:
   - `docs/qa/2026-06-18-localization.md`
 - Next action: merge, push, save/deploy Sites version, then smoke-check production language switching.
+
+### 2026-06-18
+
+- Branch: `main`
+- Mode: merge, deployment, production smoke, and branch cleanup
+- Action: merged fifth-round localization into `main` and deployed Sites version 6.
+- Merge commit:
+  - `7663f6f` - `merge: 合并第五轮本地化 / merge round 5 localization`
+- Validation on merged `main`:
+  - `npm test`: passed, 6 files / 25 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+- Remote sync:
+  - `git push origin main`: passed.
+- Sites version:
+  - version: `6`
+  - source commit: `7663f6f1af089ad798d1eaf80446dd4876537eda`
+  - deployment id: `appgdep_6a33ab611b888191826544fcdb31d33b`
+  - deployment status: `succeeded`
+  - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Production smoke:
+  - Default UI opened in Chinese.
+  - Language selector showed `中文` and `English`.
+  - Switching to English updated filters, actions, badges, and helper text.
+- Branch cleanup:
+  - Deleted local `codex/round-5-localization` after merge, deployment, and production smoke.
