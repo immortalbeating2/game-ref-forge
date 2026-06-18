@@ -478,3 +478,32 @@
 - QA note:
   - `docs/qa/2026-06-18-production-interaction-hardening.md`
 - Next action: merge/deploy and run authenticated production CRUD QA.
+
+### 2026-06-18
+
+- Branch: `main`
+- Mode: merge, remote sync, and Sites deployment
+- Action: merged fourth-round production interaction hardening into `main`, pushed to GitHub, and deployed Sites version 5.
+- Merge commit:
+  - `bcb743c` - `merge: 合并第四轮交互加固 / merge round 4 interaction hardening`
+- Validation on merged `main`:
+  - `npm test`: passed, 5 files / 18 tests
+  - `npm run typecheck`: passed
+  - `npm run lint`: passed
+  - `npm run build`: passed
+- Remote sync:
+  - `git push origin main`: passed.
+- Sites version:
+  - version: `5`
+  - source commit: `bcb743c285416e5025bd38bdad8a3a481713d275`
+  - deployment id: `appgdep_6a33036c877081918ff03d2ac837f505`
+  - deployment status: `succeeded`
+  - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Production access probe:
+  - `GET /api/references`: `401 Unauthorized`
+  - Interpretation: production remains behind the configured `custom` access policy.
+- Authenticated production browser status:
+  - Production page opened and showed fourth-round UI elements.
+  - Add form opened and showed `Preview metadata` plus `Save private reference`.
+  - Full authenticated CRUD automation was blocked by repeated in-app browser control timeouts during form fill and page-state reads.
+- Next action: complete the final production CRUD pass with a stable logged-in browser session or manual assist, then close the fourth-round branch locally.

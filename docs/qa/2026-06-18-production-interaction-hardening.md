@@ -1,7 +1,7 @@
 # Production Interaction Hardening QA
 
 Date: 2026-06-18
-Branch: `codex/round-4-production-hardening`
+Branch: `codex/round-4-production-hardening` -> merged to `main`
 
 ## Automated Validation
 
@@ -69,10 +69,20 @@ Notes:
 
 - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 - Access mode: `custom`
-- Logged-in CRUD: pending until the fourth-round branch is merged, deployed, and opened in an authenticated production browser session.
+- Sites version: `5`
+- Source commit: `bcb743c285416e5025bd38bdad8a3a481713d275`
+- Deployment id: `appgdep_6a33036c877081918ff03d2ac837f505`
+- Deployment status: `succeeded`
+- Unauthenticated command-line probe:
+  - `GET /api/references`: `401 Unauthorized`, matching the configured `custom` access policy.
+- Authenticated in-app browser status:
+  - Production page opened successfully and showed the fourth-round UI state, including `+ Add reference`, starter examples messaging, and app-owned `Delete reference`.
+  - The add form opened in the authenticated production page and exposed `Preview metadata` plus `Save private reference`.
+  - Full create/edit/delete completion through browser automation was not completed because the in-app browser control channel repeatedly timed out during form fill and page-state reads.
 
 ## Issues Found
 
 - No local automated, build, or browser QA blocker remains.
-- Production QA remains a post-deploy requirement.
+- Production deployment succeeded.
+- Authenticated production CRUD still requires a final manual or stable browser-control pass.
 
