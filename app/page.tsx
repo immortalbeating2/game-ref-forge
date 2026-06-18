@@ -10,6 +10,9 @@ import {
   MediaType,
   PUBLIC_STATUSES,
   PublicStatus,
+  QUALITY_STATUSES,
+  QualityStatus,
+  InspirationEntry,
   ReferenceRecord,
   validateReferenceInput,
 } from "../lib/reference";
@@ -31,10 +34,11 @@ import {
   labelForLicenseStatus,
   labelForMediaType,
   labelForPublicStatus,
+  labelForQualityStatus,
   Language,
   uiCopy,
 } from "../lib/localization";
-import { getVisibleDetailReference } from "../lib/ui-state";
+import { buildReferenceSearchText, getVisibleDetailReference } from "../lib/ui-state";
 
 const seedReferences: ReferenceRecord[] = [
   {
@@ -50,11 +54,29 @@ const seedReferences: ReferenceRecord[] = [
     source_category: "Game UI assets",
     style_tags: ["clean", "modular"],
     use_tags: ["inventory", "buttons"],
+    mechanic_tags: ["inventory", "interaction feedback"],
+    mood_tags: ["clean", "friendly"],
+    visual_language_tags: ["panel rhythm", "button state clarity"],
     license_status: "cc0_or_public_domain",
     attribution_text: "Kenney assets are commonly published with clear license notes on source pages.",
     public_status: "review",
+    quality_status: "analyzed",
     rating: 4,
+    reference_value_score: 4,
+    transformability_score: 4,
+    copyright_risk_score: 1,
+    production_readiness_score: 4,
     inspiration_points: ["Button state clarity", "Consistent panel rhythm"],
+    inspiration_entries: [
+      {
+        id: "seed-kenney-ui-entry-1",
+        observation: "Button states use simple surfaces, strong borders, and consistent spacing.",
+        principle: "Consistent state contrast keeps HUD actions readable under pressure.",
+        transferable_idea: "Reuse spacing and state hierarchy without copying exact icon art.",
+        original_application: "Apply the principle to a darker crafting interface with original forms.",
+        avoid_copying: "Do not copy exact icons or downloadable files into this app.",
+      },
+    ],
     deconstruction_notes: "Simple surfaces, strong borders, and readable icon spacing make the pack useful for HUD readability studies.",
     transformation_ideas: "Use the same spacing principle for a darker crafting interface with original shapes and icons.",
     avoid_copying_notes: "Do not copy exact icons or downloadable files into this app.",
@@ -75,11 +97,29 @@ const seedReferences: ReferenceRecord[] = [
     source_category: "CC0 textures",
     style_tags: ["realistic", "surface"],
     use_tags: ["wear pattern", "environment dressing"],
+    mechanic_tags: ["exploration", "environment reading"],
+    mood_tags: ["grounded", "aged"],
+    visual_language_tags: ["wear distribution", "tileable density"],
     license_status: "cc0_or_public_domain",
     attribution_text: "Review individual source page before public use.",
     public_status: "review",
+    quality_status: "analyzed",
     rating: 5,
+    reference_value_score: 5,
+    transformability_score: 4,
+    copyright_risk_score: 1,
+    production_readiness_score: 5,
     inspiration_points: ["Surface wear logic", "Tileable density"],
+    inspiration_entries: [
+      {
+        id: "seed-polyhaven-material-entry-1",
+        observation: "Wear concentrates near edges and high-contact areas.",
+        principle: "Material age reads best when wear follows plausible use patterns.",
+        transferable_idea: "Transfer the wear distribution logic to a stylized material.",
+        original_application: "Translate wear concentration into an original dungeon floor material.",
+        avoid_copying: "Check the source license before rehosting previews or textures.",
+      },
+    ],
     deconstruction_notes: "Material references are useful for studying roughness, dirt accumulation, and pattern scale.",
     transformation_ideas: "Translate wear concentration into a stylized dungeon floor material.",
     avoid_copying_notes: "Do not assume every linked preview can be rehosted without checking the specific source license.",
@@ -89,6 +129,24 @@ const seedReferences: ReferenceRecord[] = [
   },
 ];
 
+function createBlankInspirationEntry() {
+  return {
+    id: "",
+    observation: "",
+    principle: "",
+    transferable_idea: "",
+    original_application: "",
+    avoid_copying: "",
+  };
+}
+
+function ensureInspirationEntryIds(entries: InspirationEntry[]) {
+  return entries.map((entry) => ({
+    ...entry,
+    id: entry.id?.trim() || crypto.randomUUID(),
+  }));
+}
+
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
   const [references, setReferences] = useState<ReferenceRecord[]>([]);
@@ -96,6 +154,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [assetCategory, setAssetCategory] = useState<AssetCategory | "all">("all");
   const [publicStatus, setPublicStatus] = useState<PublicStatus | "all">("all");
+  const [qualityStatus, setQualityStatus] = useState<QualityStatus | "all">("all");
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
   const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
   const [editDraft, setEditDraft] = useState<ReferenceDraft | null>(null);
@@ -114,6 +173,7 @@ export default function Home() {
     query?: string;
     assetCategory?: AssetCategory | "all";
     publicStatus?: PublicStatus | "all";
+    qualityStatus?: QualityStatus | "all";
     licenseStatus?: LicenseStatus | "all";
   }) {
     if (!editingId || isSavingEdit) {
@@ -128,26 +188,16 @@ export default function Home() {
     const nextQuery = nextView.query ?? query;
     const nextAssetCategory = nextView.assetCategory ?? assetCategory;
     const nextPublicStatus = nextView.publicStatus ?? publicStatus;
+    const nextQualityStatus = nextView.qualityStatus ?? qualityStatus;
     const nextLicenseStatus = nextView.licenseStatus ?? licenseStatus;
     const normalizedQuery = nextQuery.trim().toLowerCase();
-    const searchable = [
-      editingReference.title,
-      editingReference.site_name,
-      editingReference.author,
-      editingReference.asset_category,
-      editingReference.media_type,
-      ...editingReference.style_tags,
-      ...editingReference.use_tags,
-      ...editingReference.inspiration_points,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+    const searchable = buildReferenceSearchText(editingReference);
 
     const remainsVisible =
       (!normalizedQuery || searchable.includes(normalizedQuery)) &&
       (nextAssetCategory === "all" || editingReference.asset_category === nextAssetCategory) &&
       (nextPublicStatus === "all" || editingReference.public_status === nextPublicStatus) &&
+      (nextQualityStatus === "all" || editingReference.quality_status === nextQualityStatus) &&
       (nextLicenseStatus === "all" || editingReference.license_status === nextLicenseStatus);
 
     if (!remainsVisible) {
@@ -186,28 +236,17 @@ export default function Home() {
     const normalizedQuery = query.trim().toLowerCase();
 
     return references.filter((reference) => {
-      const searchable = [
-        reference.title,
-        reference.site_name,
-        reference.author,
-        reference.asset_category,
-        reference.media_type,
-        ...reference.style_tags,
-        ...reference.use_tags,
-        ...reference.inspiration_points,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+      const searchable = buildReferenceSearchText(reference);
 
       return (
         (!normalizedQuery || searchable.includes(normalizedQuery)) &&
         (assetCategory === "all" || reference.asset_category === assetCategory) &&
         (publicStatus === "all" || reference.public_status === publicStatus) &&
+        (qualityStatus === "all" || reference.quality_status === qualityStatus) &&
         (licenseStatus === "all" || reference.license_status === licenseStatus)
       );
     });
-  }, [assetCategory, licenseStatus, publicStatus, query, references]);
+  }, [assetCategory, licenseStatus, publicStatus, qualityStatus, query, references]);
 
   const selectedReference = getVisibleDetailReference(
     filteredReferences,
@@ -228,6 +267,34 @@ export default function Home() {
     setEditingId(null);
     setEditDraft(null);
     setMessage(copy.editCanceled);
+  }
+
+  function updateDraftInspirationEntry(
+    index: number,
+    field: keyof ReturnType<typeof createBlankInspirationEntry>,
+    value: string,
+  ) {
+    setDraft((current) => {
+      const entries = [...current.inspiration_entries];
+      entries[index] = { ...(entries[index] ?? createBlankInspirationEntry()), [field]: value };
+      return { ...current, inspiration_entries: entries };
+    });
+  }
+
+  function updateEditInspirationEntry(
+    index: number,
+    field: keyof ReturnType<typeof createBlankInspirationEntry>,
+    value: string,
+  ) {
+    setEditDraft((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const entries = [...current.inspiration_entries];
+      entries[index] = { ...(entries[index] ?? createBlankInspirationEntry()), [field]: value };
+      return { ...current, inspiration_entries: entries };
+    });
   }
 
   function selectReference(id: string) {
@@ -359,11 +426,20 @@ export default function Home() {
           source_category: input.source_category ?? null,
           style_tags: input.style_tags ?? [],
           use_tags: input.use_tags ?? [],
+          mechanic_tags: input.mechanic_tags ?? [],
+          mood_tags: input.mood_tags ?? [],
+          visual_language_tags: input.visual_language_tags ?? [],
           license_status: input.license_status ?? "private_reference",
           attribution_text: input.attribution_text ?? null,
           public_status: input.public_status ?? "private",
+          quality_status: input.quality_status ?? "captured",
           rating: input.rating ?? null,
+          reference_value_score: input.reference_value_score ?? null,
+          transformability_score: input.transformability_score ?? null,
+          copyright_risk_score: input.copyright_risk_score ?? null,
+          production_readiness_score: input.production_readiness_score ?? null,
           inspiration_points: input.inspiration_points ?? [],
+          inspiration_entries: ensureInspirationEntryIds(input.inspiration_entries ?? []),
           deconstruction_notes: input.deconstruction_notes ?? null,
           transformation_ideas: input.transformation_ideas ?? null,
           avoid_copying_notes: input.avoid_copying_notes ?? null,
@@ -493,6 +569,25 @@ export default function Home() {
         </label>
 
         <label>
+          {copy.qualityStatus}
+          <select
+            value={qualityStatus}
+            onChange={(event) => {
+              const nextQualityStatus = event.target.value as QualityStatus | "all";
+              closeEditIfHiddenByView({ qualityStatus: nextQualityStatus });
+              setQualityStatus(nextQualityStatus);
+            }}
+          >
+            <option value="all">{copy.allQualityStatuses}</option>
+            {QUALITY_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {labelForQualityStatus(status, language)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
           {copy.licenseStatus}
           <select
             value={licenseStatus}
@@ -517,6 +612,7 @@ export default function Home() {
           onClick={() => {
             setAssetCategory("all");
             setPublicStatus("all");
+            setQualityStatus("all");
             setLicenseStatus("all");
             setQuery("");
           }}
@@ -632,6 +728,19 @@ export default function Home() {
                 </select>
               </label>
               <label>
+                {copy.qualityStatus}
+                <select
+                  value={draft.quality_status}
+                  onChange={(event) => setDraft({ ...draft, quality_status: event.target.value as QualityStatus })}
+                >
+                  {QUALITY_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {labelForQualityStatus(status, language)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
                 {copy.styleTags}
                 <input
                   value={draft.style_tags_text}
@@ -647,6 +756,70 @@ export default function Home() {
                   placeholder={copy.useTagsPlaceholder}
                 />
               </label>
+              <label>
+                {copy.mechanicTags}
+                <input
+                  value={draft.mechanic_tags_text}
+                  onChange={(event) => setDraft({ ...draft, mechanic_tags_text: event.target.value })}
+                  placeholder={copy.mechanicTagsPlaceholder}
+                />
+              </label>
+              <label>
+                {copy.moodTags}
+                <input
+                  value={draft.mood_tags_text}
+                  onChange={(event) => setDraft({ ...draft, mood_tags_text: event.target.value })}
+                  placeholder={copy.moodTagsPlaceholder}
+                />
+              </label>
+              <label>
+                {copy.visualLanguageTags}
+                <input
+                  value={draft.visual_language_tags_text}
+                  onChange={(event) => setDraft({ ...draft, visual_language_tags_text: event.target.value })}
+                  placeholder={copy.visualLanguageTagsPlaceholder}
+                />
+              </label>
+              <label>
+                {copy.referenceValueScore}
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={draft.reference_value_score}
+                  onChange={(event) => setDraft({ ...draft, reference_value_score: event.target.value })}
+                />
+              </label>
+              <label>
+                {copy.transformabilityScore}
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={draft.transformability_score}
+                  onChange={(event) => setDraft({ ...draft, transformability_score: event.target.value })}
+                />
+              </label>
+              <label>
+                {copy.copyrightRiskScore}
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={draft.copyright_risk_score}
+                  onChange={(event) => setDraft({ ...draft, copyright_risk_score: event.target.value })}
+                />
+              </label>
+              <label>
+                {copy.productionReadinessScore}
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={draft.production_readiness_score}
+                  onChange={(event) => setDraft({ ...draft, production_readiness_score: event.target.value })}
+                />
+              </label>
             </div>
             <label>
               {copy.inspirationPoints}
@@ -656,6 +829,76 @@ export default function Home() {
                 placeholder={copy.inspirationPointsPlaceholder}
               />
             </label>
+            <section className="inspiration-entry-editor">
+              <div className="section-heading-row">
+                <h3>{copy.structuredInspiration}</h3>
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      inspiration_entries: [...draft.inspiration_entries, createBlankInspirationEntry()],
+                    })
+                  }
+                >
+                  {copy.addInspirationEntry}
+                </button>
+              </div>
+              {(draft.inspiration_entries.length > 0 ? draft.inspiration_entries : [createBlankInspirationEntry()]).map((entry, index) => (
+                <div className="inspiration-entry-fields" key={entry.id || `draft-entry-${index}`}>
+                  <label>
+                    {copy.inspirationObservation}
+                    <textarea
+                      value={entry.observation}
+                      onChange={(event) => updateDraftInspirationEntry(index, "observation", event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    {copy.inspirationPrinciple}
+                    <textarea
+                      value={entry.principle}
+                      onChange={(event) => updateDraftInspirationEntry(index, "principle", event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    {copy.inspirationTransferableIdea}
+                    <textarea
+                      value={entry.transferable_idea}
+                      onChange={(event) => updateDraftInspirationEntry(index, "transferable_idea", event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    {copy.inspirationOriginalApplication}
+                    <textarea
+                      value={entry.original_application}
+                      onChange={(event) => updateDraftInspirationEntry(index, "original_application", event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    {copy.inspirationAvoidCopying}
+                    <textarea
+                      value={entry.avoid_copying}
+                      onChange={(event) => updateDraftInspirationEntry(index, "avoid_copying", event.target.value)}
+                    />
+                  </label>
+                  {draft.inspiration_entries.length > 0 ? (
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() =>
+                        setDraft({
+                          ...draft,
+                          inspiration_entries: draft.inspiration_entries.filter((_, entryIndex) => entryIndex !== index),
+                        })
+                      }
+                    >
+                      {copy.removeInspirationEntry}
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </section>
             <label>
               {copy.deconstructionNotes}
               <textarea
@@ -710,6 +953,7 @@ export default function Home() {
               onClick={() => {
                 setAssetCategory("all");
                 setPublicStatus("all");
+                setQualityStatus("all");
                 setLicenseStatus("all");
                 setQuery("");
               }}
@@ -744,6 +988,7 @@ export default function Home() {
                   <span>{labelForAssetCategory(reference.asset_category, language)}</span>
                   <span>{labelForLicenseStatus(reference.license_status, language)}</span>
                   <span>{labelForPublicStatus(reference.public_status, language)}</span>
+                  <span>{labelForQualityStatus(reference.quality_status, language)}</span>
                 </div>
               </div>
             </button>
@@ -887,6 +1132,21 @@ export default function Home() {
                     </select>
                   </label>
                   <label>
+                    {copy.qualityStatus}
+                    <select
+                      value={editDraft.quality_status}
+                      onChange={(event) =>
+                        setEditDraft({ ...editDraft, quality_status: event.target.value as QualityStatus })
+                      }
+                    >
+                      {QUALITY_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {labelForQualityStatus(status, language)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
                     {copy.attributionText}
                     <textarea
                       value={editDraft.attribution_text}
@@ -919,6 +1179,27 @@ export default function Home() {
                     />
                   </label>
                   <label>
+                    {copy.mechanicTags}
+                    <input
+                      value={editDraft.mechanic_tags_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, mechanic_tags_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    {copy.moodTags}
+                    <input
+                      value={editDraft.mood_tags_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, mood_tags_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    {copy.visualLanguageTags}
+                    <input
+                      value={editDraft.visual_language_tags_text}
+                      onChange={(event) => setEditDraft({ ...editDraft, visual_language_tags_text: event.target.value })}
+                    />
+                  </label>
+                  <label>
                     {copy.inspirationPoints}
                     <textarea
                       value={editDraft.inspiration_points_text}
@@ -935,6 +1216,118 @@ export default function Home() {
                       onChange={(event) => setEditDraft({ ...editDraft, rating: event.target.value })}
                     />
                   </label>
+                  <div className="score-grid">
+                    <label>
+                      {copy.referenceValueScore}
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={editDraft.reference_value_score}
+                        onChange={(event) => setEditDraft({ ...editDraft, reference_value_score: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      {copy.transformabilityScore}
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={editDraft.transformability_score}
+                        onChange={(event) => setEditDraft({ ...editDraft, transformability_score: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      {copy.copyrightRiskScore}
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={editDraft.copyright_risk_score}
+                        onChange={(event) => setEditDraft({ ...editDraft, copyright_risk_score: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      {copy.productionReadinessScore}
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={editDraft.production_readiness_score}
+                        onChange={(event) => setEditDraft({ ...editDraft, production_readiness_score: event.target.value })}
+                      />
+                    </label>
+                  </div>
+                  <div className="inspiration-entry-editor">
+                    <div className="section-heading-row">
+                      <h3>{copy.structuredInspiration}</h3>
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        onClick={() =>
+                          setEditDraft({
+                            ...editDraft,
+                            inspiration_entries: [...editDraft.inspiration_entries, createBlankInspirationEntry()],
+                          })
+                        }
+                      >
+                        {copy.addInspirationEntry}
+                      </button>
+                    </div>
+                    {(editDraft.inspiration_entries.length > 0 ? editDraft.inspiration_entries : [createBlankInspirationEntry()]).map((entry, index) => (
+                      <div className="inspiration-entry-fields" key={entry.id || `edit-entry-${index}`}>
+                        <label>
+                          {copy.inspirationObservation}
+                          <textarea
+                            value={entry.observation}
+                            onChange={(event) => updateEditInspirationEntry(index, "observation", event.target.value)}
+                          />
+                        </label>
+                        <label>
+                          {copy.inspirationPrinciple}
+                          <textarea
+                            value={entry.principle}
+                            onChange={(event) => updateEditInspirationEntry(index, "principle", event.target.value)}
+                          />
+                        </label>
+                        <label>
+                          {copy.inspirationTransferableIdea}
+                          <textarea
+                            value={entry.transferable_idea}
+                            onChange={(event) => updateEditInspirationEntry(index, "transferable_idea", event.target.value)}
+                          />
+                        </label>
+                        <label>
+                          {copy.inspirationOriginalApplication}
+                          <textarea
+                            value={entry.original_application}
+                            onChange={(event) => updateEditInspirationEntry(index, "original_application", event.target.value)}
+                          />
+                        </label>
+                        <label>
+                          {copy.inspirationAvoidCopying}
+                          <textarea
+                            value={entry.avoid_copying}
+                            onChange={(event) => updateEditInspirationEntry(index, "avoid_copying", event.target.value)}
+                          />
+                        </label>
+                        {editDraft.inspiration_entries.length > 0 ? (
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            onClick={() =>
+                              setEditDraft({
+                                ...editDraft,
+                                inspiration_entries: editDraft.inspiration_entries.filter((_, entryIndex) => entryIndex !== index),
+                              })
+                            }
+                          >
+                            {copy.removeInspirationEntry}
+                          </button>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
                   <label>
                     {copy.deconstructionNotes}
                     <textarea
@@ -983,12 +1376,27 @@ export default function Home() {
                   <dl>
                     <div><dt>{copy.license}</dt><dd>{labelForLicenseStatus(selectedReference.license_status, language)}</dd></div>
                     <div><dt>{copy.public}</dt><dd>{labelForPublicStatus(selectedReference.public_status, language)}</dd></div>
+                    <div><dt>{copy.qualityStatus}</dt><dd>{labelForQualityStatus(selectedReference.quality_status, language)}</dd></div>
                   </dl>
                   <p>{selectedReference.avoid_copying_notes ?? copy.defaultAvoidCopying}</p>
                 </section>
 
                 <section>
                   <h3>{copy.inspiration}</h3>
+                  <div className="score-summary">
+                    <span>{copy.rating}: {selectedReference.rating ?? "-"}</span>
+                    <span>{copy.referenceValueScore}: {selectedReference.reference_value_score ?? "-"}</span>
+                    <span>{copy.transformabilityScore}: {selectedReference.transformability_score ?? "-"}</span>
+                    <span>{copy.copyrightRiskScore}: {selectedReference.copyright_risk_score ?? "-"}</span>
+                    <span>{copy.productionReadinessScore}: {selectedReference.production_readiness_score ?? "-"}</span>
+                  </div>
+                  <div className="tag-groups">
+                    <p><strong>{copy.styleTags}</strong> {selectedReference.style_tags.join(", ") || "-"}</p>
+                    <p><strong>{copy.useTags}</strong> {selectedReference.use_tags.join(", ") || "-"}</p>
+                    <p><strong>{copy.mechanicTags}</strong> {selectedReference.mechanic_tags.join(", ") || "-"}</p>
+                    <p><strong>{copy.moodTags}</strong> {selectedReference.mood_tags.join(", ") || "-"}</p>
+                    <p><strong>{copy.visualLanguageTags}</strong> {selectedReference.visual_language_tags.join(", ") || "-"}</p>
+                  </div>
                   <ul>
                     {selectedReference.inspiration_points.length > 0 ? (
                       selectedReference.inspiration_points.map((point) => <li key={point}>{point}</li>)
@@ -996,6 +1404,22 @@ export default function Home() {
                       <li>{copy.defaultInspiration}</li>
                     )}
                   </ul>
+                  <div className="structured-inspiration-list">
+                    <h3>{copy.structuredInspiration}</h3>
+                    {selectedReference.inspiration_entries.length > 0 ? (
+                      selectedReference.inspiration_entries.map((entry) => (
+                        <div className="structured-inspiration-item" key={entry.id}>
+                          <p><strong>{copy.inspirationObservation}</strong> {entry.observation}</p>
+                          <p><strong>{copy.inspirationPrinciple}</strong> {entry.principle}</p>
+                          <p><strong>{copy.inspirationTransferableIdea}</strong> {entry.transferable_idea}</p>
+                          <p><strong>{copy.inspirationOriginalApplication}</strong> {entry.original_application}</p>
+                          <p><strong>{copy.inspirationAvoidCopying}</strong> {entry.avoid_copying}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>{copy.emptyInspirationEntries}</p>
+                    )}
+                  </div>
                   <p>{selectedReference.deconstruction_notes}</p>
                   <p>{selectedReference.transformation_ideas}</p>
                 </section>
