@@ -4,7 +4,7 @@ Updated: 2026-06-18
 
 ## Current Stage
 
-`Round 4 deployed / production browser CRUD follow-up needed`
+`Round 4 complete / production CRUD passed`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -86,6 +86,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, `codex/round-4-production-hardening` was merged into `main`, validated on merged `main`, pushed to GitHub, saved as Sites version 5, and deployed successfully to production.
 - On 2026-06-18, production unauthenticated `/api/references` returned `401`, matching the configured `custom` access policy.
 - On 2026-06-18, authenticated in-app browser production UI smoke confirmed the fourth-round UI and add form could open, but full production CRUD automation was blocked by repeated in-app browser control timeouts during form fill/state reads.
+- On 2026-06-18, authenticated production CRUD passed on Sites version 5: create, metadata preview success feedback, save, reload persistence, edit, reload persistence, app-owned delete confirmation, delete, and post-delete reload absence.
+- On 2026-06-18, local branch `codex/round-4-production-hardening` was deleted after merge, deployment, and production QA.
 
 ## Active Decisions
 
@@ -114,8 +116,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local in-app browser CRUD QA for third-round edit mode has passed after the browser control entrypoint became available.
 - In-app browser control is available again for local validation; authenticated production CRUD still requires the logged-in production URL rather than `localhost`.
 - Fourth-round production deployment succeeded.
-- Full authenticated production CRUD QA still needs a stable browser-control pass or manual assist because the in-app browser automation channel timed out during production form fill.
+- The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 
 ## Next Suggested Step
 
-Run the final authenticated production CRUD pass for Sites version 5, then close the fourth-round branch locally after documenting the result.
+Retry pushing the latest local documentation commits to GitHub when network connectivity to `github.com:443` recovers, then choose the fifth-round product scope.

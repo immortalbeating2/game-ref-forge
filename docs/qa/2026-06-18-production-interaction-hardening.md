@@ -78,11 +78,32 @@ Notes:
 - Authenticated in-app browser status:
   - Production page opened successfully and showed the fourth-round UI state, including `+ Add reference`, starter examples messaging, and app-owned `Delete reference`.
   - The add form opened in the authenticated production page and exposed `Preview metadata` plus `Save private reference`.
-  - Full create/edit/delete completion through browser automation was not completed because the in-app browser control channel repeatedly timed out during form fill and page-state reads.
+- Final production CRUD result: passed.
+
+Production CRUD evidence:
+
+- Created a production reference from `https://example.com/`.
+- Metadata preview returned the stable success feedback: `Metadata preview ready. Review the fields before saving.`
+- Saved reference and saw `Reference saved privately by default.`
+- Reload after create kept the production D1 record visible.
+- Edited the record to:
+  - title: `Round 4 Production Edit 20260618`
+  - asset category: `UI/HUD`
+  - license status: `source link only`
+- Saw `Reference changes saved.`
+- Reload after edit kept the updated title, category, and license visible.
+- App-owned delete confirmation appeared with `Cancel`, confirm `Delete reference`, and the record title in the confirmation copy.
+- Confirm delete showed `Reference deleted.`
+- Reload after delete removed `Round 4 Production Edit 20260618` and restored the starter examples fallback.
+
+Browser automation note:
+
+- The in-app browser control channel still intermittently timed out during coordinate actions, reloads, and screenshots.
+- Each timed-out action was followed by a fresh authenticated browser-state check before proceeding.
 
 ## Issues Found
 
 - No local automated, build, or browser QA blocker remains.
 - Production deployment succeeded.
-- Authenticated production CRUD still requires a final manual or stable browser-control pass.
+- Authenticated production CRUD passed on Sites version 5.
 

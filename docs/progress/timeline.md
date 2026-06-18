@@ -507,3 +507,25 @@
   - Add form opened and showed `Preview metadata` plus `Save private reference`.
   - Full authenticated CRUD automation was blocked by repeated in-app browser control timeouts during form fill and page-state reads.
 - Next action: complete the final production CRUD pass with a stable logged-in browser session or manual assist, then close the fourth-round branch locally.
+
+### 2026-06-18
+
+- Branch: `main`
+- Mode: authenticated production QA and branch cleanup
+- Action: completed the fourth-round production CRUD pass on Sites version 5.
+- Production CRUD result:
+  - Created a reference from `https://example.com/`.
+  - Metadata preview success feedback appeared.
+  - Saved the reference and confirmed reload persistence.
+  - Edited the record to `Round 4 Production Edit 20260618`, `UI/HUD`, and `source link only`.
+  - Confirmed edit persisted after reload.
+  - App-owned delete confirmation appeared and included the record title.
+  - Confirm delete removed the record.
+  - Reload after delete confirmed the edited title was absent and starter examples returned.
+- Browser-control note:
+  - The in-app browser channel intermittently timed out during actions and screenshots.
+  - Each timed-out action was followed by a fresh authenticated browser-state check before continuing.
+- Branch cleanup:
+  - Deleted local `codex/round-4-production-hardening` after merge, deployment, and production QA.
+- Remote sync:
+  - Latest documentation commits are still pending push because `git push origin main` hit repeated GitHub HTTPS connectivity failures.
