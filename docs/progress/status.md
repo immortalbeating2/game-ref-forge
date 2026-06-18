@@ -4,7 +4,7 @@ Updated: 2026-06-18
 
 ## Current Stage
 
-`Round 4 complete / production CRUD passed`
+`Round 5 localization branch / local QA passed`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -88,6 +88,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, authenticated in-app browser production UI smoke confirmed the fourth-round UI and add form could open, but full production CRUD automation was blocked by repeated in-app browser control timeouts during form fill/state reads.
 - On 2026-06-18, authenticated production CRUD passed on Sites version 5: create, metadata preview success feedback, save, reload persistence, edit, reload persistence, app-owned delete confirmation, delete, and post-delete reload absence.
 - On 2026-06-18, local branch `codex/round-4-production-hardening` was deleted after merge, deployment, and production QA.
+- On 2026-06-18, fifth-round localization started on `codex/round-5-localization`.
+- On 2026-06-18, Chinese-first bilingual UI helpers, interaction copy, enum labels, and language switching were implemented and locally validated.
 
 ## Active Decisions
 
@@ -120,4 +122,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Retry pushing the latest local documentation commits to GitHub when network connectivity to `github.com:443` recovers, then choose the fifth-round product scope.
+Merge, push, save, and deploy the fifth-round localization branch, then run a production language-switch smoke test.

@@ -529,3 +529,29 @@
   - Deleted local `codex/round-4-production-hardening` after merge, deployment, and production QA.
 - Remote sync:
   - Latest documentation commits are still pending push because `git push origin main` hit repeated GitHub HTTPS connectivity failures.
+
+### 2026-06-18
+
+- Branch: `codex/round-5-localization`
+- Mode: design, implementation, and local QA
+- Action: started fifth-round Chinese-first bilingual UI work.
+- Design spec:
+  - `docs/superpowers/specs/2026-06-18-localization-design.md`
+- Implementation plan:
+  - `docs/superpowers/plans/2026-06-18-localization.md`
+- Implementation:
+  - Added typed localization helpers for `zh` and `en`.
+  - Added Chinese default labels for asset categories, media types, license statuses, and public statuses.
+  - Added English label option for the same UI layer.
+  - Localized interaction-state messages, delete confirmation copy, and starter examples messaging.
+  - Added sidebar language selector with Chinese as default.
+  - Replaced main workspace hard-coded UI copy with localized copy.
+- Validation:
+  - `npm test`: passed, 6 files / 25 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - Local browser smoke confirmed Chinese default and English switch.
+- QA note:
+  - `docs/qa/2026-06-18-localization.md`
+- Next action: merge, push, save/deploy Sites version, then smoke-check production language switching.
