@@ -56,6 +56,11 @@ Production CRUD status:
   - URL/title were still readable.
   - Light DOM `evaluate`, visible DOM, and console log reads all timed out and reset the kernel.
   - This points to the production tab content bridge rather than a specific locator or form-control issue.
+- Retried again on 2026-06-19 after the user restarted the browser context:
+  - Initial reconnect saw no active tabs.
+  - A fresh production tab could be created and later rebound.
+  - URL/title became readable as production `RefForge`.
+  - Light DOM `evaluate` and screenshot capture still timed out and reset the kernel.
 - No production CRUD claim is made yet.
 
 Still pending:

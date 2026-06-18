@@ -101,6 +101,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, `codex/round-5-reference-quality` was merged locally into `main`.
 - On 2026-06-18, Sites version 7 was saved from commit `0cadbbc5fdcb481f83cc3632d22549878b729d21` and deployed successfully.
 - On 2026-06-18, a follow-up production browser-control retry still timed out on DOM, visible DOM, and console-log reads while URL/title remained readable.
+- On 2026-06-19, another retry after browser context restart still timed out on production DOM/screenshot access while URL/title remained readable.
 
 ## Active Decisions
 
@@ -133,4 +134,6 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Retry GitHub push for merged `main`, then complete authenticated production CRUD smoke for Sites version 7.
+Complete authenticated production CRUD smoke for Sites version 7.
+
+Current remote sync is complete; the remaining step is authenticated production CRUD smoke for Sites version 7.

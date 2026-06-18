@@ -667,3 +667,20 @@
 - Production CRUD:
   - Pending. Browser URL/title could be read, but DOM snapshot, evaluate, and screenshot calls repeatedly timed out after deployment.
   - A later retry after browser-control reset reproduced the blocker: URL/title readable, but light DOM evaluate, visible DOM, and console-log reads timed out.
+
+## 2026-06-19
+
+### 2026-06-19
+
+- Branch: `main`
+- Mode: production QA retry
+- Action: 用户重启浏览器上下文后，重新尝试认证态生产浏览器自动化。
+- Result:
+  - 初次重连时没有可用 active browser tab。
+  - 为 `https://game-ref-forge.yeep-6613.chatgpt-team.site/` 创建了新的生产 tab。
+  - 重新连接后 URL/title 可读，标题为 `RefForge`。
+  - light DOM `evaluate` 仍然超时，并重置 browser-control kernel。
+  - screenshot 截图同样超时，并重置 browser-control kernel。
+- Status:
+  - 生产 CRUD 仍然待验证。
+  - 本次重试没有改动生产数据。
