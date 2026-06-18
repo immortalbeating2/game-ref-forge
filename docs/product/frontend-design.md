@@ -32,6 +32,18 @@ Avoid:
 - Copy that explains the app instead of letting controls do the work.
 - Public asset showcase or download-site styling.
 
+## Confirmed Visual Direction
+
+As of 2026-06-19, the next main workspace upgrade should use the third generated UI concept as the primary direction:
+
+- Main direction: an inspiration-extraction workstation.
+- Borrow from concept 1: compact card density for fast scanning and comparison.
+- Borrow from concept 2: orderly field grouping for source, classification, safety, scores, tags, and inspiration entries.
+
+This direction is documented in `docs/superpowers/specs/2026-06-19-main-workspace-ui-upgrade-design.md`.
+
+The key product implication is that the right detail panel should evolve from a generic record inspector into a structured `灵感提炼` workspace, while the center gallery keeps dense, stable reference cards.
+
 ## First Screen Layout
 
 Use an A+C hybrid workspace:
@@ -441,4 +453,3 @@ The first implemented UI should satisfy:
 - Detail panel supports source, classification, safety, and extraction review.
 - Empty, loading, broken image, preview failure, save failure, and delete confirmation states exist.
 - Text does not overlap or overflow controls at desktop or mobile widths.
-

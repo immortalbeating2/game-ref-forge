@@ -684,3 +684,18 @@
 - Status:
   - 生产 CRUD 仍然待验证。
   - 本次重试没有改动生产数据。
+
+### 2026-06-19
+
+- Branch: `main`
+- Mode: product design decision
+- Action: 确认后续主界面升级视觉方向。
+- Decision:
+  - 以第 3 张 UI 概念图作为主方向，强调 `灵感提炼` 工作台。
+  - 吸收第 1 张概念图的卡片密度，用于中央 reference cards 扫描和比较。
+  - 吸收第 2 张概念图的字段秩序，用于来源、分类、安全、评分、标签和灵感条目组织。
+- Docs:
+  - Added `docs/superpowers/specs/2026-06-19-main-workspace-ui-upgrade-design.md`.
+  - Updated `docs/product/frontend-design.md`.
+- Next action:
+  - 后续主界面升级按大功能流程推进，建议分支 `codex/round-6-workspace-ui-upgrade`。

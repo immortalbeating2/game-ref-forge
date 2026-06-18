@@ -102,6 +102,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, Sites version 7 was saved from commit `0cadbbc5fdcb481f83cc3632d22549878b729d21` and deployed successfully.
 - On 2026-06-18, a follow-up production browser-control retry still timed out on DOM, visible DOM, and console-log reads while URL/title remained readable.
 - On 2026-06-19, another retry after browser context restart still timed out on production DOM/screenshot access while URL/title remained readable.
+- On 2026-06-19, the next main workspace UI upgrade direction was selected: use concept 3 as the primary inspiration-extraction workstation direction, with concept 1 card density and concept 2 field order.
 
 ## Active Decisions
 
@@ -114,6 +115,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Do not expose a public route in v1.
 - Default new references to private-safe source/public statuses.
 - First-version frontend should use the working research desk layout defined in `docs/product/frontend-design.md`.
+- The next main workspace upgrade should follow `docs/superpowers/specs/2026-06-19-main-workspace-ui-upgrade-design.md`.
 
 ## Current Risks
 
@@ -137,3 +139,5 @@ It helps collect source links from game asset and game design sites, normalize t
 Complete authenticated production CRUD smoke for Sites version 7.
 
 Current remote sync is complete; the remaining step is authenticated production CRUD smoke for Sites version 7.
+
+For the next product UI round, prepare an implementation plan for `codex/round-6-workspace-ui-upgrade` based on the selected concept direction.
