@@ -22,11 +22,20 @@ CREATE TABLE references (
   source_category TEXT,
   style_tags TEXT NOT NULL DEFAULT '[]',
   use_tags TEXT NOT NULL DEFAULT '[]',
+  mechanic_tags TEXT NOT NULL DEFAULT '[]',
+  mood_tags TEXT NOT NULL DEFAULT '[]',
+  visual_language_tags TEXT NOT NULL DEFAULT '[]',
   license_status TEXT NOT NULL,
   attribution_text TEXT,
   public_status TEXT NOT NULL,
+  quality_status TEXT NOT NULL DEFAULT 'captured',
   rating INTEGER,
+  reference_value_score INTEGER,
+  transformability_score INTEGER,
+  copyright_risk_score INTEGER,
+  production_readiness_score INTEGER,
   inspiration_points TEXT NOT NULL DEFAULT '[]',
+  inspiration_entries TEXT NOT NULL DEFAULT '[]',
   deconstruction_notes TEXT,
   transformation_ideas TEXT,
   avoid_copying_notes TEXT,
@@ -81,13 +90,38 @@ CREATE INDEX idx_references_created_at ON references(created_at);
 - `public_safe`
 - `public_link_only`
 
+`quality_status`:
+
+- `captured`
+- `needs_analysis`
+- `analyzed`
+- `ready_for_use`
+- `blocked`
+
 ## JSON Text Fields
 
 Store these as JSON strings in D1 and parse them in the data access layer:
 
 - `style_tags`: string array.
 - `use_tags`: string array.
+- `mechanic_tags`: string array.
+- `mood_tags`: string array.
+- `visual_language_tags`: string array.
 - `inspiration_points`: string array.
+- `inspiration_entries`: structured inspiration entry array.
+
+Structured inspiration entry shape:
+
+```ts
+type InspirationEntry = {
+  id: string;
+  observation: string;
+  principle: string;
+  transferable_idea: string;
+  original_application: string;
+  avoid_copying: string;
+};
+```
 
 ## Reference Response Shape
 
@@ -105,11 +139,20 @@ type ReferenceRecord = {
   source_category: string | null;
   style_tags: string[];
   use_tags: string[];
+  mechanic_tags: string[];
+  mood_tags: string[];
+  visual_language_tags: string[];
   license_status: LicenseStatus;
   attribution_text: string | null;
   public_status: PublicStatus;
+  quality_status: QualityStatus;
   rating: number | null;
+  reference_value_score: number | null;
+  transformability_score: number | null;
+  copyright_risk_score: number | null;
+  production_readiness_score: number | null;
   inspiration_points: string[];
+  inspiration_entries: InspirationEntry[];
   deconstruction_notes: string | null;
   transformation_ideas: string | null;
   avoid_copying_notes: string | null;
@@ -126,5 +169,16 @@ type ReferenceRecord = {
 - New records default to `license_status = private_reference` unless explicitly changed.
 - New records default to `public_status = private` unless explicitly changed.
 - `rating` is optional and should be between 1 and 5 when present.
-- `style_tags`, `use_tags`, and `inspiration_points` should always return arrays to the frontend.
+- `reference_value_score`, `transformability_score`, `copyright_risk_score`, and `production_readiness_score` are optional and should be integers between 1 and 5 when present.
+- Higher `copyright_risk_score` means higher risk.
+- `style_tags`, `use_tags`, `mechanic_tags`, `mood_tags`, `visual_language_tags`, `inspiration_points`, and `inspiration_entries` should always return arrays to the frontend.
+- Blank structured inspiration entries should be removed before saving.
+- Missing `quality_status` should default to `captured`.
 
+## Migration
+
+Round 5 uses the existing Drizzle migration flow and adds:
+
+- `drizzle/0001_massive_zodiak.sql`
+
+The migration only appends nullable/defaulted columns to the existing `references` table.

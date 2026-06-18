@@ -611,3 +611,30 @@
   - The work changes schema, typed models, API response shape, draft conversion, localization, workspace UI, tests, documentation, and production QA.
 - Baseline validation:
   - `npm test`: passed, 6 files / 25 tests.
+
+### 2026-06-18
+
+- Branch: `codex/round-5-reference-quality`
+- Mode: implementation
+- Action: implemented fifth-round reference-quality structure.
+- Commits:
+  - `a16bd1b` - `feat: 增加引用质量模型 / add reference quality model`
+  - `3e70537` - `feat: 扩展引用质量存储 / extend reference quality storage`
+  - `d3a5bc0` - `feat: 扩展引用草稿结构 / extend reference draft structure`
+  - `4d161bb` - `feat: 本地化引用质量字段 / localize reference quality fields`
+  - `0d7fcfc` - `feat: 增加引用质量工作台界面 / add reference quality workspace UI`
+- Implementation:
+  - Added multi-dimensional scores.
+  - Added mechanic, mood, and visual-language tag axes.
+  - Added structured inspiration entries.
+  - Added quality review status.
+  - Added Drizzle migration `drizzle/0001_massive_zodiak.sql`.
+  - Added Chinese/English labels and workspace UI controls.
+  - Added search coverage for new tags and structured inspiration text.
+- Validation:
+  - `npm test`: passed, 6 files / 29 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+- Next action:
+  - Run local browser QA, merge to `main`, deploy Sites, and run authenticated production CRUD smoke.
