@@ -100,6 +100,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, local API CRUD and local in-app browser CRUD passed for the fifth-round reference-quality fields.
 - On 2026-06-18, `codex/round-5-reference-quality` was merged locally into `main`.
 - On 2026-06-18, Sites version 7 was saved from commit `0cadbbc5fdcb481f83cc3632d22549878b729d21` and deployed successfully.
+- On 2026-06-18, a follow-up production browser-control retry still timed out on DOM, visible DOM, and console-log reads while URL/title remained readable.
 
 ## Active Decisions
 

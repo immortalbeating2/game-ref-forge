@@ -52,6 +52,10 @@ Production CRUD status:
 - Blocked by in-app browser control timeouts after deployment.
 - Browser URL/title could be read as production `RefForge`.
 - DOM snapshot, read-only evaluate, and screenshot all timed out and reset the browser-control kernel.
+- Retried after a fresh browser-control kernel reset:
+  - URL/title were still readable.
+  - Light DOM `evaluate`, visible DOM, and console log reads all timed out and reset the kernel.
+  - This points to the production tab content bridge rather than a specific locator or form-control issue.
 - No production CRUD claim is made yet.
 
 Still pending:

@@ -666,3 +666,4 @@
   - `git push origin main`: failed repeatedly with connection reset / `github.com:443` timeout.
 - Production CRUD:
   - Pending. Browser URL/title could be read, but DOM snapshot, evaluate, and screenshot calls repeatedly timed out after deployment.
+  - A later retry after browser-control reset reproduced the blocker: URL/title readable, but light DOM evaluate, visible DOM, and console-log reads timed out.
