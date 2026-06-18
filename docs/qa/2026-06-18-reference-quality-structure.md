@@ -61,6 +61,13 @@ Production CRUD status:
   - A fresh production tab could be created and later rebound.
   - URL/title became readable as production `RefForge`.
   - Light DOM `evaluate` and screenshot capture still timed out and reset the kernel.
+- Retried again on 2026-06-19 after browser control became partially responsive:
+  - Production DOM snapshot succeeded.
+  - Screenshot succeeded.
+  - DOM-CUA visible node read succeeded.
+  - The live production UI showed fifth-round fields including quality status, reference value, transformability, copyright risk, production readiness, richer tag axes, and structured inspiration.
+  - Playwright locator click, DOM-CUA node click, and coordinate click all timed out when trying to open `+ 添加参考`.
+  - Reconnect checks showed the app remained in list state; the add-reference form did not open.
 - No production CRUD claim is made yet.
 
 Still pending:
@@ -75,7 +82,7 @@ Still pending:
 ## Risks / Notes
 
 - Production remains behind authenticated Sites access.
-- The in-app browser automation channel may time out; fresh state checks should be used after timeouts.
+- The in-app browser automation channel can now read production DOM/screenshot in some retries, but production click actions still time out on the add-reference entry point.
 - The current UI supports multiple structured inspiration entries, but the form remains compact and non-wizard.
 - Local `wrangler d1 execute DB --local` could not find a traditional Wrangler D1 binding because this project uses Sites `.openai/hosting.json`; local QA applied `drizzle/0001_massive_zodiak.sql` directly to the Miniflare sqlite state after verifying the missing columns.
 - GitHub push for merged `main` is currently blocked by repeated `github.com:443` connection failures, but the exact source commit was pushed to the Sites source repository and deployed.

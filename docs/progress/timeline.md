@@ -699,3 +699,20 @@
   - Updated `docs/product/frontend-design.md`.
 - Next action:
   - 后续主界面升级按大功能流程推进，建议分支 `codex/round-6-workspace-ui-upgrade`。
+
+### 2026-06-19
+
+- Branch: `main`
+- Mode: production QA retry
+- Action: 再次尝试第五轮 Sites version 7 的认证态生产 CRUD 自动化。
+- Result:
+  - 生产 URL/title 可读，标题为 `RefForge`。
+  - DOM snapshot 成功读取，确认第五轮质量字段和结构化灵感已在线。
+  - Screenshot 成功读取，确认中文首选 UI、筛选、卡片、详情面板布局可见。
+  - DOM-CUA visible DOM 成功读取，确认 `+ 添加参考` 是可见交互节点。
+  - Playwright locator click、DOM-CUA node click、坐标 click 均在点击 `+ 添加参考` 时超时并重置 browser-control kernel。
+  - 重连后页面仍处于列表态，添加表单未打开。
+- Status:
+  - 第五轮生产只读 UI 验证部分恢复。
+  - 第五轮生产 CRUD 自动化仍未通过。
+  - 本次没有创建、编辑或删除生产数据。

@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-06-18
+Updated: 2026-06-19
 
 ## Current Stage
 
@@ -103,6 +103,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-18, a follow-up production browser-control retry still timed out on DOM, visible DOM, and console-log reads while URL/title remained readable.
 - On 2026-06-19, another retry after browser context restart still timed out on production DOM/screenshot access while URL/title remained readable.
 - On 2026-06-19, the next main workspace UI upgrade direction was selected: use concept 3 as the primary inspiration-extraction workstation direction, with concept 1 card density and concept 2 field order.
+- On 2026-06-19, a later production browser-control retry confirmed fifth-round fields are visible through DOM/screenshot reads, but all tested click paths for `+ 添加参考` timed out, so production CRUD remains pending.
 
 ## Active Decisions
 
@@ -133,6 +134,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - In-app browser control is available again for local validation; authenticated production CRUD still requires the logged-in production URL rather than `localhost`.
 - Fourth-round production deployment succeeded.
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
+- Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
 
 ## Next Suggested Step
 
