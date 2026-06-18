@@ -641,3 +641,28 @@
   - In-app browser CRUD passed for create, reload persistence, search by new tag, edit, reload persistence, app delete confirmation, delete, and post-delete reload absence.
 - Next action:
   - Merge to `main`, deploy Sites, and run authenticated production CRUD smoke.
+
+### 2026-06-18
+
+- Branch: `main`
+- Mode: merge and Sites deployment
+- Action: merged fifth-round reference-quality structure and deployed Sites version 7.
+- Merge commit:
+  - `0cadbbc` - `merge: 合并第五轮引用质量结构 / merge round 5 reference quality structure`
+- Merged-main validation:
+  - `npm test`: passed, 6 files / 29 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+- Sites source sync:
+  - Pushed commit `0cadbbc5fdcb481f83cc3632d22549878b729d21` to the Sites source repository.
+- Sites version:
+  - version: `7`
+  - source commit: `0cadbbc5fdcb481f83cc3632d22549878b729d21`
+  - deployment id: `appgdep_6a33c7a436c481919e89373046dae42d`
+  - deployment status: `succeeded`
+  - production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- GitHub remote sync:
+  - `git push origin main`: failed repeatedly with connection reset / `github.com:443` timeout.
+- Production CRUD:
+  - Pending. Browser URL/title could be read, but DOM snapshot, evaluate, and screenshot calls repeatedly timed out after deployment.
