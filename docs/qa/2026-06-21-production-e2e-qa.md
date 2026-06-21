@@ -36,6 +36,22 @@ The runner is ready to execute once both conditions are true:
 
 Until then, `sites-sign-in` means access policy blocked the test before application code could evaluate the token.
 
+## Production Attempt
+
+2026-06-21 follow-up:
+
+- Sites version 8 was deployed from commit `ba07ccd7351d7e1065275a968026b7f5ddb90323`.
+- `REF_FORGE_E2E_TOKEN` was configured as a Sites secret and applied as environment revision 1.
+- Attempting to switch access to `public` failed because internet publishing is disabled for the workspace.
+- Access mode remained `custom`, limited to the owner allowlist.
+- Running `npm run qa:production-crud` against production still returned `sites-sign-in`.
+
+Interpretation:
+
+- The application-side e2e token support is deployed.
+- The command-line production CRUD request still does not reach the Worker under the current Sites access layer.
+- Real production CRUD automation remains blocked until the workspace allows public access, provides a header/path allowlist, or a separate QA deployment path is created.
+
 ## Risk
 
 - This is a QA infrastructure token, not a user identity system.

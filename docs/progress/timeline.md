@@ -746,3 +746,28 @@
   - Production URL plus dummy token returned `sites-sign-in`, confirming no production write occurred and Sites access still blocks the script before Worker execution.
 - Next action:
   - Configure `REF_FORGE_E2E_TOKEN` in production and adjust Sites access policy so token-bearing requests can reach the Worker, then run the real production CRUD smoke.
+
+### 2026-06-21
+
+- Branch: `codex/round-6-production-e2e-qa`
+- Mode: Sites deployment and production smoke retry
+- Action: deployed the sixth-round e2e QA infrastructure to production and attempted real production CRUD automation.
+- Deployment:
+  - Sites version: `8`
+  - Source commit: `ba07ccd7351d7e1065275a968026b7f5ddb90323`
+  - Deployment id: `appgdep_6a37aea2570881919f74a8ffac46be22`
+  - Deployment status: `succeeded`
+  - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+  - Environment revision: `1`
+- Environment:
+  - `REF_FORGE_E2E_TOKEN` configured as a Sites secret.
+- Access attempt:
+  - Temporary `public` access was attempted for the smoke window.
+  - Sites rejected it because internet publishing is disabled for this workspace.
+  - `get_site` confirmed access remained `custom` with the owner allowlist.
+- Production smoke result:
+  - `npm run qa:production-crud` still returned `sites-sign-in`.
+  - No production CRUD write occurred.
+- Status:
+  - Application-side e2e infrastructure is deployed.
+  - Command-line production CRUD automation remains blocked by the Sites access layer before requests reach the Worker.

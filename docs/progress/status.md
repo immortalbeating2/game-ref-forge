@@ -107,6 +107,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-21, sixth-round production e2e QA infrastructure started on `codex/round-6-production-e2e-qa`.
 - On 2026-06-21, an e2e token helper, controlled production CRUD smoke runner, and production QA docs were added.
 - On 2026-06-21, local validation passed for tests, typecheck, lint, and build; production URL with a dummy token returned `sites-sign-in`, confirming Sites access still intercepts command-line requests before Worker execution.
+- On 2026-06-21, Sites version 8 was deployed from commit `ba07ccd7351d7e1065275a968026b7f5ddb90323` with `REF_FORGE_E2E_TOKEN` configured as a secret.
+- On 2026-06-21, a real production smoke retry still returned `sites-sign-in`; attempting temporary `public` access failed because internet publishing is disabled for this workspace, and the site remained `custom`.
 
 ## Active Decisions
 
@@ -138,10 +140,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - Fourth-round production deployment succeeded.
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 - Fifth-round production read-only UI checks can confirm the deployed quality fields, but write-path browser CRUD automation is still blocked at the add-reference click.
-- Production e2e API smoke now has local infrastructure, but the real production run still needs `REF_FORGE_E2E_TOKEN` configured and Sites access policy adjusted so token-bearing requests reach the Worker.
+- Production e2e API smoke now has deployed infrastructure and a configured secret, but the real production run still needs a Sites access path that lets token-bearing requests reach the Worker.
 
 ## Next Suggested Step
 
-Configure production `REF_FORGE_E2E_TOKEN`, adjust Sites access so token-bearing requests can reach the Worker, then run `npm run qa:production-crud` and record the real production CRUD result.
+Choose the long-term production QA access path: separate QA deployment/environment, or a future Sites header/path allowlist. Then run `npm run qa:production-crud` and record the real production CRUD result.
 
 For the next product UI round, prepare an implementation plan for `codex/round-6-workspace-ui-upgrade` based on the selected concept direction.
