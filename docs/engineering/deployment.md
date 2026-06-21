@@ -56,10 +56,37 @@ Before any public sharing:
 - Keep unknown-license references private.
 - Test mainland China accessibility if Cloudflare availability matters for the target users.
 
+## Production QA Smoke
+
+Production CRUD automation should use the controlled e2e smoke runner instead of relying only on browser-click automation.
+
+Command:
+
+```bash
+npm run qa:production-crud
+```
+
+Required environment variables:
+
+- `REF_FORGE_PRODUCTION_URL`: production base URL, for example `https://game-ref-forge.yeep-6613.chatgpt-team.site`.
+- `REF_FORGE_E2E_TOKEN`: shared test token configured in the deployment environment as `REF_FORGE_E2E_TOKEN`.
+
+The runner sends the token through `x-ref-forge-e2e-token`, creates an `E2E RefForge ...` reference, reads it back, updates it, checks metadata preview success/failure feedback, deletes it, and verifies it is gone.
+
+Security rules:
+
+- Do not commit the token.
+- Keep test records private and prefixed with `E2E RefForge`.
+- Treat cleanup failure as a production QA incident.
+
+Current Sites access note:
+
+- If Sites access protection intercepts the request before it reaches the Worker, the script reports `sites-sign-in`.
+- In that case, application code has not received the token yet; adjust Sites access policy or use a controlled verification deployment path before treating the smoke as a product/API failure.
+
 ## Deployment Risks
 
 - Sites/plugin behavior may change, so verify current plugin docs at implementation time.
 - D1 schema migrations need careful review before production changes.
 - Metadata preview may be blocked by source websites.
 - Public display of media has copyright risk unless license or ownership is clear.
-

@@ -1,6 +1,13 @@
+import { env } from "cloudflare:workers";
+import { requireValidE2eToken } from "../../../../lib/e2e-auth";
 import { extractMetadataFromHtml } from "../../../../lib/metadata";
 
 export async function POST(request: Request) {
+  const e2eError = requireValidE2eToken(request, env.REF_FORGE_E2E_TOKEN);
+  if (e2eError) {
+    return e2eError;
+  }
+
   const payload = (await request.json()) as { source_url?: string };
   const sourceUrl = payload.source_url?.trim() ?? "";
 

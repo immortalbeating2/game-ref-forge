@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-19
+Updated: 2026-06-21
 
 ## Current Stage
 
-`Round 5 reference quality structure deployed / production CRUD pending`
+`Round 6 production e2e QA infrastructure in progress`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -104,6 +104,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-19, another retry after browser context restart still timed out on production DOM/screenshot access while URL/title remained readable.
 - On 2026-06-19, the next main workspace UI upgrade direction was selected: use concept 3 as the primary inspiration-extraction workstation direction, with concept 1 card density and concept 2 field order.
 - On 2026-06-19, a later production browser-control retry confirmed fifth-round fields are visible through DOM/screenshot reads, but all tested click paths for `+ 添加参考` timed out, so production CRUD remains pending.
+- On 2026-06-21, sixth-round production e2e QA infrastructure started on `codex/round-6-production-e2e-qa`.
+- On 2026-06-21, an e2e token helper, controlled production CRUD smoke runner, and production QA docs were added.
+- On 2026-06-21, local validation passed for tests, typecheck, lint, and build; production URL with a dummy token returned `sites-sign-in`, confirming Sites access still intercepts command-line requests before Worker execution.
 
 ## Active Decisions
 
@@ -134,12 +137,11 @@ It helps collect source links from game asset and game design sites, normalize t
 - In-app browser control is available again for local validation; authenticated production CRUD still requires the logged-in production URL rather than `localhost`.
 - Fourth-round production deployment succeeded.
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
-- Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
+- Fifth-round production read-only UI checks can confirm the deployed quality fields, but write-path browser CRUD automation is still blocked at the add-reference click.
+- Production e2e API smoke now has local infrastructure, but the real production run still needs `REF_FORGE_E2E_TOKEN` configured and Sites access policy adjusted so token-bearing requests reach the Worker.
 
 ## Next Suggested Step
 
-Complete authenticated production CRUD smoke for Sites version 7.
-
-Current remote sync is complete; the remaining step is authenticated production CRUD smoke for Sites version 7.
+Configure production `REF_FORGE_E2E_TOKEN`, adjust Sites access so token-bearing requests can reach the Worker, then run `npm run qa:production-crud` and record the real production CRUD result.
 
 For the next product UI round, prepare an implementation plan for `codex/round-6-workspace-ui-upgrade` based on the selected concept direction.

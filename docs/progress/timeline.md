@@ -716,3 +716,33 @@
   - 第五轮生产只读 UI 验证部分恢复。
   - 第五轮生产 CRUD 自动化仍未通过。
   - 本次没有创建、编辑或删除生产数据。
+
+## 2026-06-21
+
+### 2026-06-21
+
+- Branch: `codex/round-6-production-e2e-qa`
+- Mode: design, TDD implementation, and local validation
+- Action: started sixth-round production e2e QA infrastructure.
+- Context:
+  - Production browser automation can read RefForge UI but repeatedly times out when clicking `+ 添加参考`.
+  - Direct command-line production API requests are intercepted by Sites sign-in before reaching the app.
+- Design spec:
+  - `docs/superpowers/specs/2026-06-21-production-e2e-qa-design.md`
+- Implementation plan:
+  - `docs/superpowers/plans/2026-06-21-production-e2e-qa.md`
+- Implementation:
+  - Added `lib/e2e-auth.ts` with `x-ref-forge-e2e-token` validation.
+  - Wired token validation into reference create/update/delete and metadata preview routes.
+  - Added `scripts/production-crud-smoke.mjs`.
+  - Added `npm run qa:production-crud`.
+  - Added QA documentation for the production e2e runner and Sites sign-in limitation.
+- Validation:
+  - `npm test`: passed, 8 files / 38 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - `npm run qa:production-crud` without env vars failed safely with a configuration message.
+  - Production URL plus dummy token returned `sites-sign-in`, confirming no production write occurred and Sites access still blocks the script before Worker execution.
+- Next action:
+  - Configure `REF_FORGE_E2E_TOKEN` in production and adjust Sites access policy so token-bearing requests can reach the Worker, then run the real production CRUD smoke.

@@ -9,6 +9,7 @@ interface D1Database {
 declare module "cloudflare:workers" {
   export const env: {
     DB?: D1Database;
+    REF_FORGE_E2E_TOKEN?: string;
   };
 }
 

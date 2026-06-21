@@ -1,4 +1,6 @@
+import { env } from "cloudflare:workers";
 import { createReference, listReferences } from "../../../lib/reference-db";
+import { requireValidE2eToken } from "../../../lib/e2e-auth";
 
 function toRouteErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : "Unexpected error";
@@ -23,6 +25,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const e2eError = requireValidE2eToken(request, env.REF_FORGE_E2E_TOKEN);
+  if (e2eError) {
+    return e2eError;
+  }
+
   try {
     const result = await createReference(await request.json());
 
