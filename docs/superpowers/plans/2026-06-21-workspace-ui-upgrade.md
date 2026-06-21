@@ -193,7 +193,7 @@ Record:
 - production caveat
 - next step
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Commit message:
 

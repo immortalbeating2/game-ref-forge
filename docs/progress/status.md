@@ -110,6 +110,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-21, the Round 7 workspace UI implementation plan was added at `docs/superpowers/plans/2026-06-21-workspace-ui-upgrade.md`.
 - On 2026-06-21, Round 7 workspace UI was implemented locally on `codex/round-7-workspace-ui-design` with a Chinese-first inspiration workstation layout, denser reference cards, source/safety detail sections, score matrix summaries, tag previews, and responsive styling.
 - On 2026-06-21, Round 7 local validation passed: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and in-app browser smoke for desktop copy, add-form entry, mobile no-horizontal-overflow, and empty console errors.
+- On 2026-06-21, Round 7 implementation was committed locally as `59efc0e`, but pushing `codex/round-7-workspace-ui-design` to GitHub failed three times because `github.com:443` could not be reached.
 
 ## Active Decisions
 
@@ -142,7 +143,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Fourth-round production deployment succeeded.
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 - Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
+- Round 7 branch is local-only until GitHub HTTPS connectivity recovers and `codex/round-7-workspace-ui-design` can be pushed.
 
 ## Next Suggested Step
 
-Review the local Round 7 UI implementation, then decide whether to merge, deploy through Sites, and run production smoke.
+Retry pushing `codex/round-7-workspace-ui-design`, then review/merge the local Round 7 UI implementation and decide whether to deploy through Sites.
