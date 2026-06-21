@@ -4,7 +4,7 @@ Updated: 2026-06-21
 
 ## Current Stage
 
-`Round 7 workspace UI design baseline`
+`Round 7 workspace UI implemented locally`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -107,6 +107,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-21, Round 7 workspace UI design started on `codex/round-7-workspace-ui-design`.
 - On 2026-06-21, `PRODUCT.md` was added to define RefForge as a product-register private creative research workstation.
 - On 2026-06-21, the Round 7 workspace UI upgrade design spec was added at `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`.
+- On 2026-06-21, the Round 7 workspace UI implementation plan was added at `docs/superpowers/plans/2026-06-21-workspace-ui-upgrade.md`.
+- On 2026-06-21, Round 7 workspace UI was implemented locally on `codex/round-7-workspace-ui-design` with a Chinese-first inspiration workstation layout, denser reference cards, source/safety detail sections, score matrix summaries, tag previews, and responsive styling.
+- On 2026-06-21, Round 7 local validation passed: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and in-app browser smoke for desktop copy, add-form entry, mobile no-horizontal-overflow, and empty console errors.
 
 ## Active Decisions
 
@@ -120,6 +123,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Default new references to private-safe source/public statuses.
 - First-version frontend should use the working research desk layout defined in `docs/product/frontend-design.md`.
 - The next main workspace upgrade should follow `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`, which incorporates the 2026-06-19 concept direction.
+- Round 7 is limited to frontend UI and copy. It does not change API behavior, D1 schema, or production QA infrastructure.
 
 ## Current Risks
 
@@ -141,8 +145,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Complete authenticated production CRUD smoke for Sites version 7.
-
-Current remote sync is complete; the remaining step is authenticated production CRUD smoke for Sites version 7.
-
-Review the Round 7 workspace UI design spec, then prepare an implementation plan for the main workspace upgrade.
+Review the local Round 7 UI implementation, then decide whether to merge, deploy through Sites, and run production smoke.

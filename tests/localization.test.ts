@@ -34,6 +34,11 @@ describe("uiCopy", () => {
     expect(uiCopy().mechanicTags).toBe("机制标签");
     expect(uiCopy().inspirationObservation).toBe("观察");
     expect(uiCopy().emptyInspirationEntries).toBe("还没有结构化灵感条目。");
+    expect(uiCopy().workspaceMode).toBe("灵感提炼工作台");
+    expect(uiCopy().sourceAndSafety).toBe("来源与安全");
+    expect(uiCopy().scoreMatrix).toBe("评分矩阵");
+    expect(uiCopy().tagAxes).toBe("标签轴");
+    expect(uiCopy().researchControls).toBe("研究控制");
   });
 
   it("returns English interface copy when requested", () => {
@@ -45,5 +50,10 @@ describe("uiCopy", () => {
     expect(uiCopy("en").mechanicTags).toBe("Mechanic tags");
     expect(uiCopy("en").inspirationObservation).toBe("Observation");
     expect(uiCopy("en").emptyInspirationEntries).toBe("No structured inspiration entries yet.");
+    expect(uiCopy("en").workspaceMode).toBe("Inspiration workbench");
+    expect(uiCopy("en").sourceAndSafety).toBe("Source and safety");
+    expect(uiCopy("en").scoreMatrix).toBe("Score matrix");
+    expect(uiCopy("en").tagAxes).toBe("Tag axes");
+    expect(uiCopy("en").researchControls).toBe("Research controls");
   });
 });

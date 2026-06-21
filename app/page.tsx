@@ -515,8 +515,9 @@ export default function Home() {
     <main className="workspace">
       <aside className="sidebar" aria-label={copy.filtersLabel}>
         <div className="brand-block">
-          <p className="eyebrow">RefForge</p>
+          <p className="eyebrow">REFFORGE</p>
           <h1>灵感锻造台</h1>
+          <p className="workspace-mode">{copy.workspaceMode}</p>
           <p>{copy.productDescription}</p>
           <label className="language-switcher">
             {copy.languageLabel}
@@ -528,6 +529,11 @@ export default function Home() {
               <option value="en">{copy.english}</option>
             </select>
           </label>
+        </div>
+
+        <div className="filter-heading">
+          <p className="panel-kicker">{copy.researchControls}</p>
+          <span>{copy.privateByDefault}</span>
         </div>
 
         <label>
@@ -623,20 +629,27 @@ export default function Home() {
 
       <section className="gallery-pane">
         <header className="toolbar">
-          <label className="search-label">
-            {copy.search}
-            <input
-              value={query}
-              onChange={(event) => {
-                closeEditIfHiddenByView({ query: event.target.value });
-                setQuery(event.target.value);
-              }}
-              placeholder={copy.searchPlaceholder}
-            />
-          </label>
-          <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
-            {copy.addReference}
-          </button>
+          <div className="deck-heading">
+            <p className="panel-kicker">{copy.referenceDeck}</p>
+            <h2>{filteredReferences.length} {copy.references}</h2>
+            <span>{copy.safetySummary}</span>
+          </div>
+          <div className="toolbar-actions">
+            <label className="search-label">
+              {copy.search}
+              <input
+                value={query}
+                onChange={(event) => {
+                  closeEditIfHiddenByView({ query: event.target.value });
+                  setQuery(event.target.value);
+                }}
+                placeholder={copy.searchPlaceholder}
+              />
+            </label>
+            <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
+              {copy.addReference}
+            </button>
+          </div>
         </header>
 
         {message ? <p className="status-message">{message}</p> : null}
@@ -935,8 +948,9 @@ export default function Home() {
         ) : null}
 
         <div className="result-summary">
-          <span>{filteredReferences.length} {copy.references}</span>
-          <span>{copy.safetySummary}</span>
+          <span>{copy.sourceAndSafety}</span>
+          <span>{copy.scoreMatrix}</span>
+          <span>{copy.tagAxes}</span>
         </div>
 
         {isUsingSeedReferences ? (
@@ -982,14 +996,26 @@ export default function Home() {
                 )}
               </div>
               <div className="card-body">
-                <h2>{reference.title}</h2>
-                <p>{reference.site_name ?? copy.unknownSource}</p>
+                <div className="card-meta">
+                  <h2>{reference.title}</h2>
+                  <p>{reference.site_name ?? copy.unknownSource}</p>
+                </div>
                 <div className="badge-row">
                   <span>{labelForAssetCategory(reference.asset_category, language)}</span>
                   <span>{labelForLicenseStatus(reference.license_status, language)}</span>
                   <span>{labelForPublicStatus(reference.public_status, language)}</span>
                   <span>{labelForQualityStatus(reference.quality_status, language)}</span>
                 </div>
+                <div className="compact-score-row" aria-label={copy.scoreSummary}>
+                  <span>{copy.referenceValueScore}: {reference.reference_value_score ?? "-"}</span>
+                  <span>{copy.transformabilityScore}: {reference.transformability_score ?? "-"}</span>
+                  <span>{copy.copyrightRiskScore}: {reference.copyright_risk_score ?? "-"}</span>
+                </div>
+                <p className="tag-preview">
+                  {[...reference.mechanic_tags, ...reference.mood_tags, ...reference.visual_language_tags]
+                    .slice(0, 3)
+                    .join(" · ") || copy.defaultInspiration}
+                </p>
               </div>
             </button>
           ))}
@@ -1000,8 +1026,9 @@ export default function Home() {
         {selectedReference ? (
           <>
             <div className="detail-heading">
-              <p className="eyebrow">{copy.selectedReference}</p>
+              <p className="eyebrow">{copy.inspirationWorkbench}</p>
               <h2>{selectedReference.title}</h2>
+              <p>{copy.sourceAndSafety} · {copy.scoreMatrix} · {copy.tagAxes}</p>
               {!isEditingSelected ? (
                 <div className="detail-actions">
                   <a href={selectedReference.source_url} target="_blank" rel="noreferrer">
@@ -1362,18 +1389,12 @@ export default function Home() {
               </form>
             ) : (
               <>
-                <section>
-                  <h3>{copy.source}</h3>
+                <section className="detail-hero">
+                  <h3 className="detail-section-title">{copy.sourceAndSafety}</h3>
                   <dl>
                     <div><dt>{copy.site}</dt><dd>{selectedReference.site_name ?? copy.unknown}</dd></div>
                     <div><dt>{copy.author}</dt><dd>{selectedReference.author ?? copy.unknown}</dd></div>
                     <div><dt>{copy.media}</dt><dd>{labelForMediaType(selectedReference.media_type, language)}</dd></div>
-                  </dl>
-                </section>
-
-                <section>
-                  <h3>{copy.classificationAndSafety}</h3>
-                  <dl>
                     <div><dt>{copy.license}</dt><dd>{labelForLicenseStatus(selectedReference.license_status, language)}</dd></div>
                     <div><dt>{copy.public}</dt><dd>{labelForPublicStatus(selectedReference.public_status, language)}</dd></div>
                     <div><dt>{copy.qualityStatus}</dt><dd>{labelForQualityStatus(selectedReference.quality_status, language)}</dd></div>
@@ -1382,7 +1403,7 @@ export default function Home() {
                 </section>
 
                 <section>
-                  <h3>{copy.inspiration}</h3>
+                  <h3 className="detail-section-title">{copy.scoreMatrix}</h3>
                   <div className="score-summary">
                     <span>{copy.rating}: {selectedReference.rating ?? "-"}</span>
                     <span>{copy.referenceValueScore}: {selectedReference.reference_value_score ?? "-"}</span>
@@ -1390,6 +1411,10 @@ export default function Home() {
                     <span>{copy.copyrightRiskScore}: {selectedReference.copyright_risk_score ?? "-"}</span>
                     <span>{copy.productionReadinessScore}: {selectedReference.production_readiness_score ?? "-"}</span>
                   </div>
+                </section>
+
+                <section>
+                  <h3 className="detail-section-title">{copy.tagAxes}</h3>
                   <div className="tag-groups">
                     <p><strong>{copy.styleTags}</strong> {selectedReference.style_tags.join(", ") || "-"}</p>
                     <p><strong>{copy.useTags}</strong> {selectedReference.use_tags.join(", ") || "-"}</p>
@@ -1397,6 +1422,10 @@ export default function Home() {
                     <p><strong>{copy.moodTags}</strong> {selectedReference.mood_tags.join(", ") || "-"}</p>
                     <p><strong>{copy.visualLanguageTags}</strong> {selectedReference.visual_language_tags.join(", ") || "-"}</p>
                   </div>
+                </section>
+
+                <section>
+                  <h3 className="detail-section-title">{copy.inspirationWorkbench}</h3>
                   <ul>
                     {selectedReference.inspiration_points.length > 0 ? (
                       selectedReference.inspiration_points.map((point) => <li key={point}>{point}</li>)

@@ -741,3 +741,25 @@
   - Public gallery or asset download behavior.
 - Next action:
   - User reviews the design spec, then implementation planning begins with Superpowers writing-plans.
+
+### 2026-06-21
+
+- Branch: `codex/round-7-workspace-ui-design`
+- Mode: implementation
+- Action: implemented the Round 7 main workspace UI upgrade.
+- Plan:
+  - `docs/superpowers/plans/2026-06-21-workspace-ui-upgrade.md`
+- Implementation:
+  - Added Round 7 Chinese-first copy hooks for workspace mode, source/safety, score matrix, tag axes, research controls, reference deck, inspiration workbench, and private-default status.
+  - Reorganized the main workspace into research controls, reference deck, compact reference cards, and an inspiration workbench detail panel.
+  - Added card-level score and tag previews.
+  - Reworked the detail panel around source/safety, score matrix, tag axes, and structured inspiration.
+  - Replaced the flat styling with a denser three-column workbench layout and responsive mobile fallback.
+- Validation:
+  - `npm test`: passed, 6 files / 29 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - Local in-app browser smoke passed for desktop copy, add-form entry, mobile no-horizontal-overflow, and empty console errors.
+- Scope note:
+  - No API, D1 schema, migration, or production deployment changes were included in this implementation step.
