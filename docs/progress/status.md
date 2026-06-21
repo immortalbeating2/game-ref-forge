@@ -4,7 +4,7 @@ Updated: 2026-06-21
 
 ## Current Stage
 
-`Round 7 workspace UI implemented locally`
+`Round 7 workspace UI merged locally`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -111,6 +111,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-21, Round 7 workspace UI was implemented locally on `codex/round-7-workspace-ui-design` with a Chinese-first inspiration workstation layout, denser reference cards, source/safety detail sections, score matrix summaries, tag previews, and responsive styling.
 - On 2026-06-21, Round 7 local validation passed: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and in-app browser smoke for desktop copy, add-form entry, mobile no-horizontal-overflow, and empty console errors.
 - On 2026-06-21, Round 7 implementation was committed locally as `59efc0e`, but pushing `codex/round-7-workspace-ui-design` to GitHub failed three times because `github.com:443` could not be reached.
+- On 2026-06-22, `git fetch --prune origin` confirmed `origin/codex/round-7-workspace-ui-design` exists but is not merged into `origin/main`.
+- On 2026-06-22, already-merged local branch `codex/round-5-reference-quality` was deleted.
+- On 2026-06-22, `codex/round-7-workspace-ui-design` was fast-forward merged into local `main`, and merged-main validation passed: `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build`.
 
 ## Active Decisions
 
@@ -143,8 +146,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Fourth-round production deployment succeeded.
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 - Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
-- Round 7 branch is local-only until GitHub HTTPS connectivity recovers and `codex/round-7-workspace-ui-design` can be pushed.
+- Round 7 is merged locally into `main`, but remote `main` and branch cleanup still need to be synchronized.
 
 ## Next Suggested Step
 
-Retry pushing `codex/round-7-workspace-ui-design`, then review/merge the local Round 7 UI implementation and decide whether to deploy through Sites.
+Push merged `main`, then delete local and remote `codex/round-7-workspace-ui-design` after confirming the push succeeds.
