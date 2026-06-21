@@ -4,7 +4,7 @@ Updated: 2026-06-21
 
 ## Current Stage
 
-`Round 7 workspace UI merged locally`
+`Round 7 workspace UI merged and synced`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -114,6 +114,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-22, `git fetch --prune origin` confirmed `origin/codex/round-7-workspace-ui-design` exists but is not merged into `origin/main`.
 - On 2026-06-22, already-merged local branch `codex/round-5-reference-quality` was deleted.
 - On 2026-06-22, `codex/round-7-workspace-ui-design` was fast-forward merged into local `main`, and merged-main validation passed: `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build`.
+- On 2026-06-22, merged `main` was pushed to GitHub through commit `b2feaff`.
+- On 2026-06-22, local and remote `codex/round-7-workspace-ui-design` branches were deleted after the successful `main` push.
 
 ## Active Decisions
 
@@ -146,8 +148,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Fourth-round production deployment succeeded.
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 - Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
-- Round 7 is merged locally into `main`, but remote `main` and branch cleanup still need to be synchronized.
+- Round 7 is merged into `main` and its local/remote feature branches have been cleaned up.
 
 ## Next Suggested Step
 
-Push merged `main`, then delete local and remote `codex/round-7-workspace-ui-design` after confirming the push succeeds.
+Decide whether to keep, close, or later merge `codex/round-6-production-e2e-qa`; deploy Round 7 only after a separate Sites save/deploy decision.
