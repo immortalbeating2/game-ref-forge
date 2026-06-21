@@ -716,3 +716,28 @@
   - 第五轮生产只读 UI 验证部分恢复。
   - 第五轮生产 CRUD 自动化仍未通过。
   - 本次没有创建、编辑或删除生产数据。
+
+## 2026-06-21
+
+### 2026-06-21
+
+- Branch: `codex/round-7-workspace-ui-design`
+- Mode: design baseline
+- Action: started Round 7 main workspace UI upgrade design.
+- Flow decision:
+  - User selected option A: lightweight design first.
+  - The round will first establish product context and final design spec before high-fidelity image generation or code implementation.
+- Docs:
+  - Added `PRODUCT.md`.
+  - Added `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`.
+- Scope:
+  - Main workspace visual and information architecture.
+  - Concept 3 as the primary inspiration-extraction workstation direction.
+  - Concept 1 card density.
+  - Concept 2 field order.
+- Out of scope:
+  - API and D1 changes.
+  - Production e2e QA infrastructure.
+  - Public gallery or asset download behavior.
+- Next action:
+  - User reviews the design spec, then implementation planning begins with Superpowers writing-plans.

@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-19
+Updated: 2026-06-21
 
 ## Current Stage
 
-`Round 5 reference quality structure deployed / production CRUD pending`
+`Round 7 workspace UI design baseline`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -104,6 +104,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-19, another retry after browser context restart still timed out on production DOM/screenshot access while URL/title remained readable.
 - On 2026-06-19, the next main workspace UI upgrade direction was selected: use concept 3 as the primary inspiration-extraction workstation direction, with concept 1 card density and concept 2 field order.
 - On 2026-06-19, a later production browser-control retry confirmed fifth-round fields are visible through DOM/screenshot reads, but all tested click paths for `+ 添加参考` timed out, so production CRUD remains pending.
+- On 2026-06-21, Round 7 workspace UI design started on `codex/round-7-workspace-ui-design`.
+- On 2026-06-21, `PRODUCT.md` was added to define RefForge as a product-register private creative research workstation.
+- On 2026-06-21, the Round 7 workspace UI upgrade design spec was added at `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`.
 
 ## Active Decisions
 
@@ -116,7 +119,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Do not expose a public route in v1.
 - Default new references to private-safe source/public statuses.
 - First-version frontend should use the working research desk layout defined in `docs/product/frontend-design.md`.
-- The next main workspace upgrade should follow `docs/superpowers/specs/2026-06-19-main-workspace-ui-upgrade-design.md`.
+- The next main workspace upgrade should follow `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`, which incorporates the 2026-06-19 concept direction.
 
 ## Current Risks
 
@@ -142,4 +145,4 @@ Complete authenticated production CRUD smoke for Sites version 7.
 
 Current remote sync is complete; the remaining step is authenticated production CRUD smoke for Sites version 7.
 
-For the next product UI round, prepare an implementation plan for `codex/round-6-workspace-ui-upgrade` based on the selected concept direction.
+Review the Round 7 workspace UI design spec, then prepare an implementation plan for the main workspace upgrade.
