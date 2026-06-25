@@ -163,6 +163,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local `main` is ahead of `origin/main` with deployment and Round 6 closeout documentation until GitHub push recovers.
 - Remote `origin/codex/round-6-production-e2e-qa` still needs deletion after GitHub connectivity recovers.
 - Round 8 implementation has not started; it should use a fresh `codex/round-8-research-workflow-efficiency` branch.
+- On 2026-06-26, retrying `git push origin main` and remote Round 6 branch deletion still failed with GitHub HTTPS connection reset.
 
 ## Next Suggested Step
 
