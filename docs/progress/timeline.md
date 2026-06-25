@@ -805,3 +805,23 @@
 - Remaining branch state:
   - `main` contains Round 7 workspace UI.
   - `codex/round-6-production-e2e-qa` remains open as the only active non-main feature branch.
+
+## 2026-06-25
+
+### 2026-06-25
+
+- Branch: `main`
+- Mode: deployment preparation
+- Action: prepared Round 7 for Sites deployment.
+- Changes:
+  - Refreshed canonical preview image at `public/screenshot.jpeg`.
+  - Fixed 1200px workspace preview clipping by changing the detail-panel responsive breakpoint from `1180px` to `1280px`.
+- Validation:
+  - `npm test`: passed, 6 files / 29 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - Local browser smoke confirmed `灵感锻造台`, `灵感提炼工作台`, complete `+ 添加参考` button, and no horizontal overflow at 1200px.
+- Next action:
+  - Commit and push the deployment-prep source.
+  - Save and deploy a new Sites version.
