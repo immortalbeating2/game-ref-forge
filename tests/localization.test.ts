@@ -39,6 +39,10 @@ describe("uiCopy", () => {
     expect(uiCopy().scoreMatrix).toBe("评分矩阵");
     expect(uiCopy().tagAxes).toBe("标签轴");
     expect(uiCopy().researchControls).toBe("研究控制");
+    expect(uiCopy().sortBy).toBe("排序");
+    expect(uiCopy().pinReference).toBe("置顶参考");
+    expect(uiCopy().exportMarkdown).toBe("导出 Markdown");
+    expect(uiCopy().exportJson).toBe("导出 JSON");
   });
 
   it("returns English interface copy when requested", () => {
@@ -55,5 +59,9 @@ describe("uiCopy", () => {
     expect(uiCopy("en").scoreMatrix).toBe("Score matrix");
     expect(uiCopy("en").tagAxes).toBe("Tag axes");
     expect(uiCopy("en").researchControls).toBe("Research controls");
+    expect(uiCopy("en").sortBy).toBe("Sort by");
+    expect(uiCopy("en").pinReference).toBe("Pin reference");
+    expect(uiCopy("en").exportMarkdown).toBe("Export Markdown");
+    expect(uiCopy("en").exportJson).toBe("Export JSON");
   });
 });
