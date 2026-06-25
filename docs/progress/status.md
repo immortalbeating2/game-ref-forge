@@ -4,7 +4,7 @@ Updated: 2026-06-25
 
 ## Current Stage
 
-`Round 7 deployment preparation`
+`Round 7 deployed to Sites`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -119,6 +119,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-25, Round 7 deployment preparation started on `main`.
 - On 2026-06-25, `public/screenshot.jpeg` was refreshed from the Round 7 workspace UI.
 - On 2026-06-25, the 1200px preview layout was fixed by moving the detail-panel breakpoint from `1180px` to `1280px`; validation passed with `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build`.
+- On 2026-06-25, Sites source `main` was synchronized to commit `c847ffc` using a short-lived Sites source credential because GitHub HTTPS push was resetting.
+- On 2026-06-25, Sites version 9 was saved and deployed successfully to production.
+- On 2026-06-25, production smoke passed for Chinese Round 7 workspace visibility, add-form opening, and mobile no-horizontal-overflow without writing production data.
 
 ## Active Decisions
 
@@ -152,8 +155,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 - Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
 - Round 7 is merged into `main` and its local/remote feature branches have been cleaned up.
-- Round 7 has not yet been deployed to Sites after the screenshot/layout fix.
+- GitHub `origin/main` still needs a retry push for commit `c847ffc` because the earlier HTTPS push reset; Sites production is already deployed from that commit.
 
 ## Next Suggested Step
 
-Save and deploy a new Sites version for Round 7, then run production smoke. After that, close or archive `codex/round-6-production-e2e-qa`.
+Retry pushing GitHub `origin/main`, close or archive `codex/round-6-production-e2e-qa`, then write the Round 8 design/plan entry.

@@ -825,3 +825,29 @@
 - Next action:
   - Commit and push the deployment-prep source.
   - Save and deploy a new Sites version.
+
+### 2026-06-25
+
+- Branch: `main`
+- Mode: Sites deployment and production smoke
+- Action: deployed Round 7 workspace UI to production.
+- Source sync:
+  - GitHub `git push origin main` failed twice with HTTPS connection reset.
+  - Created a short-lived Sites source credential.
+  - Confirmed Sites source `main` was at `ba07ccd`, the Round 6 experiment commit.
+  - Updated Sites source `main` to current project `main` commit `c847ffc` using `--force-with-lease=main:ba07ccd7351d7e1065275a968026b7f5ddb90323`.
+- Sites:
+  - Version: `9`
+  - Version id: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_fdb53dde3f6881918082db277aec1136`
+  - Deployment id: `appgdep_6a3d5005eea48191a376a358896a5855`
+  - Deployment status: `succeeded`
+  - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Production smoke:
+  - Confirmed `RefForge` page title.
+  - Confirmed `灵感锻造台`, `灵感提炼工作台`, `参考卡组`, and `+ 添加参考`.
+  - Confirmed add form opens and shows `来源链接`, `标题`, `结构化灵感`, and `保存为私有参考`.
+  - Confirmed 390px mobile width has no horizontal overflow.
+  - No production data was saved, edited, or deleted.
+- Next action:
+  - Retry GitHub `origin/main` push.
+  - Close or archive `codex/round-6-production-e2e-qa`.
