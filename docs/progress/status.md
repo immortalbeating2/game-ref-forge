@@ -4,7 +4,7 @@ Updated: 2026-06-26
 
 ## Current Stage
 
-`Round 8 merged locally, deployment pending`
+`Round 8 deployed to Sites, GitHub sync pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -134,6 +134,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-26, `codex/round-8-research-workflow-efficiency` was fast-forward merged into local `main`.
 - On 2026-06-26, merged-main validation passed: `npm test` (9 files / 39 tests), `npm run typecheck`, `npm run lint`, and `npm run build`.
 - On 2026-06-26, local branch `codex/round-8-research-workflow-efficiency` was deleted after the local merge and merged-main validation.
+- On 2026-06-26, GitHub `git push origin main` and remote Round 6 branch deletion still failed with `Recv failure: Connection was reset`.
+- On 2026-06-26, Sites source `main` was advanced from `c847ffc` to `9a5acdf` through a short-lived Sites source credential.
+- On 2026-06-26, Sites version 10 was saved and deployed successfully to production.
+- On 2026-06-26, unauthenticated production probes returned `401` for `/` and `/api/references`, and system Chrome displayed `Sign in required`, matching the current `custom` access policy.
 
 ## Active Decisions
 
@@ -170,9 +174,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - GitHub `origin/main` still needs a retry push for commit `c847ffc` because the earlier HTTPS push reset; Sites production is already deployed from that commit.
 - Local `main` is ahead of `origin/main` with deployment and Round 6 closeout documentation until GitHub push recovers.
 - Remote `origin/codex/round-6-production-e2e-qa` still needs deletion after GitHub connectivity recovers.
-- Round 8 is merged into local `main`; it has not yet been pushed to GitHub or deployed to Sites.
+- Round 8 is merged into local `main` and deployed to Sites version 10; it has not yet been pushed to GitHub.
 - On 2026-06-26, retrying `git push origin main` and remote Round 6 branch deletion still failed with GitHub HTTPS connection reset.
+- Authenticated production UI smoke for Round 8 remains pending because the available system browser is unauthenticated and sees the Sites sign-in page.
 
 ## Next Suggested Step
 
-Retry GitHub/Sites sync and deploy Round 8 when connectivity allows.
+Retry GitHub sync, delete remote `codex/round-6-production-e2e-qa`, and run authenticated production UI smoke for Sites version 10 when a logged-in browser control surface is available.

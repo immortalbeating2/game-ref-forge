@@ -964,3 +964,31 @@
 - Remaining:
   - GitHub remote sync is still pending.
   - Sites source sync, deployment, and production smoke are still pending.
+
+### 2026-06-26
+
+- Branch: `main`
+- Mode: remote sync retry and Sites deployment
+- Action: attempted external synchronization after Round 8 local merge.
+- GitHub result:
+  - `git push origin main`: failed with `Recv failure: Connection was reset`.
+  - `git push origin --delete codex/round-6-production-e2e-qa`: failed with `Recv failure: Connection was reset`.
+- Sites source:
+  - Created a short-lived Sites source write credential.
+  - Confirmed Sites source `main` was at `c847ffc`.
+  - Pushed local `main` commit `9a5acdf` to Sites source `main` with `--force-with-lease=main:c847ffc4032d1a62e8670e17cc6e79e4d8afbb23`.
+- Sites version:
+  - Version: `10`
+  - Version id: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_2389b8ccb1388191ac69cddeb8754e49`
+  - Source commit: `9a5acdfeac091df3c1ca3f989ed65962809a75dd`
+  - Deployment id: `appgdep_6a3d5dddb5f481919aa51b0f59872cc7`
+  - Deployment status: `succeeded`
+  - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Production access probe:
+  - `GET /`: `401`.
+  - `GET /api/references`: `401`.
+  - System Chrome smoke opened the production URL and showed `Sign in required`, matching the current `custom` access policy.
+- Remaining:
+  - GitHub `origin/main` sync.
+  - Remote Round 6 branch deletion.
+  - Authenticated production UI smoke for Round 8 controls.
