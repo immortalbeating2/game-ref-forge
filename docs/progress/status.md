@@ -4,7 +4,7 @@ Updated: 2026-06-26
 
 ## Current Stage
 
-`Round 8 design and planning`
+`Round 8 implementation on feature branch`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: none; current stable branch is `main`.
+- Current implementation branch: `codex/round-8-research-workflow-efficiency`; current stable branch is local `main`.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -126,6 +126,11 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-25, local `codex/round-6-production-e2e-qa` was deleted, but remote branch deletion failed because `github.com:443` could not be reached.
 - On 2026-06-26, Round 8 direction was approved as research workflow efficiency.
 - On 2026-06-26, Round 8 design spec and implementation plan were written for sorting, pinned references, Markdown/JSON export, and structured-inspiration editing ergonomics.
+- On 2026-06-26, branch `codex/round-8-research-workflow-efficiency` was created for implementation.
+- On 2026-06-26, Round 8 helper modules and tests were implemented for pinned references, reference sorting, and Markdown/JSON export.
+- On 2026-06-26, Round 8 UI wiring was implemented with toolbar sorting, JSON export, card pinning, detail Markdown export, and structured-inspiration entry counts.
+- On 2026-06-26, Round 8 local validation passed: `npm test` (9 files / 39 tests), `npm run typecheck`, `npm run lint`, and `npm run build`.
+- On 2026-06-26, Round 8 local browser smoke passed with system Chrome for sorting, pinned-state reload persistence, JSON export, Markdown export, add-form opening, and 390px mobile no-horizontal-overflow.
 
 ## Active Decisions
 
@@ -162,9 +167,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - GitHub `origin/main` still needs a retry push for commit `c847ffc` because the earlier HTTPS push reset; Sites production is already deployed from that commit.
 - Local `main` is ahead of `origin/main` with deployment and Round 6 closeout documentation until GitHub push recovers.
 - Remote `origin/codex/round-6-production-e2e-qa` still needs deletion after GitHub connectivity recovers.
-- Round 8 implementation has not started; it should use a fresh `codex/round-8-research-workflow-efficiency` branch.
+- Round 8 implementation is local-only on `codex/round-8-research-workflow-efficiency`; it has not yet been merged into `main`, pushed, or deployed to Sites.
 - On 2026-06-26, retrying `git push origin main` and remote Round 6 branch deletion still failed with GitHub HTTPS connection reset.
 
 ## Next Suggested Step
 
-Retry pushing GitHub `origin/main`, delete remote `codex/round-6-production-e2e-qa`, then start Round 8 implementation from a fresh branch after user confirmation.
+Finish Round 8 branch closeout after user confirmation: commit trace docs, merge into `main`, rerun merged-main validation, then retry GitHub/Sites sync and deploy when connectivity allows.

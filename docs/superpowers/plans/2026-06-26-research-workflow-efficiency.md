@@ -41,7 +41,7 @@
 - Create: `lib/pinned-references.ts`
 - Create: `tests/pinned-references.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `tests/pinned-references.test.ts`:
 
@@ -78,7 +78,7 @@ describe("pinned reference helpers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -88,7 +88,7 @@ npm test -- tests/pinned-references.test.ts
 
 Expected: FAIL because `../lib/pinned-references` does not exist.
 
-- [ ] **Step 3: Implement helper**
+- [x] **Step 3: Implement helper**
 
 Create `lib/pinned-references.ts`:
 
@@ -138,7 +138,7 @@ export function togglePinnedReferenceId(ids: string[], id: string) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -148,7 +148,7 @@ npm test -- tests/pinned-references.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/pinned-references.ts tests/pinned-references.test.ts
@@ -161,7 +161,7 @@ git commit -m "feat: 增加引用置顶 helper / add pinned reference helpers"
 - Create: `lib/reference-sort.ts`
 - Create: `tests/reference-sort.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `tests/reference-sort.test.ts`:
 
@@ -249,7 +249,7 @@ describe("sortReferences", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -259,7 +259,7 @@ npm test -- tests/reference-sort.test.ts
 
 Expected: FAIL because `../lib/reference-sort` does not exist.
 
-- [ ] **Step 3: Implement sorter**
+- [x] **Step 3: Implement sorter**
 
 Create `lib/reference-sort.ts`:
 
@@ -344,7 +344,7 @@ export function sortReferences(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -354,7 +354,7 @@ npm test -- tests/reference-sort.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/reference-sort.ts tests/reference-sort.test.ts
@@ -367,7 +367,7 @@ git commit -m "feat: 增加引用排序 helper / add reference sorting helpers"
 - Create: `lib/reference-export.ts`
 - Create: `tests/reference-export.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `tests/reference-export.test.ts`:
 
@@ -450,7 +450,7 @@ describe("reference export helpers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -460,7 +460,7 @@ npm test -- tests/reference-export.test.ts
 
 Expected: FAIL because `../lib/reference-export` does not exist.
 
-- [ ] **Step 3: Implement export helpers**
+- [x] **Step 3: Implement export helpers**
 
 Create `lib/reference-export.ts`:
 
@@ -558,7 +558,7 @@ export function createReferenceJsonExport(references: ReferenceRecord[]) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -568,7 +568,7 @@ npm test -- tests/reference-export.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/reference-export.ts tests/reference-export.test.ts
@@ -581,7 +581,7 @@ git commit -m "feat: 增加引用导出 helper / add reference export helpers"
 - Modify: `lib/localization.ts`
 - Modify: `tests/localization.test.ts`
 
-- [ ] **Step 1: Write failing localization expectations**
+- [x] **Step 1: Write failing localization expectations**
 
 Add expectations to `tests/localization.test.ts`:
 
@@ -596,7 +596,7 @@ expect(uiCopy("en").exportMarkdown).toBe("Export Markdown");
 expect(uiCopy("en").exportJson).toBe("Export JSON");
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -606,7 +606,7 @@ npm test -- tests/localization.test.ts
 
 Expected: FAIL because the new copy keys do not exist.
 
-- [ ] **Step 3: Add copy keys**
+- [x] **Step 3: Add copy keys**
 
 Add these keys to both language objects in `lib/localization.ts`:
 
@@ -646,7 +646,7 @@ exportUnavailable: "Select a reference before exporting.",
 inspirationEntryCount: "Structured inspiration entries",
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -656,7 +656,7 @@ npm test -- tests/localization.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/localization.ts tests/localization.test.ts
@@ -669,7 +669,7 @@ git commit -m "feat: 增加研究效率文案 / add research workflow copy"
 - Modify: `app/page.tsx`
 - Modify: `app/globals.css`
 
-- [ ] **Step 1: Import helpers and add state**
+- [x] **Step 1: Import helpers and add state**
 
 In `app/page.tsx`, import:
 
@@ -691,7 +691,7 @@ const [sortMode, setSortMode] = useState<ReferenceSortMode>("updated_desc");
 const [pinnedReferenceIds, setPinnedReferenceIds] = useState<string[]>([]);
 ```
 
-- [ ] **Step 2: Load and persist pinned ids**
+- [x] **Step 2: Load and persist pinned ids**
 
 Add effects:
 
@@ -710,7 +710,7 @@ useEffect(() => {
 }, [pinnedReferenceIds]);
 ```
 
-- [ ] **Step 3: Sort filtered references**
+- [x] **Step 3: Sort filtered references**
 
 Replace direct use of `filteredReferences` in selection/gallery rendering with:
 
@@ -723,11 +723,11 @@ const sortedReferences = useMemo(
 
 Pass `sortedReferences` to `getVisibleDetailReference` and card rendering.
 
-- [ ] **Step 4: Add sort and export controls**
+- [x] **Step 4: Add sort and export controls**
 
 In the toolbar actions, add a sort `<select>` and JSON export button. Use `REFERENCE_SORT_MODES` and localized labels.
 
-- [ ] **Step 5: Add pin toggle**
+- [x] **Step 5: Add pin toggle**
 
 On each card, add a compact pin button:
 
@@ -745,7 +745,7 @@ On each card, add a compact pin button:
 </button>
 ```
 
-- [ ] **Step 6: Add export helpers in component**
+- [x] **Step 6: Add export helpers in component**
 
 Add download helper:
 
@@ -786,7 +786,7 @@ function exportLibraryJson() {
 }
 ```
 
-- [ ] **Step 7: Style controls**
+- [x] **Step 7: Style controls**
 
 In `app/globals.css`, add:
 
@@ -817,7 +817,7 @@ In `app/globals.css`, add:
 }
 ```
 
-- [ ] **Step 8: Run validation**
+- [x] **Step 8: Run validation**
 
 Run:
 
@@ -830,7 +830,7 @@ npm run build
 
 Expected: all PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add app/page.tsx app/globals.css
@@ -844,7 +844,7 @@ git commit -m "feat: 增强研究工作流界面 / enhance research workflow UI"
 - Modify: `docs/progress/status.md`
 - Modify: `docs/progress/timeline.md`
 
-- [ ] **Step 1: Run local browser smoke**
+- [x] **Step 1: Run local browser smoke**
 
 Start the dev server and verify:
 
@@ -856,7 +856,7 @@ Start the dev server and verify:
 - Add reference still opens the form.
 - 390px mobile width has no horizontal overflow.
 
-- [ ] **Step 2: Update progress docs**
+- [x] **Step 2: Update progress docs**
 
 Record:
 
@@ -866,7 +866,7 @@ Record:
 - Browser smoke result.
 - Any production deployment caveat.
 
-- [ ] **Step 3: Commit docs**
+- [x] **Step 3: Commit docs**
 
 ```bash
 git add docs/progress/2026-06-26.md docs/progress/status.md docs/progress/timeline.md

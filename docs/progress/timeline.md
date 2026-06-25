@@ -905,3 +905,36 @@
 - Current state:
   - Round 8 design and plan are committed locally.
   - GitHub remote sync and remote Round 6 branch deletion remain pending.
+
+### 2026-06-26
+
+- Branch: `codex/round-8-research-workflow-efficiency`
+- Mode: implementation and local QA
+- Action: implemented Round 8 research workflow efficiency.
+- Implementation:
+  - Added device-local pinned reference helpers backed by `localStorage`.
+  - Added reference sorting helpers with pinned-first behavior and score/title modes.
+  - Added Markdown and JSON export formatting helpers.
+  - Added Chinese/English UI copy for sorting, pinning, exports, and structured-inspiration entry counts.
+  - Wired the main workspace toolbar with sorting and full-library JSON export.
+  - Added card-level pin toggles and selected-reference Markdown export.
+  - Added structured-inspiration entry counts in add and edit forms.
+  - Changed reference cards from nested-button markup to keyboard-operable `article role="button"` cards so pin controls remain valid HTML.
+- Commits:
+  - `6d09f49` - `feat: 增加引用置顶 helper / add pinned reference helpers`
+  - `21526e5` - `feat: 增加引用排序 helper / add reference sorting helpers`
+  - `8636ca6` - `feat: 增加引用导出 helper / add reference export helpers`
+  - `f7c5b91` - `feat: 增加研究效率文案 / add research workflow copy`
+  - `740f8f1` - `feat: 增强研究工作流界面 / enhance research workflow UI`
+- Validation:
+  - `npm test`: passed, 9 files / 39 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - Local browser smoke passed through system Chrome for sorting, pinned reload persistence, JSON export, Markdown export, add-form opening, and 390px mobile no-horizontal-overflow.
+- Automation note:
+  - Playwright's bundled headless Chromium was not installed in the environment.
+  - The smoke test used the system Chrome channel instead.
+- Current state:
+  - Round 8 is implemented and locally validated on the feature branch.
+  - Merge, GitHub sync, Sites deployment, and production smoke are still pending.
