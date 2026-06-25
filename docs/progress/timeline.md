@@ -938,3 +938,21 @@
 - Current state:
   - Round 8 is implemented and locally validated on the feature branch.
   - Merge, GitHub sync, Sites deployment, and production smoke are still pending.
+
+### 2026-06-26
+
+- Branch: `main`
+- Mode: local merge
+- Action: fast-forward merged `codex/round-8-research-workflow-efficiency` into local `main`.
+- Merge result:
+  - Local `main` advanced from `ab8a062` to `b105e6f`.
+  - No merge conflict.
+- Validation on merged `main`:
+  - `npm test`: passed, 9 files / 39 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+- Remaining:
+  - Delete the merged local Round 8 branch.
+  - Retry GitHub remote sync.
+  - Sync Sites source, save/deploy a new Sites version, and run production smoke.
