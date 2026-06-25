@@ -122,6 +122,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-25, Sites source `main` was synchronized to commit `c847ffc` using a short-lived Sites source credential because GitHub HTTPS push was resetting.
 - On 2026-06-25, Sites version 9 was saved and deployed successfully to production.
 - On 2026-06-25, production smoke passed for Chinese Round 7 workspace visibility, add-form opening, and mobile no-horizontal-overflow without writing production data.
+- On 2026-06-25, `codex/round-6-production-e2e-qa` was marked as deferred and not merged into `main`; the product will revisit production automation later through a cleaner QA environment path if needed.
 
 ## Active Decisions
 
@@ -159,4 +160,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Retry pushing GitHub `origin/main`, close or archive `codex/round-6-production-e2e-qa`, then write the Round 8 design/plan entry.
+Retry pushing GitHub `origin/main`, delete or remote-close `codex/round-6-production-e2e-qa`, then write the Round 8 design/plan entry.

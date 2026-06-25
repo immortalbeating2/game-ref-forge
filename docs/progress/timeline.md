@@ -851,3 +851,15 @@
 - Next action:
   - Retry GitHub `origin/main` push.
   - Close or archive `codex/round-6-production-e2e-qa`.
+
+### 2026-06-25
+
+- Branch: `main`
+- Mode: Round 6 closeout decision
+- Action: decided not to merge `codex/round-6-production-e2e-qa`.
+- Decision:
+  - Round 6 production E2E token/script infrastructure remains a deferred experiment.
+  - It will not be merged into `main` because Sites access policy still blocks command-line requests before they reach the Worker.
+  - If long-term production automation is needed later, prefer a dedicated QA deployment/environment design.
+- Next action:
+  - Delete local and remote `codex/round-6-production-e2e-qa` where connectivity allows.
