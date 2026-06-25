@@ -953,6 +953,14 @@
   - `npm run lint`: passed.
   - `npm run build`: passed.
 - Remaining:
-  - Delete the merged local Round 8 branch.
   - Retry GitHub remote sync.
   - Sync Sites source, save/deploy a new Sites version, and run production smoke.
+
+### 2026-06-26
+
+- Branch: `main`
+- Mode: branch cleanup
+- Action: deleted local `codex/round-8-research-workflow-efficiency` after the local merge and merged-main validation.
+- Remaining:
+  - GitHub remote sync is still pending.
+  - Sites source sync, deployment, and production smoke are still pending.

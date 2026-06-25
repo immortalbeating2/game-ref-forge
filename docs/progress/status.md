@@ -133,6 +133,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-26, Round 8 local browser smoke passed with system Chrome for sorting, pinned-state reload persistence, JSON export, Markdown export, add-form opening, and 390px mobile no-horizontal-overflow.
 - On 2026-06-26, `codex/round-8-research-workflow-efficiency` was fast-forward merged into local `main`.
 - On 2026-06-26, merged-main validation passed: `npm test` (9 files / 39 tests), `npm run typecheck`, `npm run lint`, and `npm run build`.
+- On 2026-06-26, local branch `codex/round-8-research-workflow-efficiency` was deleted after the local merge and merged-main validation.
 
 ## Active Decisions
 
@@ -174,4 +175,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Commit the Round 8 merge trace docs, delete the merged local Round 8 branch, then retry GitHub/Sites sync and deploy when connectivity allows.
+Retry GitHub/Sites sync and deploy Round 8 when connectivity allows.
