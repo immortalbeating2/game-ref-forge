@@ -123,6 +123,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-25, Sites version 9 was saved and deployed successfully to production.
 - On 2026-06-25, production smoke passed for Chinese Round 7 workspace visibility, add-form opening, and mobile no-horizontal-overflow without writing production data.
 - On 2026-06-25, `codex/round-6-production-e2e-qa` was marked as deferred and not merged into `main`; the product will revisit production automation later through a cleaner QA environment path if needed.
+- On 2026-06-25, local `codex/round-6-production-e2e-qa` was deleted, but remote branch deletion failed because `github.com:443` could not be reached.
 
 ## Active Decisions
 
@@ -157,7 +158,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
 - Round 7 is merged into `main` and its local/remote feature branches have been cleaned up.
 - GitHub `origin/main` still needs a retry push for commit `c847ffc` because the earlier HTTPS push reset; Sites production is already deployed from that commit.
+- Local `main` is ahead of `origin/main` with deployment and Round 6 closeout documentation until GitHub push recovers.
+- Remote `origin/codex/round-6-production-e2e-qa` still needs deletion after GitHub connectivity recovers.
 
 ## Next Suggested Step
 
-Retry pushing GitHub `origin/main`, delete or remote-close `codex/round-6-production-e2e-qa`, then write the Round 8 design/plan entry.
+Retry pushing GitHub `origin/main`, delete remote `codex/round-6-production-e2e-qa`, then write the Round 8 design/plan entry after design approval.
