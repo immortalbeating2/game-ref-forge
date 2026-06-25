@@ -248,13 +248,25 @@ label {
 
 .toolbar-actions {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(180px, 1fr) minmax(148px, 0.55fr) auto;
   gap: 12px;
   align-items: end;
 }
 
-.search-label {
+.search-label,
+.sort-label {
   min-width: 0;
+}
+
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.export-actions button {
+  min-width: 118px;
 }
 
 .status-message,
@@ -319,6 +331,12 @@ label {
 
 .section-heading-row h3 {
   margin: 0;
+}
+
+.entry-count {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .inspiration-entry-editor,
@@ -407,13 +425,25 @@ label {
   border-radius: 8px;
   background: var(--panel);
   color: var(--foreground);
+  cursor: pointer;
   padding: 0;
   text-align: left;
 }
 
-.reference-card:hover:not(:disabled) {
+.reference-card:hover {
   border-color: var(--border-strong);
   transform: translateY(-1px);
+}
+
+.reference-card:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.reference-card[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.72;
 }
 
 .reference-card.selected {
@@ -442,6 +472,35 @@ label {
   gap: 10px;
   align-content: start;
   padding: 12px;
+}
+
+.card-topline {
+  display: flex;
+  min-height: 28px;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-topline span {
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.pin-button {
+  min-width: 0;
+  border-color: var(--border);
+  background: #111517;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  padding: 6px 8px;
+}
+
+.pin-button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .card-meta {

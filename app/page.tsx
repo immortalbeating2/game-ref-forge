@@ -24,6 +24,22 @@ import {
   ReferenceDraft,
 } from "../lib/reference-draft";
 import {
+  createReferenceJsonExport,
+  formatReferenceMarkdown,
+  safeExportFilename,
+} from "../lib/reference-export";
+import {
+  PINNED_REFERENCES_STORAGE_KEY,
+  parsePinnedReferenceIds,
+  serializePinnedReferenceIds,
+  togglePinnedReferenceId,
+} from "../lib/pinned-references";
+import {
+  REFERENCE_SORT_MODES,
+  ReferenceSortMode,
+  sortReferences,
+} from "../lib/reference-sort";
+import {
   deleteConfirmationCopy,
   MetadataPreviewStatus,
   metadataPreviewMessage,
@@ -156,6 +172,14 @@ export default function Home() {
   const [publicStatus, setPublicStatus] = useState<PublicStatus | "all">("all");
   const [qualityStatus, setQualityStatus] = useState<QualityStatus | "all">("all");
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
+  const [sortMode, setSortMode] = useState<ReferenceSortMode>("updated_desc");
+  const [pinnedReferenceIds, setPinnedReferenceIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    return parsePinnedReferenceIds(window.localStorage.getItem(PINNED_REFERENCES_STORAGE_KEY));
+  });
   const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
   const [editDraft, setEditDraft] = useState<ReferenceDraft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -168,6 +192,24 @@ export default function Home() {
   const [isUsingSeedReferences, setIsUsingSeedReferences] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const copy = uiCopy(language);
+
+  function labelForReferenceSortMode(mode: ReferenceSortMode) {
+    switch (mode) {
+      case "reference_value_desc":
+        return copy.sortReferenceValue;
+      case "transformability_desc":
+        return copy.sortTransformability;
+      case "copyright_risk_asc":
+        return copy.sortCopyrightRisk;
+      case "production_readiness_desc":
+        return copy.sortProductionReadiness;
+      case "title_asc":
+        return copy.sortTitle;
+      case "updated_desc":
+      default:
+        return copy.sortUpdated;
+    }
+  }
 
   function closeEditIfHiddenByView(nextView: {
     query?: string;
@@ -232,6 +274,13 @@ export default function Home() {
     loadReferences();
   }, []);
 
+  useEffect(() => {
+    window.localStorage.setItem(
+      PINNED_REFERENCES_STORAGE_KEY,
+      serializePinnedReferenceIds(pinnedReferenceIds),
+    );
+  }, [pinnedReferenceIds]);
+
   const filteredReferences = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -248,8 +297,13 @@ export default function Home() {
     });
   }, [assetCategory, licenseStatus, publicStatus, qualityStatus, query, references]);
 
+  const sortedReferences = useMemo(
+    () => sortReferences(filteredReferences, sortMode, pinnedReferenceIds),
+    [filteredReferences, pinnedReferenceIds, sortMode],
+  );
+
   const selectedReference = getVisibleDetailReference(
-    filteredReferences,
+    sortedReferences,
     references,
     selectedId,
   );
@@ -511,6 +565,44 @@ export default function Home() {
     }
   }
 
+  function togglePinnedReference(referenceId: string) {
+    setPinnedReferenceIds((current) => togglePinnedReferenceId(current, referenceId));
+  }
+
+  function downloadText(content: string, filename: string, type: string) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportSelectedMarkdown() {
+    if (!selectedReference) {
+      setMessage(copy.exportUnavailable);
+      return;
+    }
+
+    downloadText(
+      formatReferenceMarkdown(selectedReference),
+      safeExportFilename(selectedReference.title, "md"),
+      "text/markdown;charset=utf-8",
+    );
+  }
+
+  function exportLibraryJson() {
+    downloadText(
+      JSON.stringify(createReferenceJsonExport(references), null, 2),
+      safeExportFilename("ref-forge-library", "json"),
+      "application/json;charset=utf-8",
+    );
+  }
+
   return (
     <main className="workspace">
       <aside className="sidebar" aria-label={copy.filtersLabel}>
@@ -631,7 +723,7 @@ export default function Home() {
         <header className="toolbar">
           <div className="deck-heading">
             <p className="panel-kicker">{copy.referenceDeck}</p>
-            <h2>{filteredReferences.length} {copy.references}</h2>
+            <h2>{sortedReferences.length} {copy.references}</h2>
             <span>{copy.safetySummary}</span>
           </div>
           <div className="toolbar-actions">
@@ -646,9 +738,27 @@ export default function Home() {
                 placeholder={copy.searchPlaceholder}
               />
             </label>
-            <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
-              {copy.addReference}
-            </button>
+            <label className="sort-label">
+              {copy.sortBy}
+              <select
+                value={sortMode}
+                onChange={(event) => setSortMode(event.target.value as ReferenceSortMode)}
+              >
+                {REFERENCE_SORT_MODES.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {labelForReferenceSortMode(mode)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="export-actions">
+              <button className="ghost-button" type="button" onClick={exportLibraryJson}>
+                {copy.exportJson}
+              </button>
+              <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
+                {copy.addReference}
+              </button>
+            </div>
           </div>
         </header>
 
@@ -845,6 +955,9 @@ export default function Home() {
             <section className="inspiration-entry-editor">
               <div className="section-heading-row">
                 <h3>{copy.structuredInspiration}</h3>
+                <span className="entry-count">
+                  {copy.inspirationEntryCount}: {draft.inspiration_entries.length}
+                </span>
                 <button
                   type="button"
                   className="ghost-button"
@@ -957,7 +1070,7 @@ export default function Home() {
           <p className="seed-fallback-message">{seedFallbackMessage(language)}</p>
         ) : null}
 
-        {filteredReferences.length === 0 ? (
+        {sortedReferences.length === 0 ? (
           <div className="empty-results">
             <h2>{copy.noReferencesMatch}</h2>
             <p>{copy.noReferencesHint}</p>
@@ -978,14 +1091,21 @@ export default function Home() {
         ) : null}
 
         <div className="reference-grid" aria-live="polite">
-          {filteredReferences.map((reference) => (
-            <button
-              type="button"
+          {sortedReferences.map((reference) => (
+            <article
               className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
               key={reference.id}
               onClick={() => selectReference(reference.id)}
-              disabled={isSavingEdit}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  selectReference(reference.id);
+                }
+              }}
+              role="button"
+              tabIndex={isSavingEdit ? -1 : 0}
               aria-pressed={reference.id === selectedReference?.id}
+              aria-disabled={isSavingEdit}
             >
               <div className={`thumbnail accent-${reference.asset_category}`}>
                 {reference.preview_url ? (
@@ -996,6 +1116,21 @@ export default function Home() {
                 )}
               </div>
               <div className="card-body">
+                <div className="card-topline">
+                  {pinnedReferenceIds.includes(reference.id) ? <span>{copy.pinned}</span> : <span />}
+                  <button
+                    type="button"
+                    className="pin-button"
+                    aria-pressed={pinnedReferenceIds.includes(reference.id)}
+                    disabled={isSavingEdit}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      togglePinnedReference(reference.id);
+                    }}
+                  >
+                    {pinnedReferenceIds.includes(reference.id) ? copy.unpinReference : copy.pinReference}
+                  </button>
+                </div>
                 <div className="card-meta">
                   <h2>{reference.title}</h2>
                   <p>{reference.site_name ?? copy.unknownSource}</p>
@@ -1017,7 +1152,7 @@ export default function Home() {
                     .join(" · ") || copy.defaultInspiration}
                 </p>
               </div>
-            </button>
+            </article>
           ))}
         </div>
       </section>
@@ -1036,6 +1171,9 @@ export default function Home() {
                   </a>
                   <button className="ghost-button" type="button" onClick={() => startEditing(selectedReference)}>
                     {copy.edit}
+                  </button>
+                  <button className="ghost-button" type="button" onClick={exportSelectedMarkdown}>
+                    {copy.exportMarkdown}
                   </button>
                 </div>
               ) : null}
@@ -1288,6 +1426,9 @@ export default function Home() {
                   <div className="inspiration-entry-editor">
                     <div className="section-heading-row">
                       <h3>{copy.structuredInspiration}</h3>
+                      <span className="entry-count">
+                        {copy.inspirationEntryCount}: {editDraft.inspiration_entries.length}
+                      </span>
                       <button
                         type="button"
                         className="ghost-button"
