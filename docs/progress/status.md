@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-25
+Updated: 2026-06-26
 
 ## Current Stage
 
-`Round 7 deployed to Sites`
+`Round 8 design and planning`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -124,6 +124,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-25, production smoke passed for Chinese Round 7 workspace visibility, add-form opening, and mobile no-horizontal-overflow without writing production data.
 - On 2026-06-25, `codex/round-6-production-e2e-qa` was marked as deferred and not merged into `main`; the product will revisit production automation later through a cleaner QA environment path if needed.
 - On 2026-06-25, local `codex/round-6-production-e2e-qa` was deleted, but remote branch deletion failed because `github.com:443` could not be reached.
+- On 2026-06-26, Round 8 direction was approved as research workflow efficiency.
+- On 2026-06-26, Round 8 design spec and implementation plan were written for sorting, pinned references, Markdown/JSON export, and structured-inspiration editing ergonomics.
 
 ## Active Decisions
 
@@ -160,7 +162,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - GitHub `origin/main` still needs a retry push for commit `c847ffc` because the earlier HTTPS push reset; Sites production is already deployed from that commit.
 - Local `main` is ahead of `origin/main` with deployment and Round 6 closeout documentation until GitHub push recovers.
 - Remote `origin/codex/round-6-production-e2e-qa` still needs deletion after GitHub connectivity recovers.
+- Round 8 implementation has not started; it should use a fresh `codex/round-8-research-workflow-efficiency` branch.
 
 ## Next Suggested Step
 
-Retry pushing GitHub `origin/main`, delete remote `codex/round-6-production-e2e-qa`, then write the Round 8 design/plan entry after design approval.
+Retry pushing GitHub `origin/main`, delete remote `codex/round-6-production-e2e-qa`, then start Round 8 implementation from a fresh branch after user confirmation.

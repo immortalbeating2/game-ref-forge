@@ -875,3 +875,21 @@
 - Remaining cleanup:
   - Retry `git push origin main`.
   - Retry `git push origin --delete codex/round-6-production-e2e-qa`.
+
+## 2026-06-26
+
+### 2026-06-26
+
+- Branch: `main`
+- Mode: Round 8 design and planning
+- Action: prepared the next product-development round after Round 7 deployment.
+- Decision:
+  - Round 8 will focus on research workflow efficiency.
+  - Scope includes sorting, pinned references, Markdown export, JSON export, and structured-inspiration editing ergonomics.
+  - Scope excludes API changes, D1 migrations, public sharing, upload, and production E2E token infrastructure.
+- Docs:
+  - Added `docs/superpowers/specs/2026-06-26-research-workflow-efficiency-design.md`.
+  - Added `docs/superpowers/plans/2026-06-26-research-workflow-efficiency.md`.
+- Next action:
+  - Commit the design and plan.
+  - Start implementation later from a fresh `codex/round-8-research-workflow-efficiency` branch.
