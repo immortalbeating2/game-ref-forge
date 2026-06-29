@@ -40,6 +40,14 @@ import {
   sortReferences,
 } from "../lib/reference-sort";
 import {
+  evaluateReferenceQuality,
+  filterReferencesByReviewQueue,
+  ReferenceQualityBadgeKind,
+  ReferenceQualityIssue,
+  REVIEW_QUEUE_MODES,
+  ReviewQueueMode,
+} from "../lib/reference-quality";
+import {
   deleteConfirmationCopy,
   MetadataPreviewStatus,
   metadataPreviewMessage,
@@ -172,6 +180,7 @@ export default function Home() {
   const [publicStatus, setPublicStatus] = useState<PublicStatus | "all">("all");
   const [qualityStatus, setQualityStatus] = useState<QualityStatus | "all">("all");
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
+  const [reviewQueue, setReviewQueue] = useState<ReviewQueueMode>("all");
   const [sortMode, setSortMode] = useState<ReferenceSortMode>("updated_desc");
   const [pinnedReferenceIds, setPinnedReferenceIds] = useState<string[]>(() => {
     if (typeof window === "undefined") {
@@ -211,12 +220,105 @@ export default function Home() {
     }
   }
 
+  function labelForReviewQueue(mode: ReviewQueueMode) {
+    switch (mode) {
+      case "incomplete":
+        return copy.queueIncomplete;
+      case "pinned":
+        return copy.queuePinned;
+      case "high_value":
+        return copy.queueHighValue;
+      case "low_risk":
+        return copy.queueLowRisk;
+      case "production_ready":
+        return copy.queueProductionReady;
+      case "all":
+      default:
+        return copy.queueAll;
+    }
+  }
+
+  function labelForQualityBadge(kind: ReferenceQualityBadgeKind) {
+    switch (kind) {
+      case "high_value":
+        return copy.qualityBadgeHighValue;
+      case "low_risk":
+        return copy.qualityBadgeLowRisk;
+      case "production_ready":
+        return copy.qualityBadgeProductionReady;
+      case "transformable":
+        return copy.qualityBadgeTransformable;
+      case "analyzed":
+      default:
+        return copy.qualityBadgeAnalyzed;
+    }
+  }
+
+  function labelForQualityIssue(issue: ReferenceQualityIssue) {
+    switch (issue.field) {
+      case "site_name":
+        return copy.qualityMissingSite;
+      case "author":
+        return copy.qualityMissingAuthor;
+      case "license_status":
+        return copy.qualityMissingLicense;
+      case "attribution_text":
+        return copy.qualityMissingAttribution;
+      case "avoid_copying_notes":
+        return copy.qualityMissingAvoidCopying;
+      case "inspiration_points":
+        return copy.qualityMissingInspirationPoints;
+      case "inspiration_entries":
+        return copy.qualityMissingInspirationEntries;
+      case "deconstruction_notes":
+        return copy.qualityMissingDeconstruction;
+      case "transformation_ideas":
+        return copy.qualityMissingTransformation;
+      case "rating":
+        return copy.qualityMissingRating;
+      case "reference_value_score":
+        return copy.qualityMissingReferenceValue;
+      case "transformability_score":
+        return copy.qualityMissingTransformability;
+      case "copyright_risk_score":
+        return copy.qualityMissingCopyrightRisk;
+      case "production_readiness_score":
+      default:
+        return copy.qualityMissingProductionReadiness;
+    }
+  }
+
+  function labelForQualityGroup(group: ReferenceQualityIssue["group"]) {
+    switch (group) {
+      case "source":
+        return copy.qualitySourceGroup;
+      case "safety":
+        return copy.qualitySafetyGroup;
+      case "inspiration":
+        return copy.qualityInspirationGroup;
+      case "scores":
+      default:
+        return copy.qualityScoresGroup;
+    }
+  }
+
+  function groupQualityIssues(issues: ReferenceQualityIssue[]) {
+    return issues.reduce<Record<ReferenceQualityIssue["group"], ReferenceQualityIssue[]>>(
+      (groups, issue) => {
+        groups[issue.group].push(issue);
+        return groups;
+      },
+      { source: [], safety: [], inspiration: [], scores: [] },
+    );
+  }
+
   function closeEditIfHiddenByView(nextView: {
     query?: string;
     assetCategory?: AssetCategory | "all";
     publicStatus?: PublicStatus | "all";
     qualityStatus?: QualityStatus | "all";
     licenseStatus?: LicenseStatus | "all";
+    reviewQueue?: ReviewQueueMode;
   }) {
     if (!editingId || isSavingEdit) {
       return;
@@ -232,15 +334,19 @@ export default function Home() {
     const nextPublicStatus = nextView.publicStatus ?? publicStatus;
     const nextQualityStatus = nextView.qualityStatus ?? qualityStatus;
     const nextLicenseStatus = nextView.licenseStatus ?? licenseStatus;
+    const nextReviewQueue = nextView.reviewQueue ?? reviewQueue;
     const normalizedQuery = nextQuery.trim().toLowerCase();
     const searchable = buildReferenceSearchText(editingReference);
+    const remainsInReviewQueue =
+      filterReferencesByReviewQueue([editingReference], nextReviewQueue, pinnedReferenceIds).length > 0;
 
     const remainsVisible =
       (!normalizedQuery || searchable.includes(normalizedQuery)) &&
       (nextAssetCategory === "all" || editingReference.asset_category === nextAssetCategory) &&
       (nextPublicStatus === "all" || editingReference.public_status === nextPublicStatus) &&
       (nextQualityStatus === "all" || editingReference.quality_status === nextQualityStatus) &&
-      (nextLicenseStatus === "all" || editingReference.license_status === nextLicenseStatus);
+      (nextLicenseStatus === "all" || editingReference.license_status === nextLicenseStatus) &&
+      remainsInReviewQueue;
 
     if (!remainsVisible) {
       setEditingId(null);
@@ -298,8 +404,13 @@ export default function Home() {
   }, [assetCategory, licenseStatus, publicStatus, qualityStatus, query, references]);
 
   const sortedReferences = useMemo(
-    () => sortReferences(filteredReferences, sortMode, pinnedReferenceIds),
-    [filteredReferences, pinnedReferenceIds, sortMode],
+    () =>
+      sortReferences(
+        filterReferencesByReviewQueue(filteredReferences, reviewQueue, pinnedReferenceIds),
+        sortMode,
+        pinnedReferenceIds,
+      ),
+    [filteredReferences, pinnedReferenceIds, reviewQueue, sortMode],
   );
 
   const selectedReference = getVisibleDetailReference(
@@ -629,6 +740,24 @@ export default function Home() {
         </div>
 
         <label>
+          {copy.reviewQueue}
+          <select
+            value={reviewQueue}
+            onChange={(event) => {
+              const nextReviewQueue = event.target.value as ReviewQueueMode;
+              closeEditIfHiddenByView({ reviewQueue: nextReviewQueue });
+              setReviewQueue(nextReviewQueue);
+            }}
+          >
+            {REVIEW_QUEUE_MODES.map((mode) => (
+              <option key={mode} value={mode}>
+                {labelForReviewQueue(mode)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
           {copy.assetCategory}
           <select
             value={assetCategory}
@@ -712,6 +841,7 @@ export default function Home() {
             setPublicStatus("all");
             setQualityStatus("all");
             setLicenseStatus("all");
+            setReviewQueue("all");
             setQuery("");
           }}
         >
@@ -1091,69 +1221,85 @@ export default function Home() {
         ) : null}
 
         <div className="reference-grid" aria-live="polite">
-          {sortedReferences.map((reference) => (
-            <article
-              className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
-              key={reference.id}
-              onClick={() => selectReference(reference.id)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  selectReference(reference.id);
-                }
-              }}
-              role="button"
-              tabIndex={isSavingEdit ? -1 : 0}
-              aria-pressed={reference.id === selectedReference?.id}
-              aria-disabled={isSavingEdit}
-            >
-              <div className={`thumbnail accent-${reference.asset_category}`}>
-                {reference.preview_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={reference.preview_url} alt={reference.title} />
-                ) : (
-                  <span>{labelForAssetCategory(reference.asset_category, language)}</span>
-                )}
-              </div>
-              <div className="card-body">
-                <div className="card-topline">
-                  {pinnedReferenceIds.includes(reference.id) ? <span>{copy.pinned}</span> : <span />}
-                  <button
-                    type="button"
-                    className="pin-button"
-                    aria-pressed={pinnedReferenceIds.includes(reference.id)}
-                    disabled={isSavingEdit}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      togglePinnedReference(reference.id);
-                    }}
-                  >
-                    {pinnedReferenceIds.includes(reference.id) ? copy.unpinReference : copy.pinReference}
-                  </button>
+          {sortedReferences.map((reference) => {
+            const quality = evaluateReferenceQuality(reference);
+
+            return (
+              <article
+                className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
+                key={reference.id}
+                onClick={() => selectReference(reference.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    selectReference(reference.id);
+                  }
+                }}
+                role="button"
+                tabIndex={isSavingEdit ? -1 : 0}
+                aria-pressed={reference.id === selectedReference?.id}
+                aria-disabled={isSavingEdit}
+              >
+                <div className={`thumbnail accent-${reference.asset_category}`}>
+                  {reference.preview_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={reference.preview_url} alt={reference.title} />
+                  ) : (
+                    <span>{labelForAssetCategory(reference.asset_category, language)}</span>
+                  )}
                 </div>
-                <div className="card-meta">
-                  <h2>{reference.title}</h2>
-                  <p>{reference.site_name ?? copy.unknownSource}</p>
+                <div className="card-body">
+                  <div className="card-topline">
+                    {pinnedReferenceIds.includes(reference.id) ? <span>{copy.pinned}</span> : <span />}
+                    <button
+                      type="button"
+                      className="pin-button"
+                      aria-pressed={pinnedReferenceIds.includes(reference.id)}
+                      disabled={isSavingEdit}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        togglePinnedReference(reference.id);
+                      }}
+                    >
+                      {pinnedReferenceIds.includes(reference.id) ? copy.unpinReference : copy.pinReference}
+                    </button>
+                  </div>
+                  <div className="card-meta">
+                    <h2>{reference.title}</h2>
+                    <p>{reference.site_name ?? copy.unknownSource}</p>
+                  </div>
+                  <div className="badge-row">
+                    <span>{labelForAssetCategory(reference.asset_category, language)}</span>
+                    <span>{labelForLicenseStatus(reference.license_status, language)}</span>
+                    <span>{labelForPublicStatus(reference.public_status, language)}</span>
+                    <span>{labelForQualityStatus(reference.quality_status, language)}</span>
+                  </div>
+                  <div className="compact-score-row" aria-label={copy.scoreSummary}>
+                    <span>{copy.referenceValueScore}: {reference.reference_value_score ?? "-"}</span>
+                    <span>{copy.transformabilityScore}: {reference.transformability_score ?? "-"}</span>
+                    <span>{copy.copyrightRiskScore}: {reference.copyright_risk_score ?? "-"}</span>
+                  </div>
+                  <div className="quality-chip-row" aria-label={copy.qualityChecklist}>
+                    <span className={`quality-chip ${quality.issueCount > 0 ? "warning" : "success"}`}>
+                      {quality.issueCount > 0
+                        ? `${copy.qualityIssueCount}: ${quality.issueCount}`
+                        : copy.qualityComplete}
+                    </span>
+                    {quality.badges.slice(0, 2).map((badge) => (
+                      <span className="quality-chip" key={badge.kind}>
+                        {labelForQualityBadge(badge.kind)}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="tag-preview">
+                    {[...reference.mechanic_tags, ...reference.mood_tags, ...reference.visual_language_tags]
+                      .slice(0, 3)
+                      .join(" · ") || copy.defaultInspiration}
+                  </p>
                 </div>
-                <div className="badge-row">
-                  <span>{labelForAssetCategory(reference.asset_category, language)}</span>
-                  <span>{labelForLicenseStatus(reference.license_status, language)}</span>
-                  <span>{labelForPublicStatus(reference.public_status, language)}</span>
-                  <span>{labelForQualityStatus(reference.quality_status, language)}</span>
-                </div>
-                <div className="compact-score-row" aria-label={copy.scoreSummary}>
-                  <span>{copy.referenceValueScore}: {reference.reference_value_score ?? "-"}</span>
-                  <span>{copy.transformabilityScore}: {reference.transformability_score ?? "-"}</span>
-                  <span>{copy.copyrightRiskScore}: {reference.copyright_risk_score ?? "-"}</span>
-                </div>
-                <p className="tag-preview">
-                  {[...reference.mechanic_tags, ...reference.mood_tags, ...reference.visual_language_tags]
-                    .slice(0, 3)
-                    .join(" · ") || copy.defaultInspiration}
-                </p>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -1552,6 +1698,45 @@ export default function Home() {
                     <span>{copy.copyrightRiskScore}: {selectedReference.copyright_risk_score ?? "-"}</span>
                     <span>{copy.productionReadinessScore}: {selectedReference.production_readiness_score ?? "-"}</span>
                   </div>
+                </section>
+
+                <section>
+                  <h3 className="detail-section-title">{copy.qualityChecklist}</h3>
+                  {(() => {
+                    const quality = evaluateReferenceQuality(selectedReference);
+                    const groupedIssues = groupQualityIssues(quality.issues);
+
+                    return (
+                      <div className="quality-checklist">
+                        <div className="quality-checklist-summary">
+                          <span className={`quality-chip ${quality.issueCount > 0 ? "warning" : "success"}`}>
+                            {quality.issueCount > 0
+                              ? `${copy.qualityIssueCount}: ${quality.issueCount}`
+                              : copy.qualityComplete}
+                          </span>
+                          {quality.badges.length > 0 ? (
+                            <span>{copy.qualityPositiveSignals}: {quality.badges.map((badge) => labelForQualityBadge(badge.kind)).join(", ")}</span>
+                          ) : null}
+                        </div>
+                        <div className="quality-checklist-grid">
+                          {(["source", "safety", "inspiration", "scores"] as const).map((group) => (
+                            <div className="quality-checklist-group" key={group}>
+                              <h4>{labelForQualityGroup(group)}</h4>
+                              {groupedIssues[group].length > 0 ? (
+                                <ul>
+                                  {groupedIssues[group].map((issue) => (
+                                    <li key={`${issue.group}-${issue.field}`}>{labelForQualityIssue(issue)}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p>{copy.qualityComplete}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </section>
 
                 <section>

@@ -53,7 +53,7 @@ export function evaluateReferenceQuality(reference: ReferenceRecord) {
     addIssue(issues, "source", "author");
   }
 
-  if (reference.license_status === "unknown") {
+  if (reference.license_status === "unknown_license") {
     addIssue(issues, "safety", "license_status");
   }
 

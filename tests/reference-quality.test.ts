@@ -72,7 +72,7 @@ describe("evaluateReferenceQuality", () => {
       record({
         site_name: null,
         author: null,
-        license_status: "unknown",
+        license_status: "unknown_license",
         attribution_text: null,
         avoid_copying_notes: null,
         rating: null,
