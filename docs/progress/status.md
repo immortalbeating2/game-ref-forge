@@ -138,6 +138,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-26, Sites source `main` was advanced from `c847ffc` to `9a5acdf` through a short-lived Sites source credential.
 - On 2026-06-26, Sites version 10 was saved and deployed successfully to production.
 - On 2026-06-26, unauthenticated production probes returned `401` for `/` and `/api/references`, and system Chrome displayed `Sign in required`, matching the current `custom` access policy.
+- On 2026-06-29, GitHub sync was confirmed recovered: local `main` and `origin/main` both point to `28b7a2d`.
+- On 2026-06-29, remote `origin/codex/round-6-production-e2e-qa` was confirmed deleted.
+- On 2026-06-29, authenticated production Chrome UI smoke passed for Chinese default, sorting, pin/unpin visible state, add-form opening, structured-inspiration entry count, and current desktop no-horizontal-overflow.
 
 ## Active Decisions
 
@@ -171,13 +174,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - The in-app browser automation channel still intermittently times out during production actions, but fourth-round production CRUD was completed with fresh state checks after each timeout.
 - Fifth-round production read-only UI checks can now confirm the deployed quality fields, but write-path CRUD automation is still blocked at the add-reference click.
 - Round 7 is merged into `main` and its local/remote feature branches have been cleaned up.
-- GitHub `origin/main` still needs a retry push for commit `c847ffc` because the earlier HTTPS push reset; Sites production is already deployed from that commit.
-- Local `main` is ahead of `origin/main` with deployment and Round 6 closeout documentation until GitHub push recovers.
-- Remote `origin/codex/round-6-production-e2e-qa` still needs deletion after GitHub connectivity recovers.
-- Round 8 is merged into local `main` and deployed to Sites version 10; it has not yet been pushed to GitHub.
-- On 2026-06-26, retrying `git push origin main` and remote Round 6 branch deletion still failed with GitHub HTTPS connection reset.
-- Authenticated production UI smoke for Round 8 remains pending because the available system browser is unauthenticated and sees the Sites sign-in page.
+- Round 8 is merged into `main`, pushed to GitHub, and deployed to Sites version 10.
+- Round 8 authenticated production smoke is partially complete. Chrome automation passed visible UI controls, but automatic reload persistence, download event verification, and 390px mobile production layout remain pending manual confirmation.
 
 ## Next Suggested Step
 
-Retry GitHub sync, delete remote `codex/round-6-production-e2e-qa`, and run authenticated production UI smoke for Sites version 10 when a logged-in browser control surface is available.
+Finish the remaining manual Round 8 production smoke checks: F5 pinned persistence, JSON/Markdown downloaded files, and 390px mobile no-horizontal-overflow. If those pass, proceed to Round 9 design/plan.

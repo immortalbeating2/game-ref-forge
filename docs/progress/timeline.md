@@ -992,3 +992,38 @@
   - GitHub `origin/main` sync.
   - Remote Round 6 branch deletion.
   - Authenticated production UI smoke for Round 8 controls.
+
+## 2026-06-29
+
+### 2026-06-29
+
+- Branch: `main`
+- Mode: remote sync confirmation
+- Action: confirmed the previously blocked GitHub sync and remote branch cleanup were resolved.
+- Verification:
+  - Local `main` and `origin/main` both point to `28b7a2d`.
+  - `origin/codex/round-6-production-e2e-qa` is absent after `git fetch --prune origin`.
+  - Remote branch list now contains only `origin/main` and `origin/HEAD -> origin/main`.
+
+### 2026-06-29
+
+- Branch: `main`
+- Mode: authenticated production UI smoke
+- Action: tested Round 8 controls through the user's logged-in Chrome production tab.
+- Passed:
+  - Production authenticated page was visible.
+  - Chinese default UI was active.
+  - Sorting by reference value put `Poly Haven Material Reference` first.
+  - Pinning `Kenney UI Pack` showed `已置顶` and moved it first.
+  - Cancel pin removed the `已置顶` state.
+  - `+ 添加参考` opened the add form.
+  - Adding an inspiration entry changed the count from 0 to 1.
+  - Current desktop viewport had no horizontal overflow.
+- Not fully automated:
+  - Page reload / F5 persistence could not be triggered through the Chrome extension API.
+  - Chrome extension did not expose `localStorage` reads for persistence verification.
+  - Download events for JSON and Markdown exports did not reach the automation channel.
+  - Mobile 390px production layout was not tested through the claimed logged-in tab.
+- Production data:
+  - No reference was saved, edited, or deleted.
+  - The temporary pin state was canceled before ending the smoke test.
