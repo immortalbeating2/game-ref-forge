@@ -1082,3 +1082,20 @@
   - `npm run lint`: passed.
   - `npm run build`: passed.
   - Local system Chrome UI smoke passed for review queue, pinned/high-value filters, quality chips, detail checklist, add-form entry, desktop/mobile no-horizontal-overflow, and English queue usability.
+
+### 2026-06-29
+
+- Branch: `main`
+- Mode: Round 9 branch finish and deployment
+- Action: fast-forward merged `codex/round-9-data-quality-workflow` into `main`, deleted the local feature branch, pushed `main`, saved Sites version 11, and deployed it to production.
+- Commits:
+  - `0c249fb docs: 记录第九轮质量整理实现 / record round 9 quality workflow`
+- Sites:
+  - Version: `11`
+  - Version id: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_2a6c6010817881919a89c7f1dc4da943`
+  - Deployment id: `appgdep_6a423cdffd6c8191a7242679574cfdb9`
+  - Status: `succeeded`
+  - URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Verification:
+  - Merged `main`: `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build` passed.
+  - Production read-only UI smoke passed for review queue visibility, quality chips, detail quality checklist, high-value queue selection, desktop no-horizontal-overflow, and 390px mobile no-horizontal-overflow.
