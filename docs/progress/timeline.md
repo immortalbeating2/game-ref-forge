@@ -1051,3 +1051,34 @@
 - Status:
   - Initial draft only.
   - Awaiting user review and revision before implementation.
+
+### 2026-06-29
+
+- Branch: `main`
+- Mode: GitHub sync
+- Action: pushed the ahead Round 9 initial design/plan commit to GitHub.
+- Commit:
+  - `ecb8de9 docs: 输出第九轮质量整理计划 / add round 9 quality workflow plan`
+- Verification:
+  - `git push origin main`: passed.
+
+### 2026-06-29
+
+- Branch: `codex/round-9-data-quality-workflow`
+- Mode: Round 9 implementation
+- Action: implemented the no-migration data-quality and review workflow.
+- Commits:
+  - `15b8642 feat: 增加引用质量 helper / add reference quality helpers`
+  - `e824826 feat: 增加质量整理文案 / add quality workflow copy`
+  - `e7499aa feat: 增加质量整理工作流 / add quality review workflow`
+- Scope:
+  - Added derived reference-quality helper and tests.
+  - Added Chinese/English review queue and quality checklist copy.
+  - Added sidebar review queues, card quality chips, and detail-panel quality checklist.
+  - No D1 migration, API route change, or production data structure change.
+- Verification:
+  - `npm test`: passed, 10 files / 44 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - Local system Chrome UI smoke passed for review queue, pinned/high-value filters, quality chips, detail checklist, add-form entry, desktop/mobile no-horizontal-overflow, and English queue usability.

@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-26
+Updated: 2026-06-29
 
 ## Current Stage
 
-`Round 8 deployed to Sites, GitHub sync pending`
+`Round 9 implementation branch in progress`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -142,6 +142,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-29, remote `origin/codex/round-6-production-e2e-qa` was confirmed deleted.
 - On 2026-06-29, authenticated production Chrome UI smoke passed for Chinese default, sorting, pin/unpin visible state, add-form opening, structured-inspiration entry count, and current desktop no-horizontal-overflow.
 - On 2026-06-29, Round 9 initial design and implementation plan were written for a no-migration data-quality workflow.
+- On 2026-06-29, the ahead Round 9 initial design/plan commit `ecb8de9` was pushed to `origin/main`.
+- On 2026-06-29, branch `codex/round-9-data-quality-workflow` was created from `main`.
+- On 2026-06-29, Round 9 no-migration data-quality workflow was implemented locally with derived quality helper tests, Chinese/English quality workflow copy, sidebar review queues, card quality chips, and a detail-panel quality checklist.
+- On 2026-06-29, Round 9 local validation passed: `npm test` (10 files / 44 tests), `npm run typecheck`, `npm run lint`, `npm run build`, and system Chrome UI smoke for queue filters, quality chips, detail checklist, add-form entry, desktop/mobile no-horizontal-overflow, and English queue usability.
 
 ## Active Decisions
 
@@ -177,8 +181,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 7 is merged into `main` and its local/remote feature branches have been cleaned up.
 - Round 8 is merged into `main`, pushed to GitHub, and deployed to Sites version 10.
 - Round 8 authenticated production smoke is partially complete. Chrome automation passed visible UI controls, but automatic reload persistence, download event verification, and 390px mobile production layout remain pending manual confirmation.
-- Round 9 is currently only an initial design/plan. It should not enter implementation until the user reviews the controversy points and optional scope.
+- Round 9 is implemented locally on `codex/round-9-data-quality-workflow` and still needs branch finishing, merge/push, Sites deployment, and production smoke.
 
 ## Next Suggested Step
 
-Review and revise the Round 9 initial design/plan, especially whether batch editing, completion percentage, pinned queue behavior, export quality metadata, and mobile production smoke should be included.
+Finish Round 9 branch: update final trace docs, run final validation, merge into `main`, push to GitHub, deploy through Sites, and perform authenticated production smoke for the new quality workflow.
