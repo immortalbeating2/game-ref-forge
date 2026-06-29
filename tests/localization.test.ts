@@ -43,6 +43,10 @@ describe("uiCopy", () => {
     expect(uiCopy().pinReference).toBe("置顶参考");
     expect(uiCopy().exportMarkdown).toBe("导出 Markdown");
     expect(uiCopy().exportJson).toBe("导出 JSON");
+    expect(uiCopy().reviewQueue).toBe("整理队列");
+    expect(uiCopy().queueIncomplete).toBe("待补全");
+    expect(uiCopy().qualityChecklist).toBe("质量清单");
+    expect(uiCopy().qualityComplete).toBe("资料完整");
   });
 
   it("returns English interface copy when requested", () => {
@@ -63,5 +67,9 @@ describe("uiCopy", () => {
     expect(uiCopy("en").pinReference).toBe("Pin reference");
     expect(uiCopy("en").exportMarkdown).toBe("Export Markdown");
     expect(uiCopy("en").exportJson).toBe("Export JSON");
+    expect(uiCopy("en").reviewQueue).toBe("Review queue");
+    expect(uiCopy("en").queueIncomplete).toBe("Incomplete");
+    expect(uiCopy("en").qualityChecklist).toBe("Quality checklist");
+    expect(uiCopy("en").qualityComplete).toBe("Complete");
   });
 });
