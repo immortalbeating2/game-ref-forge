@@ -1027,3 +1027,27 @@
 - Production data:
   - No reference was saved, edited, or deleted.
   - The temporary pin state was canceled before ending the smoke test.
+
+### 2026-06-29
+
+- Branch: `main`
+- Mode: Round 9 design and planning initial draft
+- Action: wrote initial Round 9 data-quality workflow documents.
+- Docs:
+  - `docs/superpowers/specs/2026-06-29-data-quality-workflow-design.md`
+  - `docs/superpowers/plans/2026-06-29-data-quality-workflow.md`
+- Recommended scope:
+  - No D1 migration.
+  - No API route changes.
+  - Derived quality issues and positive badges from existing fields.
+  - Review queue filters for incomplete, pinned, high-value, low-risk, and production-ready references.
+  - Card-level quality chips and detail-panel quality checklist.
+- Explicit controversy / optional points:
+  - Derived quality vs persistent quality fields.
+  - Whether batch editing belongs in Round 9.
+  - Whether missing author should count as incomplete.
+  - Whether seed records should appear in quality queues.
+  - Whether mobile layout work should remain smoke-only or become a dedicated UI redesign.
+- Status:
+  - Initial draft only.
+  - Awaiting user review and revision before implementation.

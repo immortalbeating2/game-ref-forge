@@ -141,6 +141,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-06-29, GitHub sync was confirmed recovered: local `main` and `origin/main` both point to `28b7a2d`.
 - On 2026-06-29, remote `origin/codex/round-6-production-e2e-qa` was confirmed deleted.
 - On 2026-06-29, authenticated production Chrome UI smoke passed for Chinese default, sorting, pin/unpin visible state, add-form opening, structured-inspiration entry count, and current desktop no-horizontal-overflow.
+- On 2026-06-29, Round 9 initial design and implementation plan were written for a no-migration data-quality workflow.
 
 ## Active Decisions
 
@@ -176,7 +177,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 7 is merged into `main` and its local/remote feature branches have been cleaned up.
 - Round 8 is merged into `main`, pushed to GitHub, and deployed to Sites version 10.
 - Round 8 authenticated production smoke is partially complete. Chrome automation passed visible UI controls, but automatic reload persistence, download event verification, and 390px mobile production layout remain pending manual confirmation.
+- Round 9 is currently only an initial design/plan. It should not enter implementation until the user reviews the controversy points and optional scope.
 
 ## Next Suggested Step
 
-Finish the remaining manual Round 8 production smoke checks: F5 pinned persistence, JSON/Markdown downloaded files, and 390px mobile no-horizontal-overflow. If those pass, proceed to Round 9 design/plan.
+Review and revise the Round 9 initial design/plan, especially whether batch editing, completion percentage, pinned queue behavior, export quality metadata, and mobile production smoke should be included.
