@@ -46,6 +46,12 @@ describe("uiCopy", () => {
     expect(uiCopy().reviewQueue).toBe("整理队列");
     expect(uiCopy().queueIncomplete).toBe("待补全");
     expect(uiCopy().qualityChecklist).toBe("质量清单");
+    expect(uiCopy().qualityGuidedEditing).toBe("补全导航");
+    expect(uiCopy().qualityGuidedPosition).toBe("当前项");
+    expect(uiCopy().previousQualityIssue).toBe("上一项");
+    expect(uiCopy().nextQualityIssue).toBe("下一项");
+    expect(uiCopy().completeQualityIssue).toBe("补全");
+    expect(uiCopy().qualityTargetMissing).toBe("未找到对应编辑字段；草稿已保留。");
     expect(uiCopy().qualityComplete).toBe("资料完整");
   });
 
@@ -70,6 +76,14 @@ describe("uiCopy", () => {
     expect(uiCopy("en").reviewQueue).toBe("Review queue");
     expect(uiCopy("en").queueIncomplete).toBe("Incomplete");
     expect(uiCopy("en").qualityChecklist).toBe("Quality checklist");
+    expect(uiCopy("en").qualityGuidedEditing).toBe("Completion navigator");
+    expect(uiCopy("en").qualityGuidedPosition).toBe("Current item");
+    expect(uiCopy("en").previousQualityIssue).toBe("Previous item");
+    expect(uiCopy("en").nextQualityIssue).toBe("Next item");
+    expect(uiCopy("en").completeQualityIssue).toBe("Complete");
+    expect(uiCopy("en").qualityTargetMissing).toBe(
+      "The matching edit field was not found; your draft is preserved.",
+    );
     expect(uiCopy("en").qualityComplete).toBe("Complete");
   });
 });
