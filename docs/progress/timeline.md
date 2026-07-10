@@ -1099,3 +1099,22 @@
 - Verification:
   - Merged `main`: `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build` passed.
   - Production read-only UI smoke passed for review queue visibility, quality chips, detail quality checklist, high-value queue selection, desktop no-horizontal-overflow, and 390px mobile no-horizontal-overflow.
+
+## 2026-07-10
+
+### 2026-07-10
+
+- Branch: `main`
+- Mode: Round 10 brainstorming and design
+- Action: approved and documented the quality-guided editing direction.
+- Decisions:
+  - Quality checklist gaps become navigation actions into the existing detail edit form.
+  - The target control scrolls into view, receives focus, and is visibly highlighted.
+  - A transient previous / next navigator uses the issue snapshot captured when editing starts.
+  - Changes continue to use the existing single manual save action.
+  - No API route, D1 schema, migration, or persistent navigation state is added.
+- Docs:
+  - `docs/superpowers/specs/2026-07-10-quality-guided-editing-design.md`
+  - `docs/progress/2026-07-10.md`
+- Status:
+  - Written specification awaits user review before implementation planning.

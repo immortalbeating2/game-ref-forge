@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-06-29
+Updated: 2026-07-10
 
 ## Current Stage
 
-`Round 9 deployed to Sites version 11`
+`Round 10 quality-guided editing design approved; written spec awaiting review`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -163,6 +163,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - First-version frontend should use the working research desk layout defined in `docs/product/frontend-design.md`.
 - The next main workspace upgrade should follow `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`, which incorporates the 2026-06-19 concept direction.
 - Round 7 is limited to frontend UI and copy. It does not change API behavior, D1 schema, or production QA infrastructure.
+- Round 10 uses quality-checklist anchor navigation into the existing edit form, keeps one manual save, and adds no D1 migration or API route.
 
 ## Current Risks
 
@@ -185,7 +186,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 8 is merged into `main`, pushed to GitHub, and deployed to Sites version 10.
 - Round 8 authenticated production smoke is partially complete. Chrome automation passed visible UI controls, but automatic reload persistence, download event verification, and 390px mobile production layout remain pending manual confirmation.
 - Round 9 is merged into `main`, pushed to GitHub, deployed to Sites version 11, and production read-only smoke has passed.
+- On 2026-07-10, Round 10 interaction design was approved as quality-checklist-to-edit-field anchor navigation with one manual save.
+- Round 10 will add transient guided-edit navigation, typed quality-field targets, focus/highlight behavior, and bilingual copy without changing API routes or D1 schema.
+- The written Round 10 design spec exists at `docs/superpowers/specs/2026-07-10-quality-guided-editing-design.md` and awaits user review before implementation planning.
 
 ## Next Suggested Step
 
-Plan Round 10 around editing ergonomics for the quality workflow, especially jumping from checklist gaps to the relevant edit fields without adding a D1 migration unless explicitly needed.
+Review and approve the written Round 10 quality-guided editing spec, then write the TDD implementation plan before creating the feature worktree.

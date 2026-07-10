@@ -4,7 +4,7 @@
 
 本文件面向在 `game-ref-forge` 仓库中工作的智能编码代理与后续开发 session。
 
-项目当前处于 RefForge / `灵感锻造台` 的产品文档基线期，下一阶段才进入 Codex App Sites 实现。开发重心是先把项目定位、来源版权边界、分类体系、数据模型、实施计划和留痕机制打稳，再小步进入可验证实现。
+项目已完成 RefForge / `灵感锻造台` 的文档基线、Sites 基础实现和 Round 1-9 迭代，当前进入 Round 10 质量引导编辑阶段。开发重心是保持私有研究工作台稳定，小步提升人工整理效率，并持续验证真实生产可用性。
 
 优先做小而准、可验证、可追溯的改动。不要跳过设计、来源策略和留痕直接扩张实现范围。
 
@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Documentation Baseline / Sites implementation planning`
+- 当前阶段：`Round 10 quality-guided editing design`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,14 +142,14 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Documentation Baseline / Sites implementation planning`。
+本项目当前为 `Round 10 quality-guided editing design`。Round 9 已合并、推送并部署到 Sites version 11。
 
 当前默认目标：
 
-- 保持项目身份、Git 远程和文档基线清晰。
-- 完成 Sites 实现前的产品与工程决策整理。
-- 进入实现前确认 `docs/engineering/implementation-plan.md`。
-- 第一版实现聚焦私有研究工作台，不做公开展示页和下载站。
+- 保持 `main`、GitHub 和 Sites 生产版本同步。
+- 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现。
+- 当前优先完成质量清单到编辑字段的引导补全路径。
+- 继续聚焦私有研究工作台，不做公开展示页和下载站。
 
 第一版产品边界：
 
@@ -258,4 +258,3 @@ Sites 实现后，交付前至少验证：
 5. 相关 `docs/product/` 与 `docs/engineering/` 文档
 
 不要只凭聊天末尾几句直接进入编码。
-
