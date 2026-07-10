@@ -52,6 +52,13 @@ describe("quality field targets", () => {
   it("returns null for a field outside the quality contract", () => {
     expect(getQualityFieldTargetId("not-a-quality-field")).toBeNull();
   });
+
+  it.each(REFERENCE_QUALITY_ISSUE_FIELDS)(
+    "returns the configured target ID for %s",
+    (field) => {
+      expect(getQualityFieldTargetId(field)).toBe(QUALITY_FIELD_TARGET_IDS[field]);
+    },
+  );
 });
 
 describe("quality edit sessions", () => {
@@ -82,4 +89,20 @@ describe("adjacent quality issue navigation", () => {
     expect(getAdjacentQualityIssueIndex(0, 4, "previous")).toBeNull();
     expect(getAdjacentQualityIssueIndex(3, 4, "next")).toBeNull();
   });
+
+  it.each([
+    { activeIndex: -1, issueCount: 4 },
+    { activeIndex: 4, issueCount: 4 },
+    { activeIndex: Number.NaN, issueCount: 4 },
+    { activeIndex: 1.5, issueCount: 4 },
+    { activeIndex: 0, issueCount: 0 },
+    { activeIndex: 0, issueCount: Number.NaN },
+    { activeIndex: 0, issueCount: 3.5 },
+  ])(
+    "rejects invalid state activeIndex=$activeIndex issueCount=$issueCount",
+    ({ activeIndex, issueCount }) => {
+      expect(getAdjacentQualityIssueIndex(activeIndex, issueCount, "previous")).toBeNull();
+      expect(getAdjacentQualityIssueIndex(activeIndex, issueCount, "next")).toBeNull();
+    },
+  );
 });

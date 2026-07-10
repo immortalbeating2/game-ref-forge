@@ -19,7 +19,7 @@ export const QUALITY_FIELD_TARGET_IDS = {
   transformability_score: "quality-edit-transformability-score",
   copyright_risk_score: "quality-edit-copyright-risk-score",
   production_readiness_score: "quality-edit-production-readiness-score",
-} satisfies Record<ReferenceQualityIssueField, string>;
+} as const satisfies Record<ReferenceQualityIssueField, string>;
 
 const qualityIssueFields = new Set<string>(REFERENCE_QUALITY_ISSUE_FIELDS);
 
@@ -60,6 +60,16 @@ export function getAdjacentQualityIssueIndex(
   issueCount: number,
   direction: "previous" | "next",
 ): number | null {
+  if (
+    !Number.isInteger(activeIndex) ||
+    !Number.isInteger(issueCount) ||
+    issueCount <= 0 ||
+    activeIndex < 0 ||
+    activeIndex >= issueCount
+  ) {
+    return null;
+  }
+
   const candidate = activeIndex + (direction === "previous" ? -1 : 1);
 
   return candidate >= 0 && candidate < issueCount ? candidate : null;
