@@ -1133,3 +1133,16 @@
   - Local CRUD QA, code review, merged-main verification, Sites deployment, and production temporary-reference CRUD cleanup.
 - Constraint:
   - No API route, D1 schema, migration, or package dependency change.
+
+### 2026-07-10
+
+- Branch: `main`
+- Mode: Round 10 isolated-workspace preparation
+- Action:
+  - Pushed the approved design and plan baseline through `382da13` to `origin/main`.
+  - Selected Subagent-Driven execution.
+  - Added `.worktrees/` to `.gitignore` after the required pre-creation ignore check failed.
+- Reason:
+  - Prevent project-local worktree contents from appearing as repository changes.
+- Next:
+  - Commit and push the ignore rule, then create `codex/round-10-quality-guided-editing` in `.worktrees/`.
