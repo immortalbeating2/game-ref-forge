@@ -13,9 +13,28 @@ export type ReviewQueueMode = (typeof REVIEW_QUEUE_MODES)[number];
 
 export type ReferenceQualityIssueGroup = "source" | "safety" | "inspiration" | "scores";
 
+export const REFERENCE_QUALITY_ISSUE_FIELDS = [
+  "site_name",
+  "author",
+  "license_status",
+  "avoid_copying_notes",
+  "attribution_text",
+  "inspiration_points",
+  "inspiration_entries",
+  "deconstruction_notes",
+  "transformation_ideas",
+  "rating",
+  "reference_value_score",
+  "transformability_score",
+  "copyright_risk_score",
+  "production_readiness_score",
+] as const;
+
+export type ReferenceQualityIssueField = (typeof REFERENCE_QUALITY_ISSUE_FIELDS)[number];
+
 export type ReferenceQualityIssue = {
   group: ReferenceQualityIssueGroup;
-  field: string;
+  field: ReferenceQualityIssueField;
 };
 
 export type ReferenceQualityBadgeKind =
@@ -36,7 +55,7 @@ function isBlank(value: string | null | undefined) {
 function addIssue(
   issues: ReferenceQualityIssue[],
   group: ReferenceQualityIssueGroup,
-  field: string,
+  field: ReferenceQualityIssueField,
 ) {
   issues.push({ group, field });
 }
