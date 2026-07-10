@@ -4,7 +4,7 @@ Updated: 2026-07-10
 
 ## Current Stage
 
-`Round 10 quality-guided editing design approved; written spec awaiting review`
+`Round 10 quality-guided editing design approved; implementation plan ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -188,8 +188,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 9 is merged into `main`, pushed to GitHub, deployed to Sites version 11, and production read-only smoke has passed.
 - On 2026-07-10, Round 10 interaction design was approved as quality-checklist-to-edit-field anchor navigation with one manual save.
 - Round 10 will add transient guided-edit navigation, typed quality-field targets, focus/highlight behavior, and bilingual copy without changing API routes or D1 schema.
-- The written Round 10 design spec exists at `docs/superpowers/specs/2026-07-10-quality-guided-editing-design.md` and awaits user review before implementation planning.
+- The written Round 10 design at `docs/superpowers/specs/2026-07-10-quality-guided-editing-design.md` has been reviewed and approved.
+- The TDD implementation plan exists at `docs/superpowers/plans/2026-07-10-quality-guided-editing.md` and covers local QA, review, merge, Sites deployment, and production temporary-reference CRUD.
 
 ## Next Suggested Step
 
-Review and approve the written Round 10 quality-guided editing spec, then write the TDD implementation plan before creating the feature worktree.
+Choose the Superpowers execution mode, then create the isolated Round 10 worktree and execute the approved TDD plan.
