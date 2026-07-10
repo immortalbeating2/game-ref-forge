@@ -43,10 +43,15 @@ import {
   evaluateReferenceQuality,
   filterReferencesByReviewQueue,
   ReferenceQualityBadgeKind,
-  ReferenceQualityIssue,
   REVIEW_QUEUE_MODES,
   ReviewQueueMode,
 } from "../lib/reference-quality";
+import type { ReferenceQualityIssue } from "../lib/reference-quality";
+import {
+  createQualityEditSession,
+  getAdjacentQualityIssueIndex,
+} from "../lib/reference-quality-navigation";
+import type { QualityEditSession } from "../lib/reference-quality-navigation";
 import {
   deleteConfirmationCopy,
   MetadataPreviewStatus,
@@ -192,6 +197,8 @@ export default function Home() {
   const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
   const [editDraft, setEditDraft] = useState<ReferenceDraft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [qualityEditSession, setQualityEditSession] =
+    useState<QualityEditSession | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewStatus, setPreviewStatus] = useState<MetadataPreviewStatus>("idle");
@@ -351,6 +358,7 @@ export default function Home() {
     if (!remainsVisible) {
       setEditingId(null);
       setEditDraft(null);
+      clearQualityEditSession();
       setMessage(copy.selectionHidden);
     }
   }
@@ -422,15 +430,57 @@ export default function Home() {
     selectedReference && editingId === selectedReference.id && editDraft,
   );
 
+  function clearQualityEditSession() {
+    setQualityEditSession(null);
+  }
+
   function startEditing(reference: ReferenceRecord) {
+    clearQualityEditSession();
     setEditingId(reference.id);
     setEditDraft(recordToReferenceDraft(reference));
     setMessage(copy.editingSelected);
   }
 
+  function startQualityEditing(
+    reference: ReferenceRecord,
+    issue: ReferenceQualityIssue,
+  ) {
+    const session = createQualityEditSession(
+      evaluateReferenceQuality(reference).issues,
+      issue,
+    );
+
+    if (!session) {
+      setMessage(copy.qualityTargetMissing);
+      return;
+    }
+
+    setQualityEditSession(session);
+    setEditingId(reference.id);
+    setEditDraft(recordToReferenceDraft(reference));
+    setMessage(copy.editingSelected);
+  }
+
+  function moveQualityIssue(direction: "previous" | "next") {
+    setQualityEditSession((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const activeIndex = getAdjacentQualityIssueIndex(
+        current.activeIndex,
+        current.issues.length,
+        direction,
+      );
+
+      return activeIndex === null ? current : { ...current, activeIndex };
+    });
+  }
+
   function cancelEditing() {
     setEditingId(null);
     setEditDraft(null);
+    clearQualityEditSession();
     setMessage(copy.editCanceled);
   }
 
@@ -473,6 +523,7 @@ export default function Home() {
     if (editingId && editingId !== id) {
       setEditingId(null);
       setEditDraft(null);
+      clearQualityEditSession();
       setMessage(copy.selectionChanged);
     }
   }
@@ -542,6 +593,7 @@ export default function Home() {
       setSelectedId(reference.id);
       setEditingId(null);
       setEditDraft(null);
+      clearQualityEditSession();
       setDraft(createEmptyReferenceDraft());
       setIsFormOpen(false);
       setMessage(copy.savedPrivate);
@@ -632,6 +684,7 @@ export default function Home() {
       setSelectedId(updatedReference.id);
       setEditingId(null);
       setEditDraft(null);
+      clearQualityEditSession();
       setMessage(
         selectedReference.id.startsWith("seed-")
           ? copy.starterUpdatedLocally
@@ -668,6 +721,7 @@ export default function Home() {
       setReferences((current) => current.filter((item) => item.id !== reference.id));
       setSelectedId(null);
       setPendingDeleteId(null);
+      clearQualityEditSession();
       setMessage(copy.deleted);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : copy.deleteFailed);
@@ -1725,7 +1779,18 @@ export default function Home() {
                               {groupedIssues[group].length > 0 ? (
                                 <ul>
                                   {groupedIssues[group].map((issue) => (
-                                    <li key={`${issue.group}-${issue.field}`}>{labelForQualityIssue(issue)}</li>
+                                    <li key={`${issue.group}-${issue.field}`}>
+                                      <button
+                                        type="button"
+                                        className="quality-checklist-action"
+                                        data-quality-issue-field={issue.field}
+                                        onClick={() => startQualityEditing(selectedReference, issue)}
+                                        aria-label={`${copy.completeQualityIssue}: ${labelForQualityIssue(issue)}`}
+                                      >
+                                        <span>{labelForQualityIssue(issue)}</span>
+                                        <span aria-hidden="true">→</span>
+                                      </button>
+                                    </li>
                                   ))}
                                 </ul>
                               ) : (
