@@ -4,7 +4,7 @@ Updated: 2026-07-11
 
 ## Current Stage
 
-`Round 10 quality-guided editing implemented and locally verified on feature branch`
+`Round 10 quality-guided editing merged and verified on local main; deployment pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: `codex/round-10-quality-guided-editing`; stable deployment source remains `main` until merge.
+- Current implementation branch: none; Round 10 is merged into local `main` and awaits remote sync and Sites deployment.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -152,6 +152,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 10 is implemented on `codex/round-10-quality-guided-editing` with typed mappings for all 14 quality fields, checklist actions, transient navigation, stable focus targets, bilingual copy, and responsive styling.
 - Round 10 local verification passed with 11 test files / 71 tests, typecheck, lint, build, full local CRUD persistence and cleanup, and desktop/mobile browser checks.
 - No API route, D1 schema, migration, or package dependency changed in Round 10.
+- Round 10 was fast-forward merged into local `main` at `80a061a`; merged-main tests, typecheck, lint, and build passed, and the owned feature worktree and branch were removed.
 
 ## Active Decisions
 
@@ -196,4 +197,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Finish the verified feature branch, merge into `main`, push GitHub, deploy the next Sites version, and complete authenticated production temporary-reference CRUD with cleanup.
+Push GitHub `main`, deploy the next Sites version, and complete authenticated production temporary-reference CRUD with cleanup.

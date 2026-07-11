@@ -49,5 +49,6 @@
 
 - No Critical or Important implementation defect was found in the final main-agent review.
 - The existing global `Arial` font declaration was flagged by the Impeccable hook. It predates Round 10 and a typography replacement would exceed this focused interaction change, so it remains a documented minor follow-up.
-- Production deployment and authenticated production CRUD remain pending until the feature branch is merged and Sites is updated.
+- Round 10 was fast-forward merged into local `main` at `80a061a`; merged-main tests, typecheck, lint, and build passed.
+- Production deployment and authenticated production CRUD remain pending until Sites is updated.
 

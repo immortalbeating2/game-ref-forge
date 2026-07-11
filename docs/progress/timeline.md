@@ -1174,3 +1174,17 @@
   - Subagents implemented and independently reviewed Tasks 1-3; the main agent completed Task 4 onward after the subagent service exhausted available credits.
 - Next:
   - Commit QA evidence, finish the feature branch, merge and verify `main`, push GitHub, then deploy and run production CRUD cleanup.
+
+### 2026-07-11
+
+- Branch: `main`
+- Mode: branch finish and merged-main verification
+- Action:
+  - Fast-forward merged `codex/round-10-quality-guided-editing` into `main` at `80a061a`.
+  - Verified merged `main` with 11 test files / 71 tests, typecheck, lint, and build.
+  - Removed the owned `.worktrees/round-10-quality-guided-editing` worktree and deleted the merged local feature branch.
+- Diagnostic note:
+  - The first merged-main lint run traversed the still-present worktree's generated `dist` files.
+  - A control run excluding `.worktrees` passed, and the unmodified canonical lint command passed after the owned worktree was removed.
+- Next:
+  - Push GitHub `main`, synchronize Sites source, deploy the next version, and run production temporary CRUD cleanup.
