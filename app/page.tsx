@@ -47,10 +47,7 @@ import {
   ReviewQueueMode,
 } from "../lib/reference-quality";
 import type { ReferenceQualityIssue } from "../lib/reference-quality";
-import {
-  createQualityEditSession,
-  getAdjacentQualityIssueIndex,
-} from "../lib/reference-quality-navigation";
+import { createQualityEditSession } from "../lib/reference-quality-navigation";
 import type { QualityEditSession } from "../lib/reference-quality-navigation";
 import {
   deleteConfirmationCopy,
@@ -197,7 +194,7 @@ export default function Home() {
   const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
   const [editDraft, setEditDraft] = useState<ReferenceDraft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [qualityEditSession, setQualityEditSession] =
+  const [, setQualityEditSession] =
     useState<QualityEditSession | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -459,22 +456,6 @@ export default function Home() {
     setEditingId(reference.id);
     setEditDraft(recordToReferenceDraft(reference));
     setMessage(copy.editingSelected);
-  }
-
-  function moveQualityIssue(direction: "previous" | "next") {
-    setQualityEditSession((current) => {
-      if (!current) {
-        return current;
-      }
-
-      const activeIndex = getAdjacentQualityIssueIndex(
-        current.activeIndex,
-        current.issues.length,
-        direction,
-      );
-
-      return activeIndex === null ? current : { ...current, activeIndex };
-    });
   }
 
   function cancelEditing() {
