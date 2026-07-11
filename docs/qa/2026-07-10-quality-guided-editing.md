@@ -50,5 +50,34 @@
 - No Critical or Important implementation defect was found in the final main-agent review.
 - The existing global `Arial` font declaration was flagged by the Impeccable hook. It predates Round 10 and a typography replacement would exceed this focused interaction change, so it remains a documented minor follow-up.
 - Round 10 was fast-forward merged into local `main` at `80a061a`; merged-main tests, typecheck, lint, and build passed.
-- Production deployment and authenticated production CRUD remain pending until Sites is updated.
+
+## Production Acceptance
+
+- Sites source commit: `d79a44f610cfd1b49b9c81dc91514b17597520ba`.
+- Sites version: `12`.
+- Version id: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_ce194abad8248191a6a95286f194966a`.
+- Deployment id: `appgdep_6a5270b362888191bbf50c04d9a4fe58`.
+- Deployment status: `succeeded`.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt.site`.
+- Access remained owner-only custom access with one allowed user and no groups.
+- Sites source remains at deployed application commit `d79a44f`; the final GitHub-only follow-up adds documentation evidence and does not require another deployment.
+
+### Production CRUD
+
+- The controllable browser had no signed-in Sites session, so direct navigation correctly showed `Sign in required`.
+- Used the existing Sites SIWC bypass token through an ephemeral localhost reverse proxy; no token or proxy code was written to the repository, and all proxy processes were stopped after QA.
+- The browser loaded the exact production version 12 resources and used the real production API/D1 through that authenticated route.
+- Created `Round 10 Production QA 20260711-0037`; the card showed 12 derived gaps.
+- Reload confirmed the record persisted.
+- A guided author action focused `quality-edit-author` and showed the navigator with desktop horizontal overflow `0`.
+- In one save, added author, safety notes, inspiration points, and rating; the checklist recalculated from 12 gaps to 8.
+- Reload confirmed all four values persisted and the four matching actions were absent.
+- Deleted the temporary record through the app-owned dialog, reloaded, and confirmed `0` records.
+- A direct authenticated production API read returned `{ "references": [] }` after cleanup.
+- Browser console error count during production CRUD: `0`.
+
+### Remaining QA Gap
+
+- The production viewport capability accepted a 390x844 request but the controlled page continued reporting 1280px, including in a newly opened tab. Production 390px overflow is therefore not claimed as directly passed.
+- The same commit passed a real 390x844 local browser check with horizontal overflow `0`; production version 12 was built from that exact commit.
 

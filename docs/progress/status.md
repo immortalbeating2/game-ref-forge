@@ -4,7 +4,7 @@ Updated: 2026-07-11
 
 ## Current Stage
 
-`Round 10 quality-guided editing merged and verified on local main; deployment pending`
+`Round 10 quality-guided editing deployed to Sites version 12`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: none; Round 10 is merged into local `main` and awaits remote sync and Sites deployment.
+- Current implementation branch: none; stable branch is `main` and Round 10 is deployed.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -153,6 +153,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 10 local verification passed with 11 test files / 71 tests, typecheck, lint, build, full local CRUD persistence and cleanup, and desktop/mobile browser checks.
 - No API route, D1 schema, migration, or package dependency changed in Round 10.
 - Round 10 was fast-forward merged into local `main` at `80a061a`; merged-main tests, typecheck, lint, and build passed, and the owned feature worktree and branch were removed.
+- GitHub `main` was pushed through `d79a44f` and Sites source was synchronized to the same commit.
+- Sites version 12 deployed successfully to `https://game-ref-forge.yeep-6613.chatgpt.site`.
+- Production temporary CRUD passed through an ephemeral SIWC-authenticated browser route for create, reload persistence, guided edit, one-save persistence, delete, post-delete reload, and final empty API state.
 
 ## Active Decisions
 
@@ -191,10 +194,12 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 8 authenticated production smoke is partially complete. Chrome automation passed visible UI controls, but automatic reload persistence, download event verification, and 390px mobile production layout remain pending manual confirmation.
 - Round 9 is merged into `main`, pushed to GitHub, deployed to Sites version 11, and production read-only smoke has passed.
 - On 2026-07-10, Round 10 interaction design was approved as quality-checklist-to-edit-field anchor navigation with one manual save.
-- Round 10 will add transient guided-edit navigation, typed quality-field targets, focus/highlight behavior, and bilingual copy without changing API routes or D1 schema.
+- Round 10 added transient guided-edit navigation, typed quality-field targets, focus/highlight behavior, and bilingual copy without changing API routes or D1 schema.
 - The written Round 10 design at `docs/superpowers/specs/2026-07-10-quality-guided-editing-design.md` has been reviewed and approved.
 - The TDD implementation plan exists at `docs/superpowers/plans/2026-07-10-quality-guided-editing.md` and covers local QA, review, merge, Sites deployment, and production temporary-reference CRUD.
+- Direct production 390px emulation remains unverified because the browser viewport override did not change the reported 1280px width; the exact deployed commit passed local 390px overflow checks.
+- Final deployment-evidence documentation is one local commit ahead of `origin/main` because three GitHub HTTPS push attempts ended in connection reset or `github.com:443` connectivity failure. The remote already contains all deployed Round 10 application code at `d79a44f`.
 
 ## Next Suggested Step
 
-Push GitHub `main`, deploy the next Sites version, and complete authenticated production temporary-reference CRUD with cleanup.
+Retry the one pending documentation-only GitHub push when connectivity returns, review the production viewport-emulation gap, then brainstorm and approve the next product round before changing application behavior.

@@ -1188,3 +1188,38 @@
   - A control run excluding `.worktrees` passed, and the unmodified canonical lint command passed after the owned worktree was removed.
 - Next:
   - Push GitHub `main`, synchronize Sites source, deploy the next version, and run production temporary CRUD cleanup.
+
+### 2026-07-11
+
+- Branch: `main`
+- Mode: GitHub sync, Sites version 12 deployment, and production CRUD
+- Source sync:
+  - Pushed GitHub `main` from `7547187` to `d79a44f`.
+  - Pushed Sites source `main` from `0c249fb` to `d79a44f610cfd1b49b9c81dc91514b17597520ba` using a short-lived source credential.
+- Sites:
+  - Version: `12`
+  - Version id: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_ce194abad8248191a6a95286f194966a`
+  - Deployment id: `appgdep_6a5270b362888191bbf50c04d9a4fe58`
+  - Status: `succeeded`
+  - URL: `https://game-ref-forge.yeep-6613.chatgpt.site`
+- Production QA:
+  - Direct controllable-browser navigation showed `Sign in required` because that browser had no signed-in Sites session.
+  - An ephemeral localhost reverse proxy injected the existing SIWC bypass header without persisting credentials or code.
+  - Production UI CRUD passed for create, reload persistence, guided author focus, one-save author/safety/inspiration/rating update, second reload persistence, app-owned delete, and post-delete reload absence.
+  - Quality gaps recalculated from 12 to 8 after one save.
+  - Final authenticated production API state was an empty `references` array; console errors were 0.
+  - Desktop horizontal overflow was 0.
+  - Production 390px was not claimed because the browser viewport override remained at 1280px; exact-commit local 390px validation remains passed.
+
+### 2026-07-11
+
+- Branch: `main`
+- Mode: final documentation sync retry
+- Action: committed the Round 10 deployment and production QA trace, then attempted to push it to GitHub three times.
+- Result:
+  - First push failed with `Recv failure: Connection was reset`.
+  - Second attempt did not advance the remote.
+  - HTTP/1.1 retry failed to connect to `github.com:443`.
+  - `origin/main` remains at deployed application commit `d79a44f`; local `main` is ahead by one documentation-only commit.
+- Next:
+  - Retry the pending documentation push after GitHub connectivity returns; no application rebuild or Sites redeployment is required.
