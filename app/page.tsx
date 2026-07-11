@@ -47,7 +47,12 @@ import {
   ReviewQueueMode,
 } from "../lib/reference-quality";
 import type { ReferenceQualityIssue } from "../lib/reference-quality";
-import { createQualityEditSession } from "../lib/reference-quality-navigation";
+import {
+  QUALITY_FIELD_TARGET_IDS,
+  createQualityEditSession,
+  getAdjacentQualityIssueIndex,
+  getQualityFieldTargetId,
+} from "../lib/reference-quality-navigation";
 import type { QualityEditSession } from "../lib/reference-quality-navigation";
 import {
   deleteConfirmationCopy,
@@ -194,7 +199,7 @@ export default function Home() {
   const [draft, setDraft] = useState<ReferenceDraft>(createEmptyReferenceDraft);
   const [editDraft, setEditDraft] = useState<ReferenceDraft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [, setQualityEditSession] =
+  const [qualityEditSession, setQualityEditSession] =
     useState<QualityEditSession | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -426,6 +431,33 @@ export default function Home() {
   const isEditingSelected = Boolean(
     selectedReference && editingId === selectedReference.id && editDraft,
   );
+  const activeQualityIssue = qualityEditSession
+    ? qualityEditSession.issues[qualityEditSession.activeIndex] ?? null
+    : null;
+
+  useEffect(() => {
+    if (!isEditingSelected || !activeQualityIssue) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const targetId = getQualityFieldTargetId(activeQualityIssue.field);
+      const target = targetId ? document.getElementById(targetId) : null;
+      if (!(target instanceof HTMLElement)) {
+        setMessage(copy.qualityTargetMissing);
+        return;
+      }
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      target.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeQualityIssue, copy.qualityTargetMissing, isEditingSelected]);
 
   function clearQualityEditSession() {
     setQualityEditSession(null);
@@ -456,6 +488,26 @@ export default function Home() {
     setEditingId(reference.id);
     setEditDraft(recordToReferenceDraft(reference));
     setMessage(copy.editingSelected);
+  }
+
+  function moveQualityIssue(direction: "previous" | "next") {
+    setQualityEditSession((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const activeIndex = getAdjacentQualityIssueIndex(
+        current.activeIndex,
+        current.issues.length,
+        direction,
+      );
+
+      return activeIndex === null ? current : { ...current, activeIndex };
+    });
+  }
+
+  function qualityTargetClass(field: ReferenceQualityIssue["field"]) {
+    return activeQualityIssue?.field === field ? "quality-target-active" : undefined;
   }
 
   function cancelEditing() {
@@ -1362,6 +1414,47 @@ export default function Home() {
 
             {isEditingSelected && editDraft ? (
               <form className="detail-edit-form" onSubmit={saveReferenceEdit}>
+                {qualityEditSession && activeQualityIssue ? (
+                  <section
+                    className="quality-guided-navigation"
+                    data-quality-guided-navigation
+                    aria-label={copy.qualityGuidedEditing}
+                  >
+                    <div>
+                      <p className="eyebrow">{copy.qualityGuidedEditing}</p>
+                      <strong>{labelForQualityIssue(activeQualityIssue)}</strong>
+                      <span>
+                        {copy.qualityGuidedPosition} {qualityEditSession.activeIndex + 1} /{" "}
+                        {qualityEditSession.issues.length}
+                      </span>
+                    </div>
+                    <div className="quality-guided-actions">
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        title={copy.previousQualityIssue}
+                        aria-label={copy.previousQualityIssue}
+                        disabled={isSavingEdit || qualityEditSession.activeIndex === 0}
+                        onClick={() => moveQualityIssue("previous")}
+                      >
+                        <span aria-hidden="true">←</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        title={copy.nextQualityIssue}
+                        aria-label={copy.nextQualityIssue}
+                        disabled={
+                          isSavingEdit ||
+                          qualityEditSession.activeIndex === qualityEditSession.issues.length - 1
+                        }
+                        onClick={() => moveQualityIssue("next")}
+                      >
+                        <span aria-hidden="true">→</span>
+                      </button>
+                    </div>
+                  </section>
+                ) : null}
                 <section>
                   <h3>{copy.source}</h3>
                   <label>
@@ -1387,16 +1480,18 @@ export default function Home() {
                       onChange={(event) => setEditDraft({ ...editDraft, canonical_url: event.target.value })}
                     />
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("site_name")}>
                     {copy.site}
                     <input
+                      id={QUALITY_FIELD_TARGET_IDS.site_name}
                       value={editDraft.site_name}
                       onChange={(event) => setEditDraft({ ...editDraft, site_name: event.target.value })}
                     />
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("author")}>
                     {copy.author}
                     <input
+                      id={QUALITY_FIELD_TARGET_IDS.author}
                       value={editDraft.author}
                       onChange={(event) => setEditDraft({ ...editDraft, author: event.target.value })}
                     />
@@ -1447,9 +1542,10 @@ export default function Home() {
                       ))}
                     </select>
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("license_status")}>
                     {copy.licenseStatus}
                     <select
+                      id={QUALITY_FIELD_TARGET_IDS.license_status}
                       value={editDraft.license_status}
                       onChange={(event) =>
                         setEditDraft({ ...editDraft, license_status: event.target.value as LicenseStatus })
@@ -1492,16 +1588,18 @@ export default function Home() {
                       ))}
                     </select>
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("attribution_text")}>
                     {copy.attributionText}
                     <textarea
+                      id={QUALITY_FIELD_TARGET_IDS.attribution_text}
                       value={editDraft.attribution_text}
                       onChange={(event) => setEditDraft({ ...editDraft, attribution_text: event.target.value })}
                     />
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("avoid_copying_notes")}>
                     {copy.avoidCopying}
                     <textarea
+                      id={QUALITY_FIELD_TARGET_IDS.avoid_copying_notes}
                       value={editDraft.avoid_copying_notes}
                       onChange={(event) => setEditDraft({ ...editDraft, avoid_copying_notes: event.target.value })}
                     />
@@ -1545,16 +1643,18 @@ export default function Home() {
                       onChange={(event) => setEditDraft({ ...editDraft, visual_language_tags_text: event.target.value })}
                     />
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("inspiration_points")}>
                     {copy.inspirationPoints}
                     <textarea
+                      id={QUALITY_FIELD_TARGET_IDS.inspiration_points}
                       value={editDraft.inspiration_points_text}
                       onChange={(event) => setEditDraft({ ...editDraft, inspiration_points_text: event.target.value })}
                     />
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("rating")}>
                     {copy.rating}
                     <input
+                      id={QUALITY_FIELD_TARGET_IDS.rating}
                       type="number"
                       min="1"
                       max="5"
@@ -1563,9 +1663,10 @@ export default function Home() {
                     />
                   </label>
                   <div className="score-grid">
-                    <label>
+                    <label className={qualityTargetClass("reference_value_score")}>
                       {copy.referenceValueScore}
                       <input
+                        id={QUALITY_FIELD_TARGET_IDS.reference_value_score}
                         type="number"
                         min="1"
                         max="5"
@@ -1573,9 +1674,10 @@ export default function Home() {
                         onChange={(event) => setEditDraft({ ...editDraft, reference_value_score: event.target.value })}
                       />
                     </label>
-                    <label>
+                    <label className={qualityTargetClass("transformability_score")}>
                       {copy.transformabilityScore}
                       <input
+                        id={QUALITY_FIELD_TARGET_IDS.transformability_score}
                         type="number"
                         min="1"
                         max="5"
@@ -1583,9 +1685,10 @@ export default function Home() {
                         onChange={(event) => setEditDraft({ ...editDraft, transformability_score: event.target.value })}
                       />
                     </label>
-                    <label>
+                    <label className={qualityTargetClass("copyright_risk_score")}>
                       {copy.copyrightRiskScore}
                       <input
+                        id={QUALITY_FIELD_TARGET_IDS.copyright_risk_score}
                         type="number"
                         min="1"
                         max="5"
@@ -1593,9 +1696,10 @@ export default function Home() {
                         onChange={(event) => setEditDraft({ ...editDraft, copyright_risk_score: event.target.value })}
                       />
                     </label>
-                    <label>
+                    <label className={qualityTargetClass("production_readiness_score")}>
                       {copy.productionReadinessScore}
                       <input
+                        id={QUALITY_FIELD_TARGET_IDS.production_readiness_score}
                         type="number"
                         min="1"
                         max="5"
@@ -1604,7 +1708,12 @@ export default function Home() {
                       />
                     </label>
                   </div>
-                  <div className="inspiration-entry-editor">
+                  <div
+                    className={[
+                      "inspiration-entry-editor",
+                      qualityTargetClass("inspiration_entries"),
+                    ].filter(Boolean).join(" ")}
+                  >
                     <div className="section-heading-row">
                       <h3>{copy.structuredInspiration}</h3>
                       <span className="entry-count">
@@ -1628,6 +1737,7 @@ export default function Home() {
                         <label>
                           {copy.inspirationObservation}
                           <textarea
+                            id={index === 0 ? QUALITY_FIELD_TARGET_IDS.inspiration_entries : undefined}
                             value={entry.observation}
                             onChange={(event) => updateEditInspirationEntry(index, "observation", event.target.value)}
                           />
@@ -1677,16 +1787,18 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                  <label>
+                  <label className={qualityTargetClass("deconstruction_notes")}>
                     {copy.deconstructionNotes}
                     <textarea
+                      id={QUALITY_FIELD_TARGET_IDS.deconstruction_notes}
                       value={editDraft.deconstruction_notes}
                       onChange={(event) => setEditDraft({ ...editDraft, deconstruction_notes: event.target.value })}
                     />
                   </label>
-                  <label>
+                  <label className={qualityTargetClass("transformation_ideas")}>
                     {copy.transformationIdeas}
                     <textarea
+                      id={QUALITY_FIELD_TARGET_IDS.transformation_ideas}
                       value={editDraft.transformation_ideas}
                       onChange={(event) => setEditDraft({ ...editDraft, transformation_ideas: event.target.value })}
                     />

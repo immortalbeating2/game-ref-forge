@@ -754,13 +754,104 @@ label {
 .quality-checklist-group ul {
   display: grid;
   gap: 5px;
-  padding-left: 16px;
+  padding-left: 0;
 }
 
 .quality-checklist-group p,
 .quality-checklist-group li {
   color: var(--muted-strong);
   font-size: 0.78rem;
+}
+
+.quality-checklist-group li {
+  list-style: none;
+}
+
+.quality-checklist-action {
+  display: flex;
+  width: 100%;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #151a1c;
+  color: var(--muted-strong);
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.quality-checklist-action:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: #19211f;
+  color: var(--foreground);
+}
+
+.quality-guided-navigation {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-color: rgba(117, 216, 189, 0.55) !important;
+  background: #141a1a !important;
+}
+
+.quality-guided-navigation > div:first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.quality-guided-navigation p {
+  margin: 0;
+}
+
+.quality-guided-navigation strong {
+  overflow-wrap: anywhere;
+}
+
+.quality-guided-navigation span {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+}
+
+.quality-guided-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.quality-guided-actions button {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
+.quality-guided-actions button:disabled {
+  cursor: not-allowed;
+}
+
+.quality-target-active {
+  border-radius: 6px;
+  outline: 2px solid rgba(117, 216, 189, 0.72);
+  outline-offset: 4px;
+  background: rgba(117, 216, 189, 0.08);
+  animation: quality-target-pulse 1.2s ease-out;
+}
+
+@keyframes quality-target-pulse {
+  from {
+    background: rgba(117, 216, 189, 0.22);
+  }
+
+  to {
+    background: rgba(117, 216, 189, 0.08);
+  }
 }
 
 .empty-detail {
@@ -782,6 +873,10 @@ label {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 1ms !important;
+  }
+
+  .quality-target-active {
+    animation: none;
   }
 }
 
@@ -834,5 +929,16 @@ label {
   .detail-panel dl div {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .quality-guided-navigation {
+    position: static;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quality-guided-actions button {
+    flex: 1 1 0;
+    width: auto;
   }
 }
