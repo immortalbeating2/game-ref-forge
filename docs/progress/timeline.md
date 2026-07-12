@@ -1238,3 +1238,22 @@
   - Round 10 is complete.
   - The repository is ready to enter Round 11 brainstorming, design, and planning.
   - Round 11 application implementation must not start before its design and plan are approved.
+
+### 2026-07-12
+
+- Branch: `main`
+- Mode: authenticated production 390px QA follow-up
+- Root cause:
+  - The earlier viewport call did not affect the tab that was later measured, so the page remained at 1280px despite a successful capability response.
+  - This was a browser-control session-binding problem, not a RefForge responsive CSS defect.
+- Verification:
+  - Claimed the user's authenticated production tab at `https://game-ref-forge.yeep-6613.chatgpt.site/`.
+  - Applied 390x844 to the same active browser session.
+  - Production reported `innerWidth: 390`, `clientWidth: 375`, `scrollWidth: 375`, and horizontal overflow `0` for document and body.
+  - Both 1280px and 720px responsive breakpoints matched.
+  - Screenshot inspection found no horizontal clipping or overlap in toolbar actions, filter chips, starter copy, or the visible reference card.
+  - Reset the viewport and confirmed the tab returned to its normal size with overflow `0`.
+- Result:
+  - The Round 10 production 390px QA evidence gap is closed.
+  - The evidence commit remained local after three GitHub HTTPS push attempts failed through connection reset and `github.com:443` connectivity loss.
+  - `origin/main` still contains the completed Round 10 state; only this follow-up evidence is pending remote sync.

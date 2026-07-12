@@ -76,8 +76,13 @@
 - A direct authenticated production API read returned `{ "references": [] }` after cleanup.
 - Browser console error count during production CRUD: `0`.
 
-### Remaining QA Gap
+### 390px Follow-up Verification
 
-- The production viewport capability accepted a 390x844 request but the controlled page continued reporting 1280px, including in a newly opened tab. Production 390px overflow is therefore not claimed as directly passed.
-- The same commit passed a real 390x844 local browser check with horizontal overflow `0`; production version 12 was built from that exact commit.
+- On 2026-07-12, claimed the user's authenticated production tab and applied an explicit 390x844 viewport to that same active browser session.
+- Production reported `innerWidth: 390`, `innerHeight: 844`, `clientWidth: 375`, and `scrollWidth: 375`.
+- Document and body horizontal overflow were both `0`.
+- Both `(max-width: 1280px)` and `(max-width: 720px)` media queries matched.
+- A viewport screenshot confirmed the toolbar, buttons, filter chips, starter message, and reference card remained readable without horizontal clipping or overlap.
+- The previous failure was a browser-control session-binding issue: the viewport capability had not affected the tab being measured. It was not a RefForge responsive-layout defect.
+- The browser viewport was reset after verification; the production tab returned to its normal 673x648 visible size with overflow `0`.
 

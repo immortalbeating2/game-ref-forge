@@ -197,9 +197,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 10 added transient guided-edit navigation, typed quality-field targets, focus/highlight behavior, and bilingual copy without changing API routes or D1 schema.
 - The written Round 10 design at `docs/superpowers/specs/2026-07-10-quality-guided-editing-design.md` has been reviewed and approved.
 - The TDD implementation plan exists at `docs/superpowers/plans/2026-07-10-quality-guided-editing.md` and covers local QA, review, merge, Sites deployment, and production temporary-reference CRUD.
-- Direct production 390px emulation remains unverified because the browser viewport override did not change the reported 1280px width; the exact deployed commit passed local 390px overflow checks.
+- On 2026-07-12, authenticated production 390x844 verification passed with `innerWidth: 390`, both mobile breakpoints active, and document/body horizontal overflow `0`; the prior failure was isolated to browser session binding rather than application layout.
 - On 2026-07-12, local `main`, `origin/main`, and `origin/HEAD` were confirmed aligned at `ea3eb66`; the previously pending deployment-evidence documentation push is resolved.
+- The new production-390px evidence commit is temporarily one local commit ahead of `origin/main` after three GitHub HTTPS attempts ended in connection reset or `github.com:443` connectivity failure; no application or production data change is pending.
 
 ## Next Suggested Step
 
-Start Round 11 with Superpowers brainstorming, resolve its scope and controversy points, then approve design and implementation-plan documents before changing application behavior.
+Retry the pending 390px-evidence documentation push when GitHub connectivity returns, then start Round 11 with Superpowers brainstorming and approve its design and implementation plan before changing application behavior.
