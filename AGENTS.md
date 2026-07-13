@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 11 implemented and locally verified; merge pending`
+- 当前阶段：`Round 11 merged and locally verified; Task 9 external sync pending`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,11 +142,11 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 11 implemented and locally verified; merge pending`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 Task 1-8 已在 `codex/round-11-multi-reference-synthesis` 隔离 worktree 中完成本地验证。Task 9 的 GitHub 推送、Sites migration/deployment 和生产 CRUD 尚未执行，不得提前记录为完成。
+本项目当前为 `Round 11 merged and locally verified; Task 9 external sync pending`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 Task 1-8 已合并到本地 `main`，并完成合并后测试、typecheck、lint 和 build。Task 9 的 GitHub 推送、Sites migration/deployment 和生产 CRUD 尚未执行，不得提前记录为完成。
 
 当前默认目标：
 
-- 将已验证的 Round 11 分支合并到 `main`，再按 Task 9 计划同步 GitHub、Sites 和生产环境。
+- 按 Task 9 计划同步已验证的 `main` 到 GitHub 与 Sites，并完成生产 migration、CRUD、Markdown、390px 和清理验证。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。

@@ -4,7 +4,7 @@ Updated: 2026-07-14
 
 ## Current Stage
 
-`Round 11 implemented and locally verified; merge pending`
+`Round 11 merged and locally verified; Task 9 external sync pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: `codex/round-11-multi-reference-synthesis`; Task 1-8 is locally verified, final independent review is `Approved`, and merge to `main` is pending. No Task 9 GitHub push, Sites deployment, or production QA is claimed.
+- Round 11 Task 1-8 is merged into local `main` at `c7e9f54`; final independent review is `Approved`, merged-main validation passed, and Task 9 external sync remains pending. No Round 11 Sites deployment or production QA is claimed.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -206,7 +206,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - The new production-390px evidence commit is temporarily one local commit ahead of `origin/main` after three GitHub HTTPS attempts ended in connection reset or `github.com:443` connectivity failure; no application or production data change is pending.
 - On 2026-07-13, the Round 11 multi-reference synthesis direction and all four design sections were approved.
 - The Round 11 written design uses independent `syntheses` and `synthesis_references` tables, 2-4 ordered reference snapshots, manual structured synthesis, explicit snapshot refresh, full synthesis CRUD, and single-item Markdown export.
-- Round 11 application implementation is complete through Task 8 and is being merged into local `main`; merged-main revalidation remains pending.
+- Round 11 application implementation through Task 8 is merged into local `main` at `c7e9f54`; merged-main tests, typecheck, lint, and build passed.
 - The Round 11 design baseline and TDD implementation plan were approved before implementation; Task 1-7 commits run from `153078b` to `cbbc914`.
 - The user approved Subagent-Driven execution. Branch `codex/round-11-multi-reference-synthesis` and the isolated worktree `.worktrees/round-11-multi-reference-synthesis` were created from synchronized commit `153078b`.
 - Round 11 baseline verification passed with 11 test files / 71 tests; after two independent final-review repair rounds the latest automated feature-head verification passed with 21 test files / 187 tests, typecheck, lint, and build. Full migration/API/UI CRUD, exact 1024px/390px overflow metrics, and console errors 0 remain earlier evidence; post-repair browser regression additionally passed dirty-dialog focus/Escape/restore, confirmed comparison entry, 390x844 visual layout, and cleanup 0.
@@ -215,8 +215,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task commit ranges: Task 1 `e86011b..19d2bfd`; Task 2 `19d2bfd..89c15ae`; Task 3 `89c15ae..0ccfb06`; Task 4 `0ccfb06..29d5dc4`; Task 5 `29d5dc4..1b1bcb4`; Task 6 `1b1bcb4..111be1e`; Task 7 `111be1e..cbbc914`.
 - The in-app browser did not capture the programmatic Blob Markdown download event. Markdown content, filename, source-link, no-media, and unsaved-warning behavior are covered by automated tests; this is a non-blocking evidence gap for Task 9 production recheck.
 - An earlier clean Browser Use `iab` initialization diagnostic failed to discover a backend; later in the same work period the existing bound in-app browser runtime became usable and completed real DOM/click/focus/390px regression. The tooling blocker is no longer current.
-- Task 9 remains pending after the local merge: merged-main validation, GitHub push, Sites migration/deployment, authenticated production CRUD, and production cleanup. No Round 11 production result is recorded.
+- Task 9 remains pending after the local merge: GitHub push, Sites migration/deployment, authenticated production CRUD, Markdown download recheck, and production cleanup. No Round 11 production result is recorded.
 
 ## Next Suggested Step
 
-Complete merged-main revalidation, then execute Task 9 GitHub/Sites/production work while keeping the QA document and three progress traces current.
+Push the verified local `main`, deploy a Sites version containing migration 2, then execute authenticated production CRUD/Markdown/390px QA and cleanup while keeping the QA document and three progress traces current.
