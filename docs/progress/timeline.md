@@ -1257,3 +1257,23 @@
   - The Round 10 production 390px QA evidence gap is closed.
   - The evidence commit remained local after three GitHub HTTPS push attempts failed through connection reset and `github.com:443` connectivity loss.
   - `origin/main` still contains the completed Round 10 state; only this follow-up evidence is pending remote sync.
+
+### 2026-07-13
+
+- Branch: `main`
+- Mode: Round 11 Superpowers brainstorming and design baseline
+- Decision:
+  - Approved multi-reference comparison and manual inspiration synthesis as the Round 11 direction.
+  - Approved independent `syntheses` and `synthesis_references` D1 tables with 2-4 ordered creation-time snapshots.
+  - Approved explicit snapshot refresh, full synthesis CRUD, draft/actionable/archived states, and single-item Markdown export.
+- Documentation:
+  - Added `docs/superpowers/specs/2026-07-13-multi-reference-synthesis-design.md`.
+  - Updated the required status, timeline, and dated progress records.
+- Scope:
+  - Documentation only; no application source, API, migration, dependency, or Sites deployment change.
+- Verification:
+  - Placeholder, consistency, scope, ambiguity, and `git diff --check` reviews passed.
+  - The design baseline was committed locally.
+  - GitHub push failed because the current environment could not resolve `github.com`; local `main` remains two documentation commits ahead.
+- Next:
+  - Complete written-spec review, then write and approve the TDD implementation plan before creating the Round 11 feature branch.
