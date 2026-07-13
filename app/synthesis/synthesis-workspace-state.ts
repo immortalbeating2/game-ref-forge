@@ -1,5 +1,28 @@
 import type { SynthesisDetail } from "../../lib/synthesis";
-import type { SynthesisDraft } from "../../lib/synthesis-draft";
+import { detailToSynthesisDraft, type SynthesisDraft } from "../../lib/synthesis-draft";
+
+export type ArchiveWorkspaceState = {
+  activeDetail: SynthesisDetail | null;
+  draft: SynthesisDraft;
+};
+
+export function applyArchiveResult(
+  state: ArchiveWorkspaceState,
+  requestSynthesisId: string,
+  requestDraftBaseline: SynthesisDraft,
+  responseDetail: SynthesisDetail,
+): ArchiveWorkspaceState {
+  if (state.activeDetail?.id !== requestSynthesisId) {
+    return state;
+  }
+
+  return {
+    activeDetail: responseDetail,
+    draft: JSON.stringify(state.draft) === JSON.stringify(requestDraftBaseline)
+      ? detailToSynthesisDraft(responseDetail)
+      : state.draft,
+  };
+}
 
 export type RefreshWorkspaceState = {
   activeDetail: SynthesisDetail | null;

@@ -3,8 +3,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import type { SynthesisDetail } from "../lib/synthesis";
-import { createEmptySynthesisDraft } from "../lib/synthesis-draft";
+import { createEmptySynthesisDraft, detailToSynthesisDraft, isSynthesisDraftDirty } from "../lib/synthesis-draft";
 import {
+  applyArchiveResult,
   applyRefreshResult,
   canCommitController,
   getDialogKeyboardAction,
@@ -83,6 +84,45 @@ describe("synthesis workspace state regressions", () => {
   it("does not expose list archiving as editor saving", () => {
     expect(isEditorSaveBusy(false, "syn-a")).toBe(false);
     expect(isEditorSaveBusy(true, null)).toBe(true);
+  });
+
+  it("preserves edits made to A while its archive request is pending", () => {
+    const original = makeDetail("syn-a", "A");
+    const baseline = detailToSynthesisDraft(original);
+    const editedDraft = { ...baseline, title: "A edited while archiving" };
+    const archived = { ...original, status: "archived" as const };
+
+    const result = applyArchiveResult({ activeDetail: original, draft: editedDraft }, "syn-a", baseline, archived);
+
+    expect(result.activeDetail).toBe(archived);
+    expect(result.draft).toBe(editedDraft);
+  });
+
+  it("keeps B active and edited when A archive returns late", () => {
+    const originalA = makeDetail("syn-a", "A");
+    const baselineA = detailToSynthesisDraft(originalA);
+    const activeB = makeDetail("syn-b", "B");
+    const draftB = { ...detailToSynthesisDraft(activeB), title: "B edited" };
+    const state = { activeDetail: activeB, draft: draftB };
+
+    expect(applyArchiveResult(
+      state,
+      "syn-a",
+      baselineA,
+      { ...originalA, status: "archived" },
+    )).toBe(state);
+  });
+
+  it("applies archived A and rebuilds a clean draft without concurrent edits", () => {
+    const original = makeDetail("syn-a", "A");
+    const baseline = detailToSynthesisDraft(original);
+    const archived = { ...original, status: "archived" as const };
+
+    const result = applyArchiveResult({ activeDetail: original, draft: baseline }, "syn-a", baseline, archived);
+
+    expect(result.activeDetail).toBe(archived);
+    expect(result.draft.status).toBe("archived");
+    expect(isSynthesisDraftDirty(result.draft, archived)).toBe(false);
   });
 
   it("commits an async result only for the current live controller", () => {

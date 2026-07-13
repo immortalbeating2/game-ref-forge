@@ -12,7 +12,9 @@ import { formatSynthesisMarkdown, safeSynthesisExportFilename } from "../../lib/
 import { SynthesisEditor } from "./synthesis-editor";
 import { SynthesisList } from "./synthesis-list";
 import {
+  applyArchiveResult,
   applyRefreshResult,
+  type ArchiveWorkspaceState,
   canCommitController,
   getDialogKeyboardAction,
   getInitialReferenceConsumption,
@@ -61,6 +63,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const [statusFilter, setStatusFilter] = useState<SynthesisStatus | "all">("all");
   const [activeDetail, setActiveDetail] = useState<SynthesisDetail | null>(null);
   const [draft, setDraft] = useState<SynthesisDraft>(createEmptySynthesisDraft);
+  const workspaceStateRef = useRef<ArchiveWorkspaceState>({ activeDetail: null, draft });
   const [mode, setMode] = useState<"create" | "edit">("edit");
   const [isListLoading, setIsListLoading] = useState(true);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
@@ -77,6 +80,17 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const createReferenceIds = useRef<string[]>([]);
   const consumedInitialIds = useRef<string | null>(null);
   const deleteGuard = useRef(false);
+
+  const commitWorkspaceState = useCallback((nextState: ArchiveWorkspaceState) => {
+    workspaceStateRef.current = nextState;
+    setActiveDetail(nextState.activeDetail);
+    setDraft(nextState.draft);
+  }, []);
+
+  const updateDraft = useCallback((nextDraft: SynthesisDraft) => {
+    workspaceStateRef.current = { ...workspaceStateRef.current, draft: nextDraft };
+    setDraft(nextDraft);
+  }, []);
 
   const isDraftDirty = useMemo(() => {
     if (activeDetail) return isSynthesisDraftDirty(draft, activeDetail);
@@ -117,8 +131,10 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     try {
       const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${id}`, { signal: controller.signal }));
       if (canCommitController(detailAbort.current, controller)) {
-        setActiveDetail(payload.synthesis);
-        setDraft(detailToSynthesisDraft(payload.synthesis));
+        commitWorkspaceState({
+          activeDetail: payload.synthesis,
+          draft: detailToSynthesisDraft(payload.synthesis),
+        });
         setMode("edit");
         createReferenceIds.current = [];
       }
@@ -129,7 +145,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     } finally {
       if (canCommitController(detailAbort.current, controller)) setIsDetailLoading(false);
     }
-  }, []);
+  }, [commitWorkspaceState]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,13 +177,12 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     consumedInitialIds.current = consumption.nextSignature;
     if (!consumption.shouldConsume) return;
     createReferenceIds.current = [...initialReferenceIds];
-    setActiveDetail(null);
-    setDraft(createEmptySynthesisDraft());
+    commitWorkspaceState({ activeDetail: null, draft: createEmptySynthesisDraft() });
     setMode("create");
     setMessage(null);
     setError(null);
     onInitialReferenceIdsConsumed();
-  }, [initialReferenceIds, onInitialReferenceIdsConsumed]);
+  }, [commitWorkspaceState, initialReferenceIds, onInitialReferenceIdsConsumed]);
 
   useEffect(() => {
     if (!isDraftDirty) return;
@@ -216,8 +231,10 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         ? await fetch("/api/syntheses", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, reference_ids: createReferenceIds.current }) })
         : await fetch(`/api/syntheses/${activeDetail?.id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(input) });
       const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(response);
-      setActiveDetail(payload.synthesis);
-      setDraft(detailToSynthesisDraft(payload.synthesis));
+      commitWorkspaceState({
+        activeDetail: payload.synthesis,
+        draft: detailToSynthesisDraft(payload.synthesis),
+      });
       setMode("edit");
       createReferenceIds.current = [];
       setMessage(copy.synthesisSaved);
@@ -231,15 +248,22 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
 
   const archive = async (id: string) => {
     if (archivingId !== null) return;
+    const requestDraftBaseline = workspaceStateRef.current.draft;
     setArchivingId(id);
     setError(null);
     try {
       const detailPayload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${id}`));
       const input: SynthesisInput = { ...detailToSynthesisDraft(detailPayload.synthesis), status: "archived" };
       const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(input) }));
-      if (activeDetail?.id === id) {
-        setActiveDetail(payload.synthesis);
-        setDraft(detailToSynthesisDraft(payload.synthesis));
+      const currentWorkspaceState = workspaceStateRef.current;
+      const nextWorkspaceState = applyArchiveResult(
+        currentWorkspaceState,
+        id,
+        requestDraftBaseline,
+        payload.synthesis,
+      );
+      if (nextWorkspaceState !== currentWorkspaceState) {
+        commitWorkspaceState(nextWorkspaceState);
       }
       await reloadList(statusFilter);
     } catch (requestError) {
@@ -256,11 +280,15 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     setError(null);
     try {
       const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${requestSynthesisId}/references/${link.id}/refresh`, { method: "POST" }));
-      setActiveDetail((currentDetail) => applyRefreshResult({
-        activeDetail: currentDetail,
-        draft,
+      const refreshResult = applyRefreshResult({
+        activeDetail: workspaceStateRef.current.activeDetail,
+        draft: workspaceStateRef.current.draft,
         isDraftDirty,
-      }, requestSynthesisId, payload.synthesis).activeDetail);
+      }, requestSynthesisId, payload.synthesis);
+      commitWorkspaceState({
+        activeDetail: refreshResult.activeDetail,
+        draft: refreshResult.draft,
+      });
       await reloadList(statusFilter);
     } catch (requestError) {
       setError(errorMessage(requestError));
@@ -277,8 +305,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     try {
       await getResponsePayload<unknown>(await fetch(`/api/syntheses/${deleteTarget.id}`, { method: "DELETE" }));
       if (activeDetail?.id === deleteTarget.id) {
-        setActiveDetail(null);
-        setDraft(createEmptySynthesisDraft());
+        commitWorkspaceState({ activeDetail: null, draft: createEmptySynthesisDraft() });
         setMode("edit");
       }
       setPendingDelete(null);
@@ -339,7 +366,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         isDeleting={isDeleting}
         error={error}
         message={message}
-        onDraftChange={setDraft}
+        onDraftChange={updateDraft}
         onSave={save}
         onRefresh={refresh}
         onExport={exportMarkdown}
