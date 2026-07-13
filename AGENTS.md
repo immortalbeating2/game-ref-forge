@@ -168,7 +168,7 @@ Round 11 扩展边界：
 - 显式 stale/refresh、综合稿列表/编辑/归档/删除和单份 Markdown 导出。
 - 综合稿不写回 reference，不公开托管第三方媒体，不新增公开路由。
 
-Round 11 当前本地证据：20 个测试文件 / 158 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0；Blob Markdown 下载事件仍有非阻塞证据缺口。
+Round 11 当前本地证据：21 个测试文件 / 187 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0；Blob Markdown 下载事件仍有非阻塞证据缺口。
 
 ## 来源与版权边界
 

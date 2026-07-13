@@ -207,6 +207,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - On 2026-07-13, the Round 11 multi-reference synthesis direction and all four design sections were approved.
 - The Round 11 written design uses independent `syntheses` and `synthesis_references` tables, 2-4 ordered reference snapshots, manual structured synthesis, explicit snapshot refresh, full synthesis CRUD, and single-item Markdown export.
 - Round 11 application implementation through Task 8 is merged into local `main` at `c7e9f54`; merged-main tests, typecheck, lint, and build passed.
+- The owned Round 11 worktree registration, local feature branch, and residual empty worktree directory were removed after merged-main verification. Three orphaned temporary Node automation processes holding the directory handle were identified and stopped without affecting active agents or application processes.
 - The Round 11 design baseline and TDD implementation plan were approved before implementation; Task 1-7 commits run from `153078b` to `cbbc914`.
 - The user approved Subagent-Driven execution. Branch `codex/round-11-multi-reference-synthesis` and the isolated worktree `.worktrees/round-11-multi-reference-synthesis` were created from synchronized commit `153078b`.
 - Round 11 baseline verification passed with 11 test files / 71 tests; after two independent final-review repair rounds the latest automated feature-head verification passed with 21 test files / 187 tests, typecheck, lint, and build. Full migration/API/UI CRUD, exact 1024px/390px overflow metrics, and console errors 0 remain earlier evidence; post-repair browser regression additionally passed dirty-dialog focus/Escape/restore, confirmed comparison entry, 390x844 visual layout, and cleanup 0.
@@ -215,7 +216,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task commit ranges: Task 1 `e86011b..19d2bfd`; Task 2 `19d2bfd..89c15ae`; Task 3 `89c15ae..0ccfb06`; Task 4 `0ccfb06..29d5dc4`; Task 5 `29d5dc4..1b1bcb4`; Task 6 `1b1bcb4..111be1e`; Task 7 `111be1e..cbbc914`.
 - The in-app browser did not capture the programmatic Blob Markdown download event. Markdown content, filename, source-link, no-media, and unsaved-warning behavior are covered by automated tests; this is a non-blocking evidence gap for Task 9 production recheck.
 - An earlier clean Browser Use `iab` initialization diagnostic failed to discover a backend; later in the same work period the existing bound in-app browser runtime became usable and completed real DOM/click/focus/390px regression. The tooling blocker is no longer current.
-- Task 9 remains pending after the local merge: GitHub push, Sites migration/deployment, authenticated production CRUD, Markdown download recheck, and production cleanup. No Round 11 production result is recorded.
+- Task 9 remains pending after the local merge and local branch cleanup: GitHub push, Sites migration/deployment, authenticated production CRUD, Markdown download recheck, and production cleanup. No Round 11 production result is recorded.
 
 ## Next Suggested Step
 
