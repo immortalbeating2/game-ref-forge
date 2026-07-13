@@ -79,10 +79,53 @@ describe("synthesis domain contract", () => {
     expect(parseReferenceSnapshot("not-json")).toBeNull();
   });
 
+  it("rejects snapshots with the wrong schema version", () => {
+    const snapshot = createReferenceSnapshot(reference);
+    expect(parseReferenceSnapshot(JSON.stringify({ ...snapshot, schema_version: 2 }))).toBeNull();
+  });
+
+  it.each([
+    "media_type",
+    "asset_category",
+    "license_status",
+    "public_status",
+    "quality_status",
+  ] as const)("rejects snapshots with an illegal %s", (field) => {
+    const snapshot = createReferenceSnapshot(reference);
+    expect(parseReferenceSnapshot(JSON.stringify({ ...snapshot, [field]: "illegal" }))).toBeNull();
+  });
+
+  it("rejects snapshots with malformed scores", () => {
+    const snapshot = createReferenceSnapshot(reference);
+    const malformed = { ...snapshot, scores: { ...snapshot.scores, rating: "5" } };
+    expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
+  });
+
+  it("rejects snapshots with malformed tags", () => {
+    const snapshot = createReferenceSnapshot(reference);
+    const malformed = { ...snapshot, tags: { ...snapshot.tags, style_tags: ["aged", 42] } };
+    expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
+  });
+
+  it("rejects snapshots with malformed inspiration", () => {
+    const snapshot = createReferenceSnapshot(reference);
+    const malformed = {
+      ...snapshot,
+      inspiration: { ...snapshot.inspiration, inspiration_entries: [{}] },
+    };
+    expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
+  });
+
   it("derives current, stale, and unavailable states without persisting them", () => {
     const snapshot = createReferenceSnapshot(reference);
     expect(deriveSnapshotState(snapshot, reference.updated_at, true)).toEqual({ available: true, stale: false });
     expect(deriveSnapshotState(snapshot, "2026-07-13T02:00:00.000Z", true)).toEqual({ available: true, stale: true });
     expect(deriveSnapshotState(snapshot, null, false)).toEqual({ available: false, stale: false });
+  });
+
+  it("treats invalid snapshot timestamps as not stale", () => {
+    const snapshot = createReferenceSnapshot(reference);
+    expect(deriveSnapshotState(snapshot, "not-a-timestamp", true)).toEqual({ available: true, stale: false });
+    expect(deriveSnapshotState({ ...snapshot, reference_updated_at: "invalid" }, reference.updated_at, true)).toEqual({ available: true, stale: false });
   });
 });

@@ -1,4 +1,11 @@
-import type { ReferenceRecord } from "./reference";
+import {
+  ASSET_CATEGORIES,
+  LICENSE_STATUSES,
+  MEDIA_TYPES,
+  PUBLIC_STATUSES,
+  QUALITY_STATUSES,
+  type ReferenceRecord,
+} from "./reference";
 
 export const SYNTHESIS_STATUSES = ["draft", "actionable", "archived"] as const;
 export type SynthesisStatus = (typeof SYNTHESIS_STATUSES)[number];
@@ -247,6 +254,13 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function includesValue<T extends readonly string[]>(
+  values: T,
+  value: unknown,
+): value is T[number] {
+  return typeof value === "string" && values.includes(value as T[number]);
+}
+
 function isSnapshot(value: unknown): value is SynthesisReferenceSnapshot {
   if (!isObject(value) || value.schema_version !== 1) return false;
   const scalarFields = [
@@ -254,14 +268,16 @@ function isSnapshot(value: unknown): value is SynthesisReferenceSnapshot {
     "reference_updated_at",
     "title",
     "source_url",
-    "media_type",
-    "asset_category",
-    "license_status",
-    "public_status",
-    "quality_status",
   ];
   if (scalarFields.some((field) => typeof value[field] !== "string")) return false;
   if (!["canonical_url", "site_name", "author"].every((field) => isNullableString(value[field]))) return false;
+  if (
+    !includesValue(MEDIA_TYPES, value.media_type) ||
+    !includesValue(ASSET_CATEGORIES, value.asset_category) ||
+    !includesValue(LICENSE_STATUSES, value.license_status) ||
+    !includesValue(PUBLIC_STATUSES, value.public_status) ||
+    !includesValue(QUALITY_STATUSES, value.quality_status)
+  ) return false;
 
   const scores = value.scores;
   if (!isObject(scores)) return false;
