@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { SQLWrapper } from "drizzle-orm";
+import { SQLiteSyncDialect } from "drizzle-orm/sqlite-core";
 
 vi.mock("../db", () => ({ getDb: vi.fn() }));
 
@@ -24,6 +26,8 @@ type QueryOperation = { name: string; args: unknown[] };
 type FakeQuery = PromiseLike<unknown[]> & { operations: QueryOperation[] };
 type StatementKind = "insert" | "update" | "delete";
 
+const sqliteDialect = new SQLiteSyncDialect();
+
 type FakeStatement = {
   kind: StatementKind;
   table: unknown;
@@ -35,6 +39,17 @@ type FakeStatement = {
   where(value: unknown): FakeStatement;
   returning(shape?: unknown): Promise<unknown[]>;
 };
+
+function compileExpression(expression: unknown) {
+  const { sql, params } = sqliteDialect.sqlToQuery((expression as SQLWrapper).getSQL());
+  return { sql, params };
+}
+
+function findOperation(query: FakeQuery, name: string) {
+  const operation = query.operations.find((candidate) => candidate.name === name);
+  expect(operation, `expected query operation ${name}`).toBeDefined();
+  return operation!;
+}
 
 function makeQuery(result: unknown[], queries: FakeQuery[]) {
   const operations: QueryOperation[] = [];
@@ -228,10 +243,6 @@ function makeRelationRow(
   };
 }
 
-function operationNames(query: FakeQuery) {
-  return query.operations.map(({ name }) => name);
-}
-
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
@@ -279,20 +290,37 @@ describe("synthesis data access", () => {
         reference_count: 2,
       },
     ]);
-    expect(operationNames(fake.queries[0])).toEqual([
-      "from",
-      "leftJoin",
-      "groupBy",
-      "orderBy",
-      "where",
-    ]);
+    const selection = fake.selections[0] as Record<string, unknown>;
+    expect(compileExpression(selection.reference_count)).toEqual({
+      sql: "count(\"synthesis_references\".\"id\")",
+      params: [],
+    });
+    const listQuery = fake.queries[0];
+    const join = findOperation(listQuery, "leftJoin");
+    expect(join.args[0]).toBe(synthesisReferences);
+    expect(compileExpression(join.args[1])).toEqual({
+      sql: "\"syntheses\".\"id\" = \"synthesis_references\".\"synthesis_id\"",
+      params: [],
+    });
+    expect(compileExpression(findOperation(listQuery, "groupBy").args[0])).toEqual({
+      sql: "\"syntheses\".\"id\"",
+      params: [],
+    });
+    expect(compileExpression(findOperation(listQuery, "orderBy").args[0])).toEqual({
+      sql: "\"syntheses\".\"updated_at\" desc",
+      params: [],
+    });
+    expect(compileExpression(findOperation(listQuery, "where").args[0])).toEqual({
+      sql: "\"syntheses\".\"status\" = ?",
+      params: ["draft"],
+    });
   });
 
   it("rejects an invalid runtime list status without executing the query", async () => {
     const fake = useFakeDb({ selectResults: [[{ id: "unexpected" }]] });
 
     await expect(listSyntheses("invalid" as SynthesisStatus)).resolves.toEqual([]);
-    expect(operationNames(fake.queries[0])).toEqual(["from", "leftJoin", "groupBy", "orderBy"]);
+    expect(fake.queries[0].operations.some(({ name }) => name === "where")).toBe(false);
   });
 
   it("lists all synthesis summaries when no status filter is provided", async () => {
@@ -315,7 +343,7 @@ describe("synthesis data access", () => {
       updated_at: "2026-07-13T01:00:00.000Z",
       reference_count: 2,
     }]);
-    expect(operationNames(fake.queries[0])).toEqual(["from", "leftJoin", "groupBy", "orderBy"]);
+    expect(fake.queries[0].operations.some(({ name }) => name === "where")).toBe(false);
   });
 
   it("loads ordered reference links and derives current, stale, and unavailable states", async () => {
@@ -363,7 +391,15 @@ describe("synthesis data access", () => {
         },
       ],
     });
-    expect(operationNames(fake.queries[1])).toEqual(["from", "leftJoin", "where", "orderBy"]);
+    const detailQuery = fake.queries[1];
+    expect(compileExpression(findOperation(detailQuery, "where").args[0])).toEqual({
+      sql: "\"synthesis_references\".\"synthesis_id\" = ?",
+      params: ["syn-1"],
+    });
+    expect(compileExpression(findOperation(detailQuery, "orderBy").args[0])).toEqual({
+      sql: "\"synthesis_references\".\"position\"",
+      params: [],
+    });
   });
 
   it("returns null when a synthesis does not exist", async () => {
@@ -558,6 +594,10 @@ describe("synthesis data access", () => {
       status: "actionable",
       updatedAt: "2026-07-13T05:00:00.000Z",
     });
+    expect(compileExpression(update.whereClause)).toEqual({
+      sql: "\"syntheses\".\"id\" = ?",
+      params: ["syn-1"],
+    });
     expect(fake.batches).toEqual([]);
     expect(fake.statements).toHaveLength(1);
   });
@@ -628,6 +668,10 @@ describe("synthesis data access", () => {
         }],
       },
     });
+    expect(compileExpression(findOperation(fake.queries[0], "where").args[0])).toEqual({
+      sql: "(\"synthesis_references\".\"synthesis_id\" = ? and \"synthesis_references\".\"id\" = ?)",
+      params: ["syn-1", "link-1"],
+    });
     expect(fake.batches).toHaveLength(1);
     const [relationUpdate, synthesisUpdate] = fake.batches[0];
     expect(fake.batches[0]).toHaveLength(2);
@@ -637,13 +681,19 @@ describe("synthesis data access", () => {
       snapshotUpdatedAt: "2026-07-13T06:00:00.000Z",
     });
     expect(JSON.parse((relationUpdate.payload as { snapshotJson: string }).snapshotJson)).toEqual(refreshedSnapshot);
-    expect(relationUpdate.whereClause).toBeDefined();
+    expect(compileExpression(relationUpdate.whereClause)).toEqual({
+      sql: "\"synthesis_references\".\"id\" = ?",
+      params: ["link-1"],
+    });
     expect(synthesisUpdate.table).toBe(syntheses);
     expect(synthesisUpdate).toMatchObject({
       kind: "update",
       payload: { updatedAt: "2026-07-13T06:00:00.000Z" },
     });
-    expect(synthesisUpdate.whereClause).toBeDefined();
+    expect(compileExpression(synthesisUpdate.whereClause)).toEqual({
+      sql: "\"syntheses\".\"id\" = ?",
+      params: ["syn-1"],
+    });
   });
 
   it.each([
@@ -655,6 +705,9 @@ describe("synthesis data access", () => {
     await expect(deleteSynthesis("syn-1")).resolves.toBe(expected);
     expect(fake.statements[0].table).toBe(syntheses);
     expect(fake.statements[0]).toMatchObject({ kind: "delete" });
-    expect(fake.statements[0].whereClause).toBeDefined();
+    expect(compileExpression(fake.statements[0].whereClause)).toEqual({
+      sql: "\"syntheses\".\"id\" = ?",
+      params: ["syn-1"],
+    });
   });
 });
