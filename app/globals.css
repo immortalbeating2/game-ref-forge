@@ -1377,6 +1377,12 @@ label {
     grid-column: 1;
   }
 
+  .synthesis-workspace-header button,
+  .synthesis-toolbar select,
+  .synthesis-list select {
+    min-height: 44px;
+  }
+
   .synthesis-toolbar {
     grid-template-columns: minmax(0, 1fr);
   }

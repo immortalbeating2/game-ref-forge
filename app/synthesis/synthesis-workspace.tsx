@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type React from "react";
 
 import type { Language } from "../../lib/localization";
@@ -11,6 +11,14 @@ import { createEmptySynthesisDraft, detailToSynthesisDraft, draftToSynthesisInpu
 import { formatSynthesisMarkdown, safeSynthesisExportFilename } from "../../lib/synthesis-export";
 import { SynthesisEditor } from "./synthesis-editor";
 import { SynthesisList } from "./synthesis-list";
+import {
+  applyRefreshResult,
+  canCommitController,
+  getDialogKeyboardAction,
+  getInitialReferenceConsumption,
+  isEditorSaveBusy,
+  tryAcquireOperationGuard,
+} from "./synthesis-workspace-state";
 
 export type SynthesisWorkspaceProps = {
   language: Language;
@@ -57,6 +65,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const [isListLoading, setIsListLoading] = useState(true);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -67,6 +76,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const detailAbort = useRef<AbortController | null>(null);
   const createReferenceIds = useRef<string[]>([]);
   const consumedInitialIds = useRef<string | null>(null);
+  const deleteGuard = useRef(false);
 
   const isDraftDirty = useMemo(() => {
     if (activeDetail) return isSynthesisDraftDirty(draft, activeDetail);
@@ -86,11 +96,15 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     setIsListLoading(true);
     try {
       const payload = await fetchList(status, controller.signal);
-      setSummaries(payload.syntheses);
+      if (canCommitController(listAbort.current, controller)) {
+        setSummaries(payload.syntheses);
+      }
     } catch (requestError) {
-      if ((requestError as Error).name !== "AbortError") setError(errorMessage(requestError));
+      if ((requestError as Error).name !== "AbortError" && canCommitController(listAbort.current, controller)) {
+        setError(errorMessage(requestError));
+      }
     } finally {
-      if (!controller.signal.aborted) setIsListLoading(false);
+      if (canCommitController(listAbort.current, controller)) setIsListLoading(false);
     }
   }, [fetchList, statusFilter]);
 
@@ -102,14 +116,18 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     setError(null);
     try {
       const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${id}`, { signal: controller.signal }));
-      setActiveDetail(payload.synthesis);
-      setDraft(detailToSynthesisDraft(payload.synthesis));
-      setMode("edit");
-      createReferenceIds.current = [];
+      if (canCommitController(detailAbort.current, controller)) {
+        setActiveDetail(payload.synthesis);
+        setDraft(detailToSynthesisDraft(payload.synthesis));
+        setMode("edit");
+        createReferenceIds.current = [];
+      }
     } catch (requestError) {
-      if ((requestError as Error).name !== "AbortError") setError(errorMessage(requestError));
+      if ((requestError as Error).name !== "AbortError" && canCommitController(detailAbort.current, controller)) {
+        setError(errorMessage(requestError));
+      }
     } finally {
-      if (!controller.signal.aborted) setIsDetailLoading(false);
+      if (canCommitController(detailAbort.current, controller)) setIsDetailLoading(false);
     }
   }, []);
 
@@ -120,23 +138,28 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     const readList = async () => {
       try {
         const payload = await fetchList(statusFilter, controller.signal);
-        if (!controller.signal.aborted) setSummaries(payload.syntheses);
+        if (canCommitController(listAbort.current, controller)) setSummaries(payload.syntheses);
       } catch (requestError) {
-        if ((requestError as Error).name !== "AbortError") setError(errorMessage(requestError));
+        if ((requestError as Error).name !== "AbortError" && canCommitController(listAbort.current, controller)) {
+          setError(errorMessage(requestError));
+        }
       } finally {
-        if (!controller.signal.aborted) setIsListLoading(false);
+        if (canCommitController(listAbort.current, controller)) setIsListLoading(false);
       }
     };
     void readList();
     return () => controller.abort();
   }, [fetchList, statusFilter]);
 
-  useEffect(() => () => detailAbort.current?.abort(), []);
+  useEffect(() => () => {
+    listAbort.current?.abort();
+    detailAbort.current?.abort();
+  }, []);
 
   useEffect(() => {
-    const signature = initialReferenceIds.join("\u0000");
-    if (initialReferenceIds.length < 2 || consumedInitialIds.current === signature) return;
-    consumedInitialIds.current = signature;
+    const consumption = getInitialReferenceConsumption(consumedInitialIds.current, initialReferenceIds);
+    consumedInitialIds.current = consumption.nextSignature;
+    if (!consumption.shouldConsume) return;
     createReferenceIds.current = [...initialReferenceIds];
     setActiveDetail(null);
     setDraft(createEmptySynthesisDraft());
@@ -207,7 +230,8 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   };
 
   const archive = async (id: string) => {
-    setIsSaving(true);
+    if (archivingId !== null) return;
+    setArchivingId(id);
     setError(null);
     try {
       const detailPayload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${id}`));
@@ -221,18 +245,22 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     } catch (requestError) {
       setError(errorMessage(requestError));
     } finally {
-      setIsSaving(false);
+      setArchivingId(null);
     }
   };
 
   const refresh = async (link: SynthesisReferenceLink) => {
     if (!activeDetail || !link.available) return;
+    const requestSynthesisId = activeDetail.id;
     setIsRefreshing(true);
     setError(null);
     try {
-      const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${activeDetail.id}/references/${link.id}/refresh`, { method: "POST" }));
-      setActiveDetail(payload.synthesis);
-      if (!isDraftDirty) setDraft(detailToSynthesisDraft(payload.synthesis));
+      const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${requestSynthesisId}/references/${link.id}/refresh`, { method: "POST" }));
+      setActiveDetail((currentDetail) => applyRefreshResult({
+        activeDetail: currentDetail,
+        draft,
+        isDraftDirty,
+      }, requestSynthesisId, payload.synthesis).activeDetail);
       await reloadList(statusFilter);
     } catch (requestError) {
       setError(errorMessage(requestError));
@@ -242,12 +270,13 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   };
 
   const confirmDelete = async () => {
-    if (!pendingDelete) return;
+    if (!pendingDelete || !tryAcquireOperationGuard(deleteGuard)) return;
+    const deleteTarget = pendingDelete;
     setIsDeleting(true);
     setError(null);
     try {
-      await getResponsePayload<unknown>(await fetch(`/api/syntheses/${pendingDelete.id}`, { method: "DELETE" }));
-      if (activeDetail?.id === pendingDelete.id) {
+      await getResponsePayload<unknown>(await fetch(`/api/syntheses/${deleteTarget.id}`, { method: "DELETE" }));
+      if (activeDetail?.id === deleteTarget.id) {
         setActiveDetail(null);
         setDraft(createEmptySynthesisDraft());
         setMode("edit");
@@ -258,6 +287,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     } catch (requestError) {
       setError(errorMessage(requestError) || copy.synthesisDeleteFailed);
     } finally {
+      deleteGuard.current = false;
       setIsDeleting(false);
     }
   };
@@ -285,7 +315,8 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         summaries={summaries}
         statusFilter={statusFilter}
         isLoading={isListLoading}
-        isMutating={isSaving || isDeleting}
+        isMutating={isSaving || archivingId !== null || isDeleting}
+        archivingId={archivingId}
         activeId={activeDetail?.id ?? null}
         onStatusFilterChange={(status) => requestNavigation({ kind: "filter", status })}
         onOpen={(id) => requestNavigation({ kind: "open", id })}
@@ -303,7 +334,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         detail={activeDetail}
         draft={draft}
         mode={mode}
-        isSaving={isSaving}
+        isSaving={isEditorSaveBusy(isSaving, archivingId)}
         isRefreshing={isRefreshing}
         isDeleting={isDeleting}
         error={error}
@@ -325,12 +356,57 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         }} />
       ) : null}
       {pendingDelete ? (
-        <Confirmation title={copy.deleteSynthesis} body={`${copy.deleteSynthesisConfirmation} “${pendingDelete.title}”`} cancelLabel={copy.cancel} confirmLabel={copy.deleteSynthesis} destructive onCancel={() => setPendingDelete(null)} onConfirm={() => void confirmDelete()} />
+        <Confirmation title={copy.deleteSynthesis} body={`${copy.deleteSynthesisConfirmation} “${pendingDelete.title}”`} cancelLabel={copy.cancel} confirmLabel={copy.deleteSynthesis} destructive busy={isDeleting} onCancel={() => setPendingDelete(null)} onConfirm={() => void confirmDelete()} />
       ) : null}
     </section>
   );
 }
 
-function Confirmation({ title, body, cancelLabel, confirmLabel, destructive = false, onCancel, onConfirm }: { title: string; body: string; cancelLabel: string; confirmLabel: string; destructive?: boolean; onCancel: () => void; onConfirm: () => void }): React.JSX.Element {
-  return <div className="synthesis-confirmation" role="alertdialog" aria-modal="true" aria-label={title}><div><h2>{title}</h2><p>{body}</p><div><button className="ghost-button" type="button" onClick={onCancel}>{cancelLabel}</button><button className={destructive ? "danger-button" : ""} type="button" onClick={onConfirm}>{confirmLabel}</button></div></div></div>;
+function Confirmation({ title, body, cancelLabel, confirmLabel, destructive = false, busy = false, onCancel, onConfirm }: { title: string; body: string; cancelLabel: string; confirmLabel: string; destructive?: boolean; busy?: boolean; onCancel: () => void; onConfirm: () => void }): React.JSX.Element {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef(onCancel);
+  const busyRef = useRef(busy);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  useEffect(() => {
+    cancelRef.current = onCancel;
+    busyRef.current = busy;
+  }, [busy, onCancel]);
+
+  useEffect(() => {
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const focusableSelector = "button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])";
+    const firstControl = dialog.querySelector<HTMLElement>(focusableSelector);
+    (firstControl ?? dialog).focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
+      const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
+      const action = getDialogKeyboardAction(event.key, event.shiftKey, activeIndex, focusable.length);
+      if (action?.kind === "cancel") {
+        if (!busyRef.current) {
+          event.preventDefault();
+          cancelRef.current();
+        }
+      } else if (action?.kind === "focus") {
+        event.preventDefault();
+        if (action.index < 0) {
+          dialog.focus();
+        } else {
+          focusable[action.index]?.focus();
+        }
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => {
+      dialog.removeEventListener("keydown", handleKeyDown);
+      trigger?.focus();
+    };
+  }, []);
+
+  return <div ref={dialogRef} className="synthesis-confirmation" role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} tabIndex={-1}><div><h2 id={titleId}>{title}</h2><p id={descriptionId}>{body}</p><div><button className="ghost-button" type="button" onClick={onCancel} disabled={busy}>{cancelLabel}</button><button className={destructive ? "danger-button" : ""} type="button" onClick={onConfirm} disabled={busy}>{confirmLabel}</button></div></div></div>;
 }

@@ -12,6 +12,7 @@ export type SynthesisListProps = {
   statusFilter: SynthesisStatus | "all";
   isLoading: boolean;
   isMutating: boolean;
+  archivingId: string | null;
   activeId: string | null;
   onStatusFilterChange: (status: SynthesisStatus | "all") => void;
   onOpen: (id: string) => void;
@@ -26,6 +27,7 @@ export function SynthesisList(_props: SynthesisListProps): React.JSX.Element {
     statusFilter,
     isLoading,
     isMutating,
+    archivingId,
     activeId,
     onStatusFilterChange,
     onOpen,
@@ -62,7 +64,7 @@ export function SynthesisList(_props: SynthesisListProps): React.JSX.Element {
             </button>
             <div className="synthesis-row-actions">
               {summary.status !== "archived" ? (
-                <button className="ghost-button" type="button" onClick={() => onArchive(summary.id)} disabled={isMutating}>{labelForSynthesisStatus("archived", language)}</button>
+                <button className="ghost-button" type="button" onClick={() => onArchive(summary.id)} disabled={isMutating}>{archivingId === summary.id ? `${labelForSynthesisStatus("archived", language)}...` : labelForSynthesisStatus("archived", language)}</button>
               ) : null}
               <button className="ghost-button synthesis-delete-trigger" type="button" onClick={() => onDelete(summary)} disabled={isMutating}>{copy.deleteSynthesis}</button>
             </div>
