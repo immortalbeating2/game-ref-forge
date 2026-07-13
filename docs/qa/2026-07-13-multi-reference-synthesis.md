@@ -102,3 +102,13 @@ Round 11 本地 migration、API CRUD、UI CRUD、快照生命周期、双语和�
 - 修复后重新执行内置浏览器聚焦回归：alertdialog 初始焦点位于“取消”，Escape 关闭后焦点恢复到“开始对比”，dirty 标题保留；确认后成功进入对比选择模式。
 - 修复后 390x844 截图未见横向裁切、控件重叠或对比操作异常；两条临时 focus QA reference 均删除成功，最终 references 与 QA 标题残留为 0。
 - 本补充仍没有执行 GitHub push、Sites deployment、生产 D1 migration 或生产 CRUD。生产验证仍未完成。
+
+## 生产部署与复测补充（2026-07-14）
+
+- GitHub `main` 与 Sites source 均同步到 `d7db34a48b02ad679b96776b044983498f561a3c`。
+- Sites version 13 已成功部署；归档包含 migration 2。生产 URL 为 `https://game-ref-forge.yeep-6613.chatgpt.site`。
+- 已登录生产页只读 DOM 验证通过：默认中文、参考/综合稿工作区切换、开始对比、添加参考入口、完整添加字段和 seed examples 均可见；添加表单可打开。
+- 生产写入未通过：内置浏览器的 Playwright fill 与 DOM-CUA type 均在最小字段动作上超时并重置会话；Chrome 扩展通道不可用。
+- 超时后回读显示表单仍为空且页面无 `R11 QA` 标题，未观察到临时生产数据。
+- 重新生成 SIWC bypass token 后，使用文档规定的 `OAI-Sites-Authorization: Bearer ...` 访问生产 API 仍在边缘层返回 `403`，因此没有在鉴权未确认时执行 API 写入。
+- 当前结论：部署成功，Round 11 生产只读可见性通过；生产 CRUD、Markdown 下载、390px 和最终清理仍是阻塞证据缺口，不能标记生产 QA 完成。

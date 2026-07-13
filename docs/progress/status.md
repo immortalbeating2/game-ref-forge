@@ -4,7 +4,7 @@ Updated: 2026-07-14
 
 ## Current Stage
 
-`Round 11 merged and locally verified; Task 9 external sync pending`
+`Round 11 deployed to Sites version 13; production write-path QA pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Round 11 Task 1-8 is merged into local `main` at `c7e9f54`; final independent review is `Approved`, merged-main validation passed, and Task 9 external sync remains pending. No Round 11 Sites deployment or production QA is claimed.
+- Round 11 is merged into `main`; final independent review is `Approved`, merged-main validation passed, GitHub and Sites source are synchronized to `d7db34a`, and Sites version 13 deployed successfully. Production write-path QA is still pending.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -38,8 +38,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 11 adds temporary 2-4 reference comparison selection, a separate synthesis list/editor workspace, server snapshots, stale/refresh state, archive/delete controls, bilingual copy, and single-item Markdown export.
 - Local validation has passed for tests, typecheck, lint, and production build.
 - After two independent final-review repair rounds, the latest automated validation passed with 21 test files / 187 tests, typecheck, lint, and build. Final independent review is `Approved`; a post-repair browser regression passed for alertdialog focus/Escape/restore, dirty-title preservation, comparison entry, 390x844 visual layout, and cleanup 0. Earlier full feature evidence still covers migration 2, HTTP/UI CRUD, exact 1024px/390px overflow metrics, and console errors 0.
-- Sites version 1 has been saved and deployed.
-- Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
+- Sites version 13 has been saved and deployed.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt.site`
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
 - Second-round design spec exists at `docs/superpowers/specs/2026-06-10-live-usability-validation-design.md`.
 - Second-round implementation plan exists at `docs/superpowers/plans/2026-06-10-live-usability-validation.md`.
@@ -216,8 +216,11 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task commit ranges: Task 1 `e86011b..19d2bfd`; Task 2 `19d2bfd..89c15ae`; Task 3 `89c15ae..0ccfb06`; Task 4 `0ccfb06..29d5dc4`; Task 5 `29d5dc4..1b1bcb4`; Task 6 `1b1bcb4..111be1e`; Task 7 `111be1e..cbbc914`.
 - The in-app browser did not capture the programmatic Blob Markdown download event. Markdown content, filename, source-link, no-media, and unsaved-warning behavior are covered by automated tests; this is a non-blocking evidence gap for Task 9 production recheck.
 - An earlier clean Browser Use `iab` initialization diagnostic failed to discover a backend; later in the same work period the existing bound in-app browser runtime became usable and completed real DOM/click/focus/390px regression. The tooling blocker is no longer current.
-- Task 9 remains pending after the local merge and local branch cleanup: GitHub push, Sites migration/deployment, authenticated production CRUD, Markdown download recheck, and production cleanup. No Round 11 production result is recorded.
+- GitHub `main` and Sites source are synchronized to `d7db34a48b02ad679b96776b044983498f561a3c`; Sites version 13 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_bd1b020d6b9c8191bf4e1c615816d208`) deployed successfully as `appgdep_6a554351cd608191b6b8348439729684` with migration 2 included in the archive.
+- Authenticated production read-only UI evidence passed after deployment: Chinese default, Round 11 workspace switch, disabled start-comparison state for seed examples, add-reference form opening, and full Round 11 fields were visible.
+- Production write-path QA is still pending. In-app Browser click could open the form, but fill/type actions repeatedly timed out and reset the control session; form values and QA title checks remained empty. Chrome extension control was unavailable after the required retry. A newly generated SIWC bypass token still returned edge-layer `403` for `/api/references` with the documented header, so no API CRUD was attempted after that probe.
+- No Round 11 QA title was visible and the add form remained empty after the failed write attempts. Markdown download and production 390px evidence remain unverified; no production CRUD pass is claimed.
 
 ## Next Suggested Step
 
-Push the verified local `main`, deploy a Sites version containing migration 2, then execute authenticated production CRUD/Markdown/390px QA and cleanup while keeping the QA document and three progress traces current.
+Restore a writable authenticated browser channel, or have the user execute the minimal production form steps in the already signed-in page, then complete CRUD/Markdown/390px QA and cleanup before declaring Round 11 complete or starting Round 12.

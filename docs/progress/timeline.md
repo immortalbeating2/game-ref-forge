@@ -1423,3 +1423,23 @@
   - All temporary subagents were already closed before cleanup.
 - Status:
   - Local branch/worktree cleanup is complete. Task 9 external synchronization, deployment, and production QA remain pending.
+
+### 2026-07-14
+
+- Branch: `main`
+- Mode: Round 11 Task 9 external synchronization and production QA attempt
+- Synchronization:
+  - First two GitHub HTTPS pushes failed with `Recv failure: Connection was reset`; repository authentication and `ADMIN` permission were valid.
+  - A later HTTP/1.1 retry succeeded. Local `main` and `origin/main` now match `d7db34a48b02ad679b96776b044983498f561a3c`.
+  - Sites source `main` was pushed to the same commit with a short-lived source credential.
+- Deployment:
+  - Packaged the validated vinext build with `dist/server/index.js`, `.openai/hosting.json`, and `drizzle/0002_multi_reference_synthesis.sql`.
+  - Saved Sites version 13 and deployed it successfully to `https://game-ref-forge.yeep-6613.chatgpt.site`.
+  - Version ID: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_bd1b020d6b9c8191bf4e1c615816d208`; deployment ID: `appgdep_6a554351cd608191b6b8348439729684`.
+- Production evidence:
+  - Authenticated production DOM showed Chinese default, the Round 11 reference/synthesis workspace switch, start-comparison control, add-reference form, full fields, and existing seed references.
+  - The add form opened, but Playwright fill and DOM-CUA type actions repeatedly timed out at the browser-control layer. Readback showed an empty form and no `R11 QA` title.
+  - Chrome extension control remained unavailable after one required delayed retry.
+  - The existing and newly rotated SIWC bypass tokens both returned edge-layer `403` with the documented `OAI-Sites-Authorization` header, so identity-less API CRUD could not start.
+- Status:
+  - Source synchronization and production deployment are complete. Production write CRUD, Markdown download, 390px evidence, and cleanup remain pending; Round 11 is not yet marked complete.

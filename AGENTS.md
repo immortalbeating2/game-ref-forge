@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 11 merged and locally verified; Task 9 external sync pending`
+- 当前阶段：`Round 11 deployed to Sites version 13; production write-path QA pending`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,11 +142,11 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 11 merged and locally verified; Task 9 external sync pending`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 Task 1-8 已合并到本地 `main`，并完成合并后测试、typecheck、lint 和 build。Task 9 的 GitHub 推送、Sites migration/deployment 和生产 CRUD 尚未执行，不得提前记录为完成。
+本项目当前为 `Round 11 deployed to Sites version 13; production write-path QA pending`。Round 11 已合并、通过本地完整门禁、同步到 GitHub，并以包含 migration 2 的 Sites version 13 成功部署。生产已确认显示 Round 11 工作区与添加表单；真实写入 CRUD、Markdown 下载和 390px 生产证据仍因当前浏览器写入控制超时及 SIWC bypass 403 而待复测，不得提前记录为完成。
 
 当前默认目标：
 
-- 按 Task 9 计划同步已验证的 `main` 到 GitHub 与 Sites，并完成生产 migration、CRUD、Markdown、390px 和清理验证。
+- 在已部署的 version 13 上完成生产 CRUD、Markdown、390px 和清理验证；优先恢复可写浏览器控制或由用户在已登录页面执行最小人工步骤。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。
@@ -169,6 +169,8 @@ Round 11 扩展边界：
 - 综合稿不写回 reference，不公开托管第三方媒体，不新增公开路由。
 
 Round 11 当前本地证据：21 个测试文件 / 187 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0；Blob Markdown 下载事件仍有非阻塞证据缺口。
+
+Round 11 当前外部状态：GitHub `main`、Sites source 和 Sites version 13 均指向 `d7db34a`；生产只读 UI 已显示“参考 / 综合稿”“开始对比”和添加表单。生产写路径尚未通过，当前会话中内置浏览器 fill/type 连续超时、Chrome 扩展通道不可用，重新生成的 SIWC bypass token 仍在边缘层返回 403。
 
 ## 来源与版权边界
 
