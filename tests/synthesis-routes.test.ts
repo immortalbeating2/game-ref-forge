@@ -100,6 +100,18 @@ describe("synthesis API routes", () => {
     expect(listSyntheses).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["unknown query parameters", "unknown=x", ["query parameter unknown is not supported"]],
+    ["duplicate status parameters", "status=draft&status=invalid", ["status must be provided at most once"]],
+    ["duplicate sort parameters", "sort=recent&sort=title", ["sort must be provided at most once"]],
+  ])("rejects %s before calling the database", async (_case, query, errors) => {
+    const response = await collection.GET(new Request(`http://local/api/syntheses?${query}`));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ errors });
+    expect(listSyntheses).not.toHaveBeenCalled();
+  });
+
   it("creates a synthesis and returns its server snapshot detail", async () => {
     vi.mocked(createSynthesis).mockResolvedValue({ ok: true, synthesis });
 

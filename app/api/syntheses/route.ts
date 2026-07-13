@@ -29,6 +29,24 @@ async function parseJson(request: Request): Promise<{ ok: true; value: unknown }
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
+  const unsupportedParameters = [...new Set(url.searchParams.keys())]
+    .filter((parameter) => parameter !== "status" && parameter !== "sort");
+
+  if (unsupportedParameters.length > 0) {
+    return Response.json(
+      { errors: unsupportedParameters.map((parameter) => `query parameter ${parameter} is not supported`) },
+      { status: 400 },
+    );
+  }
+
+  if (url.searchParams.getAll("status").length > 1) {
+    return Response.json({ errors: ["status must be provided at most once"] }, { status: 400 });
+  }
+
+  if (url.searchParams.getAll("sort").length > 1) {
+    return Response.json({ errors: ["sort must be provided at most once"] }, { status: 400 });
+  }
+
   const status = url.searchParams.get("status");
   const sort = url.searchParams.get("sort");
 
