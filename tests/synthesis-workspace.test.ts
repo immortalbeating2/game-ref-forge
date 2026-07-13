@@ -9,8 +9,10 @@ import {
   applyRefreshResult,
   canCommitController,
   getDialogKeyboardAction,
+  getInitialDialogFocusIndex,
   getInitialReferenceConsumption,
-  isEditorSaveBusy,
+  isEditorMutationBusy,
+  isRefreshingRelation,
   runOwnedSynthesisMutation,
   tryAcquireOperationGuard,
 } from "../app/synthesis/synthesis-workspace-state";
@@ -82,9 +84,51 @@ describe("synthesis workspace state regressions", () => {
     expect(getDialogKeyboardAction("Tab", false, -1, 0)).toEqual({ kind: "focus", index: -1 });
   });
 
-  it("does not expose list archiving as editor saving", () => {
-    expect(isEditorSaveBusy(false, "syn-a")).toBe(false);
-    expect(isEditorSaveBusy(true, null)).toBe(true);
+  it("chooses a stable initial dialog focus target and constrains a single control", () => {
+    expect(getInitialDialogFocusIndex(2)).toBe(0);
+    expect(getInitialDialogFocusIndex(0)).toBe(-1);
+    expect(getDialogKeyboardAction("Tab", false, 0, 1)).toEqual({ kind: "focus", index: 0 });
+    expect(getDialogKeyboardAction("Tab", true, 0, 1)).toEqual({ kind: "focus", index: 0 });
+  });
+
+  it("treats refresh as an editor mutation busy state", () => {
+    expect(isEditorMutationBusy({ isSaving: false, isArchiving: false, isRefreshing: true })).toBe(true);
+    expect(isEditorMutationBusy({ isSaving: false, isArchiving: false, isRefreshing: false })).toBe(false);
+  });
+
+  it("wires refresh busy into field, save, delete, and visible status controls", () => {
+    const editorSource = readFileSync(
+      new URL("../app/synthesis/synthesis-editor.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(editorSource).toContain("getIsEditorMutationBusy({ isSaving, isArchiving, isRefreshing })");
+    expect(editorSource).toContain("copy.refreshingSnapshot");
+    expect(editorSource).toMatch(/onDelete[^\n]+disabled=\{isDeleting \|\| isEditorMutationBusy\}/);
+    expect(editorSource).toMatch(/type="submit" disabled=\{isEditorMutationBusy\}/);
+  });
+
+  it("marks only the requested relation card as refreshing", () => {
+    expect(isRefreshingRelation("relation-a", "relation-a")).toBe(true);
+    expect(isRefreshingRelation("relation-a", "relation-b")).toBe(false);
+    expect(isRefreshingRelation(null, "relation-a")).toBe(false);
+
+    const editorSource = readFileSync(
+      new URL("../app/synthesis/synthesis-editor.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(editorSource).toContain("isRefreshingRelation(refreshingRelationId, link.id)");
+  });
+
+  it("uses the shared app confirmation for synthesis and reference dirty dialogs", () => {
+    const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+    const workspaceSource = readFileSync(
+      new URL("../app/synthesis/synthesis-workspace.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(pageSource).toContain("<SynthesisConfirmation");
+    expect(workspaceSource).toContain("<SynthesisConfirmation");
   });
 
   it("does not start Save A while Archive A is pending", async () => {

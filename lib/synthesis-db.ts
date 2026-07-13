@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { references, synthesisReferences, syntheses } from "../db/schema";
 import { referenceRowToRecord } from "./reference-db";
@@ -190,10 +190,28 @@ export async function createSynthesis(input: CreateSynthesisInput): Promise<Synt
     snapshotUpdatedAt: now,
   }));
   const db = getDb();
-  await db.batch([
-    db.insert(syntheses).values(recordToSynthesisRow(record)),
-    db.insert(synthesisReferences).values(relationRows),
-  ]);
+  try {
+    await db.batch([
+      db.insert(syntheses).values(recordToSynthesisRow(record)),
+      db.insert(synthesisReferences).values(relationRows),
+    ]);
+  } catch (error) {
+    const remainingReferences = await db
+      .select({ id: references.id })
+      .from(references)
+      .where(inArray(references.id, referenceIds));
+    const remainingIds = new Set(remainingReferences.map(({ id }) => id));
+    const missingAfterFailure = referenceIds.filter((id) => !remainingIds.has(id));
+
+    if (missingAfterFailure.length > 0) {
+      return {
+        ok: false,
+        code: "reference_not_found",
+        reference_ids: missingAfterFailure,
+      };
+    }
+    throw error;
+  }
 
   const synthesis = await getSynthesis(record.id);
   if (!synthesis) throw new Error("created synthesis was not found");
@@ -227,38 +245,128 @@ export async function deleteSynthesis(id: string): Promise<boolean> {
   return deleted.length > 0;
 }
 
+export function buildRefreshRelationCasCondition(input: {
+  synthesisId: string;
+  relationId: string;
+  referenceId: string;
+  previousSnapshotJson: string;
+  previousSnapshotUpdatedAt: string;
+  referenceUpdatedAt: string;
+}) {
+  return and(
+    eq(synthesisReferences.synthesisId, input.synthesisId),
+    eq(synthesisReferences.id, input.relationId),
+    eq(synthesisReferences.referenceId, input.referenceId),
+    eq(synthesisReferences.snapshotJson, input.previousSnapshotJson),
+    eq(synthesisReferences.snapshotUpdatedAt, input.previousSnapshotUpdatedAt),
+    sql`exists (select 1 from ${references} where ${references.id} = ${input.referenceId} and ${references.updatedAt} = ${input.referenceUpdatedAt})`,
+  )!;
+}
+
+export function buildRefreshSynthesisCasCondition(input: {
+  synthesisId: string;
+  relationId: string;
+  referenceId: string;
+  snapshotJson: string;
+  snapshotUpdatedAt: string;
+}) {
+  return and(
+    eq(syntheses.id, input.synthesisId),
+    sql`exists (select 1 from ${synthesisReferences} where ${synthesisReferences.synthesisId} = ${input.synthesisId} and ${synthesisReferences.id} = ${input.relationId} and ${synthesisReferences.referenceId} = ${input.referenceId} and ${synthesisReferences.snapshotJson} = ${input.snapshotJson} and ${synthesisReferences.snapshotUpdatedAt} = ${input.snapshotUpdatedAt})`,
+  )!;
+}
+
 export async function refreshSynthesisReference(
   synthesisId: string,
   relationId: string,
 ): Promise<SynthesisRefreshResult> {
   const db = getDb();
-  const [link] = await db
-    .select({ relation: synthesisReferences, reference: references })
-    .from(synthesisReferences)
-    .leftJoin(references, eq(synthesisReferences.referenceId, references.id))
-    .where(and(
-      eq(synthesisReferences.synthesisId, synthesisId),
-      eq(synthesisReferences.id, relationId),
-    ))
-    .limit(1);
+  const loadTarget = async () => {
+    const [target] = await db
+      .select({ relation: synthesisReferences, reference: references })
+      .from(synthesisReferences)
+      .leftJoin(references, eq(synthesisReferences.referenceId, references.id))
+      .where(and(
+        eq(synthesisReferences.synthesisId, synthesisId),
+        eq(synthesisReferences.id, relationId),
+      ))
+      .limit(1);
+    return target;
+  };
 
+  let link = await loadTarget();
   if (!link) return { ok: false, code: "relation_not_found" };
-  if (link.reference === null) return { ok: false, code: "reference_unavailable" };
+  if (link.reference === null || link.relation.referenceId === null) {
+    return { ok: false, code: "reference_unavailable" };
+  }
+  const originalReferenceId = link.relation.referenceId;
 
-  const now = new Date().toISOString();
-  const snapshot = createReferenceSnapshot(referenceRowToRecord(link.reference));
-  await db.batch([
-    db
-      .update(synthesisReferences)
-      .set({ snapshotJson: JSON.stringify(snapshot), snapshotUpdatedAt: now })
-      .where(eq(synthesisReferences.id, relationId)),
-    db
-      .update(syntheses)
-      .set({ updatedAt: now })
-      .where(eq(syntheses.id, synthesisId)),
-  ]);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (link.relation.referenceId !== originalReferenceId) {
+      return { ok: false, code: "relation_not_found" };
+    }
+    if (link.reference === null) {
+      return { ok: false, code: "reference_unavailable" };
+    }
 
-  const synthesis = await getSynthesis(synthesisId);
-  if (!synthesis) throw new Error("refreshed synthesis was not found");
-  return { ok: true, synthesis };
+    const currentReference = referenceRowToRecord(link.reference);
+    const now = new Date().toISOString();
+    const snapshot = createReferenceSnapshot(currentReference);
+    const snapshotJson = JSON.stringify(snapshot);
+    const [updatedRelations, updatedSyntheses] = await db.batch([
+      db
+        .update(synthesisReferences)
+        .set({ snapshotJson, snapshotUpdatedAt: now })
+        .where(buildRefreshRelationCasCondition({
+          synthesisId,
+          relationId,
+          referenceId: originalReferenceId,
+          previousSnapshotJson: link.relation.snapshotJson,
+          previousSnapshotUpdatedAt: link.relation.snapshotUpdatedAt,
+          referenceUpdatedAt: currentReference.updated_at,
+        }))
+        .returning({ id: synthesisReferences.id }),
+      db
+        .update(syntheses)
+        .set({ updatedAt: now })
+        .where(buildRefreshSynthesisCasCondition({
+          synthesisId,
+          relationId,
+          referenceId: originalReferenceId,
+          snapshotJson,
+          snapshotUpdatedAt: now,
+        }))
+        .returning({ id: syntheses.id }),
+    ]);
+
+    if (updatedRelations.length > 0) {
+      if (updatedSyntheses.length === 0) {
+        throw new Error("synthesis timestamp was not updated with refreshed snapshot");
+      }
+      const synthesis = await getSynthesis(synthesisId);
+      if (!synthesis) throw new Error("refreshed synthesis was not found");
+      return { ok: true, synthesis };
+    }
+
+    link = await loadTarget();
+    if (!link) return { ok: false, code: "relation_not_found" };
+    if (link.relation.referenceId === null || link.reference === null) {
+      return { ok: false, code: "reference_unavailable" };
+    }
+    if (link.relation.referenceId !== originalReferenceId) {
+      return { ok: false, code: "relation_not_found" };
+    }
+
+    const storedSnapshot = parseReferenceSnapshot(link.relation.snapshotJson);
+    if (
+      storedSnapshot?.reference_id === originalReferenceId &&
+      storedSnapshot.reference_updated_at === link.reference.updatedAt
+    ) {
+      const synthesis = await getSynthesis(synthesisId);
+      if (!synthesis) throw new Error("refreshed synthesis was not found");
+      return { ok: true, synthesis };
+    }
+  }
+
+  throw new Error("snapshot refresh could not settle on the latest reference version");
 }

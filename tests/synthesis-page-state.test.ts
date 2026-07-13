@@ -3,11 +3,16 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  getComparisonStartDecision,
   getComparisonAvailability,
   reconcileComparisonSelectionSource,
   toggleSynthesisSelection,
 } from "../lib/synthesis-selection";
-import { consumeExternalBackRequest } from "../app/synthesis/synthesis-workspace-state";
+import {
+  consumeExternalBackRequest,
+  recoverMissingCreateReferences,
+} from "../app/synthesis/synthesis-workspace-state";
+import { createEmptySynthesisDraft } from "../lib/synthesis-draft";
 
 describe("synthesis page comparison selection state", () => {
   it("allows comparison only after persisted references are ready", () => {
@@ -76,6 +81,41 @@ describe("synthesis page comparison selection state", () => {
     ).toEqual(["reference-a", "reference-b", "reference-c", "reference-d"]);
   });
 
+  it("requires an app confirmation before comparison discards a dirty reference edit", () => {
+    expect(getComparisonStartDecision({
+      canStartComparison: true,
+      isSavingReference: false,
+      hasDirtyReferenceEdit: true,
+    })).toBe("confirm-discard");
+    expect(getComparisonStartDecision({
+      canStartComparison: true,
+      isSavingReference: false,
+      hasDirtyReferenceEdit: false,
+    })).toBe("start");
+  });
+
+  it("keeps comparison blocked while a reference save is active", () => {
+    expect(getComparisonStartDecision({
+      canStartComparison: true,
+      isSavingReference: true,
+      hasDirtyReferenceEdit: true,
+    })).toBe("blocked");
+  });
+
+  it("preserves the create draft and clears stale IDs after a selected reference disappears", () => {
+    const draft = {
+      ...createEmptySynthesisDraft(),
+      title: "Keep this synthesis",
+      original_direction: "Keep this direction",
+    };
+
+    expect(recoverMissingCreateReferences(draft)).toEqual({
+      draft,
+      referenceIds: [],
+      needsReselection: true,
+    });
+  });
+
   it("consumes each external back request token only once", () => {
     const first = consumeExternalBackRequest(0, 1);
     const repeated = consumeExternalBackRequest(first.nextHandledToken, 1);
@@ -107,5 +147,31 @@ describe("synthesis page comparison selection state", () => {
     );
     expect(workspaceSource).toContain("consumeExternalBackRequest");
     expect(workspaceSource).toContain('requestNavigation({ kind: "back" })');
+  });
+
+  it("lifts a failed create draft to the page while references are reselected", () => {
+    const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+    const workspaceSource = readFileSync(
+      new URL("../app/synthesis/synthesis-workspace.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(pageSource).toContain("pendingSynthesisDraft");
+    expect(pageSource).toContain("initialDraft={pendingSynthesisDraft}");
+    expect(pageSource).toContain("onReselectReferences=");
+    expect(workspaceSource).toContain("recoverMissingCreateReferences");
+    expect(workspaceSource).toContain("createReferenceIds.current = recovery.referenceIds");
+  });
+
+  it("reloads persisted references before a recovered draft can reselect IDs", () => {
+    const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+    const recoveryStart = pageSource.indexOf("async function reselectSynthesisReferences");
+    const recoveryEnd = pageSource.indexOf("async function previewMetadata", recoveryStart);
+    const recoverySource = pageSource.slice(recoveryStart, recoveryEnd);
+
+    expect(recoveryStart).toBeGreaterThan(-1);
+    expect(recoverySource).toContain('await fetch("/api/references")');
+    expect(recoverySource).toContain("setReferences(rows.length > 0 ? rows : seedReferences)");
+    expect(recoverySource).toContain('nextSource === "persisted"');
   });
 });

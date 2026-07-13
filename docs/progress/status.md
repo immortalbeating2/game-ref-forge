@@ -37,7 +37,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - First-version research desk UI exists with filters, gallery, detail panel, add form, metadata preview, and seed fallback.
 - Round 11 adds temporary 2-4 reference comparison selection, a separate synthesis list/editor workspace, server snapshots, stale/refresh state, archive/delete controls, bilingual copy, and single-item Markdown export.
 - Local validation has passed for tests, typecheck, lint, and production build.
-- Round 11 local validation passed with 20 test files / 158 tests, typecheck, lint, build, migration 2, HTTP API CRUD, in-app browser CRUD, 1024px and 390px layout checks, console errors 0, and final local cleanup 0.
+- After two independent final-review repair rounds, the latest automated validation passed with 21 test files / 187 tests, typecheck, lint, and build. Earlier feature-head evidence covers migration 2, HTTP API CRUD, in-app browser CRUD, 1024px and 390px layout checks, console errors 0, and final local cleanup 0; those browser/API flows were not rerun after the review repairs.
 - Sites version 1 has been saved and deployed.
 - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
@@ -208,7 +208,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 11 application implementation is complete through Task 8 on the feature branch; the branch is not yet merged to `main`.
 - The Round 11 design baseline and TDD implementation plan were approved before implementation; Task 1-7 commits run from `153078b` to `cbbc914`.
 - The user approved Subagent-Driven execution. Branch `codex/round-11-multi-reference-synthesis` and the isolated worktree `.worktrees/round-11-multi-reference-synthesis` were created from synchronized commit `153078b`.
-- Round 11 baseline verification passed with 11 test files / 71 tests; the final feature-head verification passed with 20 test files / 158 tests, typecheck, lint, build, local migration/API/browser QA, 1024px and 390px overflow 0, console errors 0, and cleanup 0.
+- Round 11 baseline verification passed with 11 test files / 71 tests; after two independent final-review repair rounds the latest automated feature-head verification passed with 21 test files / 187 tests, typecheck, lint, and build. Local migration/API/browser QA, 1024px and 390px overflow 0, console errors 0, and cleanup 0 remain earlier pre-repair evidence and were not rerun in this repair.
+- Final-review repairs cover refresh ownership/source CAS and atomic timestamp semantics, strict closed snapshot parsing, dirty reference-edit confirmation, failed-create draft reselection, localized synthesis failures, refresh mutation busy state, create batch deletion races, required non-empty inspiration entry IDs, alertdialog focus behavior, and relation-specific refresh loading.
+- A real in-memory SQLite test executes the production refresh CAS predicates and verifies stale-write rejection plus relation/synthesis transaction atomicity; no dependency or migration change was introduced.
 - Task commit ranges: Task 1 `e86011b..19d2bfd`; Task 2 `19d2bfd..89c15ae`; Task 3 `89c15ae..0ccfb06`; Task 4 `0ccfb06..29d5dc4`; Task 5 `29d5dc4..1b1bcb4`; Task 6 `1b1bcb4..111be1e`; Task 7 `111be1e..cbbc914`.
 - The in-app browser did not capture the programmatic Blob Markdown download event. Markdown content, filename, source-link, no-media, and unsaved-warning behavior are covered by automated tests; this is a non-blocking evidence gap for Task 9 production recheck.
 - Task 9 remains pending: merge to local `main`, then GitHub push, Sites migration/deployment, authenticated production CRUD, and production cleanup. No Round 11 production result is recorded.

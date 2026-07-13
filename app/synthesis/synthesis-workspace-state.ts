@@ -86,6 +86,14 @@ export function getInitialReferenceConsumption(
   };
 }
 
+export function recoverMissingCreateReferences(draft: SynthesisDraft) {
+  return {
+    draft: { ...draft },
+    referenceIds: [] as string[],
+    needsReselection: true as const,
+  };
+}
+
 export function consumeExternalBackRequest(
   handledToken: number,
   requestToken: number,
@@ -140,9 +148,23 @@ export function getDialogKeyboardAction(
   return null;
 }
 
-export function isEditorSaveBusy(isSaveActive: boolean, archivingId: string | null) {
-  void archivingId;
-  return isSaveActive;
+export function getInitialDialogFocusIndex(focusableCount: number) {
+  return focusableCount > 0 ? 0 : -1;
+}
+
+export function isRefreshingRelation(
+  refreshingRelationId: string | null,
+  relationId: string,
+) {
+  return refreshingRelationId === relationId;
+}
+
+export function isEditorMutationBusy(options: {
+  isSaving: boolean;
+  isArchiving: boolean;
+  isRefreshing: boolean;
+}) {
+  return options.isSaving || options.isArchiving || options.isRefreshing;
 }
 
 export function canCommitController(

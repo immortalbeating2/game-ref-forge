@@ -89,3 +89,13 @@
 ## 结论
 
 Round 11 本地 migration、API CRUD、UI CRUD、快照生命周期、双语和响应式主路径通过。唯一非阻塞证据缺口是内置浏览器未捕获 Blob Markdown 下载事件；生成内容、文件名和安全边界已有自动化测试覆盖，生产复测时继续验证真实下载。
+
+## 两轮独立终审补充
+
+- 第一轮按 RED→GREEN 修复 refresh snapshot TOCTOU/CAS、snapshot 全层级闭集校验与稳定 fallback、reference dirty 开始对比确认、创建失败草稿恢复/重新选择、综合稿错误双语化和 refresh editor mutation busy。
+- 第二轮按 RED→GREEN 修复 create 初查后、batch 写入前 reference 删除竞态；batch 失败后回查全部所选 IDs，缺失时返回精确 IDs，仍全部存在时继续抛出原持久化错误。
+- 第二轮同时要求 inspiration entry `id` 必需且非空；共享 alertdialog 支持 `aria-modal`、初始焦点、Escape、Tab 焦点约束和焦点恢复；refresh loading 仅显示在目标 relation 卡片，editor 其他 mutation 仍全局 busy。
+- RED 证据包括：第一轮 snapshot/DB 15 项、页面恢复 4 项与缓存重载 1 项、本地化/busy 5 项预期失败；第二轮 batch requery、entry ID、dialog/relation helper 均先失败；真实 SQLite CAS 首跑因生产条件构造器尚未导出而 1 项失败。
+- GREEN 证据：聚焦 6 文件 / 88 测试通过；全量 21 文件 / 187 测试通过；typecheck、lint、build、`git diff --check` 通过。
+- 真实内存 SQLite 测试直接执行生产 Drizzle CAS 条件，验证旧 refresh 不覆盖较新 snapshot、事务回滚无半更新、成功事务同步更新 relation snapshot 与 synthesis `updated_at`。未引入新依赖，未修改 migration。
+- 本补充仅为本地自动化终审证据，没有重新执行浏览器布局/CRUD，也没有执行 GitHub push、Sites deployment、生产 D1 migration 或生产 CRUD。生产验证仍未完成。

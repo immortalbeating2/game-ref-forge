@@ -28,7 +28,7 @@ type StatementKind = "insert" | "update" | "delete";
 
 const sqliteDialect = new SQLiteSyncDialect();
 
-type FakeStatement = {
+type FakeStatement = PromiseLike<unknown[]> & {
   kind: StatementKind;
   table: unknown;
   payload?: unknown;
@@ -37,7 +37,7 @@ type FakeStatement = {
   values(value: unknown): FakeStatement;
   set(value: unknown): FakeStatement;
   where(value: unknown): FakeStatement;
-  returning(shape?: unknown): Promise<unknown[]>;
+  returning(shape?: unknown): FakeStatement;
 };
 
 function compileExpression(expression: unknown) {
@@ -95,7 +95,10 @@ function makeStatement(
     },
     returning(shape) {
       statement.returningShape = shape;
-      return Promise.resolve(returningResults.shift() ?? []);
+      return statement;
+    },
+    then(onFulfilled, onRejected) {
+      return Promise.resolve(returningResults.shift() ?? []).then(onFulfilled, onRejected);
     },
   };
   statements.push(statement);
@@ -105,9 +108,13 @@ function makeStatement(
 function useFakeDb(options: {
   selectResults?: unknown[][];
   returningResults?: unknown[][];
+  batchResults?: unknown[][][];
+  batchErrors?: unknown[];
 } = {}) {
   const selectResults = [...(options.selectResults ?? [])];
   const returningResults = [...(options.returningResults ?? [])];
+  const batchResults = [...(options.batchResults ?? [])];
+  const batchErrors = [...(options.batchErrors ?? [])];
   const queries: FakeQuery[] = [];
   const statements: FakeStatement[] = [];
   const batches: FakeStatement[][] = [];
@@ -123,7 +130,9 @@ function useFakeDb(options: {
     delete: vi.fn((table: unknown) => makeStatement("delete", table, statements, returningResults)),
     batch: vi.fn(async (batch: FakeStatement[]) => {
       batches.push(batch);
-      return batch.map(() => ({ success: true }));
+      const batchError = batchErrors.shift();
+      if (batchError !== undefined) throw batchError;
+      return batchResults.shift() ?? batch.map(() => []);
     }),
   };
 
@@ -538,6 +547,56 @@ describe("synthesis data access", () => {
     ]);
   });
 
+  it("returns exact missing references when a create batch loses a reference race", async () => {
+    const ref1 = makeReference();
+    const ref2 = makeReference({ id: "ref-2", title: "Second" });
+    const persistenceError = new Error("FOREIGN KEY constraint failed");
+    const fake = useFakeDb({
+      batchErrors: [persistenceError],
+      selectResults: [
+        [toReferenceRow(ref1), toReferenceRow(ref2)],
+        [{ id: "ref-2" }],
+      ],
+    });
+
+    await expect(createSynthesis({
+      title: "Race",
+      status: "draft",
+      reference_ids: ["ref-1", "ref-2"],
+    })).resolves.toEqual({
+      ok: false,
+      code: "reference_not_found",
+      reference_ids: ["ref-1"],
+    });
+    expect(fake.batches).toHaveLength(1);
+    expect(fake.queries).toHaveLength(2);
+    expect(compileExpression(findOperation(fake.queries[1], "where").args[0])).toEqual({
+      sql: "\"references\".\"id\" in (?, ?)",
+      params: ["ref-1", "ref-2"],
+    });
+  });
+
+  it("rethrows a create batch error when every selected reference still exists", async () => {
+    const ref1 = makeReference();
+    const ref2 = makeReference({ id: "ref-2", title: "Second" });
+    const persistenceError = new Error("D1 write failed");
+    const fake = useFakeDb({
+      batchErrors: [persistenceError],
+      selectResults: [
+        [toReferenceRow(ref1), toReferenceRow(ref2)],
+        [{ id: "ref-1" }, { id: "ref-2" }],
+      ],
+    });
+
+    await expect(createSynthesis({
+      title: "Persistent failure",
+      status: "draft",
+      reference_ids: ["ref-1", "ref-2"],
+    })).rejects.toBe(persistenceError);
+    expect(fake.batches).toHaveLength(1);
+    expect(fake.queries).toHaveLength(2);
+  });
+
   it("updates only synthesis fields and preserves the fixed relation set", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-13T05:00:00.000Z"));
@@ -645,6 +704,7 @@ describe("synthesis data access", () => {
     });
     const updatedRow = makeSynthesisRow({ updatedAt: "2026-07-13T06:00:00.000Z" });
     const fake = useFakeDb({
+      batchResults: [[[ { id: "link-1" } ], [ { id: "syn-1" } ]]],
       selectResults: [
         [{ relation, reference: toReferenceRow(current) }],
         [updatedRow],
@@ -681,19 +741,106 @@ describe("synthesis data access", () => {
       snapshotUpdatedAt: "2026-07-13T06:00:00.000Z",
     });
     expect(JSON.parse((relationUpdate.payload as { snapshotJson: string }).snapshotJson)).toEqual(refreshedSnapshot);
-    expect(compileExpression(relationUpdate.whereClause)).toEqual({
-      sql: "\"synthesis_references\".\"id\" = ?",
-      params: ["link-1"],
-    });
+    const relationCas = compileExpression(relationUpdate.whereClause);
+    expect(relationCas.sql).toBe("(\"synthesis_references\".\"synthesis_id\" = ? and \"synthesis_references\".\"id\" = ? and \"synthesis_references\".\"reference_id\" = ? and \"synthesis_references\".\"snapshot_json\" = ? and \"synthesis_references\".\"snapshot_updated_at\" = ? and exists (select 1 from \"references\" where \"references\".\"id\" = ? and \"references\".\"updated_at\" = ?))");
+    expect(relationCas.params).toEqual([
+      "syn-1",
+      "link-1",
+      "ref-1",
+      relation.snapshotJson,
+      relation.snapshotUpdatedAt,
+      "ref-1",
+      current.updated_at,
+    ]);
     expect(synthesisUpdate.table).toBe(syntheses);
     expect(synthesisUpdate).toMatchObject({
       kind: "update",
       payload: { updatedAt: "2026-07-13T06:00:00.000Z" },
     });
-    expect(compileExpression(synthesisUpdate.whereClause)).toEqual({
-      sql: "\"syntheses\".\"id\" = ?",
-      params: ["syn-1"],
+    const synthesisCas = compileExpression(synthesisUpdate.whereClause);
+    expect(synthesisCas.sql).toBe("(\"syntheses\".\"id\" = ? and exists (select 1 from \"synthesis_references\" where \"synthesis_references\".\"synthesis_id\" = ? and \"synthesis_references\".\"id\" = ? and \"synthesis_references\".\"reference_id\" = ? and \"synthesis_references\".\"snapshot_json\" = ? and \"synthesis_references\".\"snapshot_updated_at\" = ?))");
+    expect(synthesisCas.params).toEqual([
+      "syn-1",
+      "syn-1",
+      "link-1",
+      "ref-1",
+      JSON.stringify(refreshedSnapshot),
+      "2026-07-13T06:00:00.000Z",
+    ]);
+  });
+
+  it("retries from the latest source when the refresh compare-and-swap loses a race", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-13T06:00:00.000Z"));
+    const original = makeReference({ title: "Version A", updated_at: "2026-07-13T05:00:00.000Z" });
+    const latest = makeReference({ title: "Version B", updated_at: "2026-07-13T05:30:00.000Z" });
+    const oldSnapshot = createReferenceSnapshot(makeReference({ title: "Stored" }));
+    const relation = makeRelationRow(oldSnapshot);
+    const latestSnapshot = createReferenceSnapshot(latest);
+    const refreshedRelation = makeRelationRow(latestSnapshot, {
+      snapshotUpdatedAt: "2026-07-13T06:00:00.000Z",
     });
+    const updatedRow = makeSynthesisRow({ updatedAt: "2026-07-13T06:00:00.000Z" });
+    const fake = useFakeDb({
+      batchResults: [
+        [[], []],
+        [[{ id: "link-1" }], [{ id: "syn-1" }]],
+      ],
+      selectResults: [
+        [{ relation, reference: toReferenceRow(original) }],
+        [{ relation, reference: toReferenceRow(latest) }],
+        [updatedRow],
+        [{ relation: refreshedRelation, reference: toReferenceRow(latest) }],
+      ],
+    });
+
+    const result = await refreshSynthesisReference("syn-1", "link-1");
+
+    expect(result).toMatchObject({
+      ok: true,
+      synthesis: {
+        references: [{ snapshot: { title: "Version B", reference_updated_at: latest.updated_at } }],
+      },
+    });
+    expect(fake.batches).toHaveLength(2);
+    expect(JSON.parse((fake.batches[1][0].payload as { snapshotJson: string }).snapshotJson)).toEqual(latestSnapshot);
+  });
+
+  it("returns relation_not_found when ownership disappears before the CAS write", async () => {
+    const current = makeReference();
+    const relation = makeRelationRow(createReferenceSnapshot(current));
+    const fake = useFakeDb({
+      batchResults: [[[], []]],
+      selectResults: [
+        [{ relation, reference: toReferenceRow(current) }],
+        [],
+      ],
+    });
+
+    await expect(refreshSynthesisReference("syn-1", "link-1")).resolves.toEqual({
+      ok: false,
+      code: "relation_not_found",
+    });
+    expect(fake.batches).toHaveLength(1);
+  });
+
+  it("returns reference_unavailable when the source disappears before the CAS retry", async () => {
+    const current = makeReference();
+    const relation = makeRelationRow(createReferenceSnapshot(current));
+    const unavailableRelation = { ...relation, referenceId: null };
+    const fake = useFakeDb({
+      batchResults: [[[], []]],
+      selectResults: [
+        [{ relation, reference: toReferenceRow(current) }],
+        [{ relation: unavailableRelation, reference: null }],
+      ],
+    });
+
+    await expect(refreshSynthesisReference("syn-1", "link-1")).resolves.toEqual({
+      ok: false,
+      code: "reference_unavailable",
+    });
+    expect(fake.batches).toHaveLength(1);
   });
 
   it.each([

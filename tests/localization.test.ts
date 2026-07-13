@@ -6,6 +6,7 @@ import {
   labelForPublicStatus,
   labelForQualityStatus,
   labelForSynthesisStatus,
+  synthesisErrorMessage,
   uiCopy,
 } from "../lib/localization";
 
@@ -17,6 +18,9 @@ const synthesisCopyKeys = [
   "enterSynthesis",
   "comparisonCount",
   "selectedForComparison",
+  "discardReferenceEditTitle",
+  "discardReferenceEditConfirmation",
+  "discardReferenceEditAndCompare",
   "synthesisWorkspace",
   "syntheses",
   "createSynthesis",
@@ -42,6 +46,14 @@ const synthesisCopyKeys = [
   "savingSynthesis",
   "synthesisSaved",
   "synthesisSaveFailed",
+  "reselectSynthesisReferences",
+  "synthesisValidationFailed",
+  "synthesisReferencesChanged",
+  "synthesisRelationNotFound",
+  "synthesisReferenceUnavailable",
+  "synthesisNotFound",
+  "synthesisMigrationRequired",
+  "synthesisOperationFailed",
   "unsavedChanges",
   "unsavedChangesConfirmation",
   "deleteSynthesis",
@@ -75,6 +87,24 @@ describe("uiCopy", () => {
     for (const key of synthesisCopyKeys) {
       expect(uiCopy(language)[key], `${language}.${key}`).toBeTypeOf("string");
       expect(uiCopy(language)[key].trim(), `${language}.${key}`).not.toBe("");
+    }
+  });
+
+  it("maps synthesis API and fallback failures to localized user copy", () => {
+    const codes = [
+      "validation",
+      "reference_not_found",
+      "relation_not_found",
+      "reference_unavailable",
+      "not_found",
+      "migration_required",
+      "operation_failed",
+      undefined,
+    ] as const;
+
+    for (const code of codes) {
+      expect(synthesisErrorMessage(code, "zh")).toMatch(/[\u4e00-\u9fff]/);
+      expect(synthesisErrorMessage(code, "en")).toMatch(/[A-Za-z]/);
     }
   });
 

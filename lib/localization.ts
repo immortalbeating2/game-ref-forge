@@ -142,6 +142,9 @@ const copy = {
     enterSynthesis: "进入综合稿",
     comparisonCount: "已选择 {count} / 4",
     selectedForComparison: "已选择",
+    discardReferenceEditTitle: "未保存的参考编辑",
+    discardReferenceEditConfirmation: "开始对比会丢弃当前参考的未保存修改，是否继续？",
+    discardReferenceEditAndCompare: "丢弃修改并开始对比",
     synthesisWorkspace: "综合稿工作区",
     syntheses: "综合稿",
     createSynthesis: "新建综合稿",
@@ -167,6 +170,14 @@ const copy = {
     savingSynthesis: "正在保存综合稿...",
     synthesisSaved: "综合稿已保存。",
     synthesisSaveFailed: "综合稿保存失败；草稿内容已保留。",
+    reselectSynthesisReferences: "返回参考并重新选择",
+    synthesisValidationFailed: "请检查综合稿标题、状态和字段长度后重试。",
+    synthesisReferencesChanged: "所选参考已发生变化；草稿已保留，请返回参考并重新选择。",
+    synthesisRelationNotFound: "这条综合稿参考关系已不存在，请重新打开综合稿。",
+    synthesisReferenceUnavailable: "当前参考已不可用，旧快照保持不变。",
+    synthesisNotFound: "综合稿已不存在或无法读取。",
+    synthesisMigrationRequired: "综合稿数据尚未就绪，请完成数据库迁移后重试。",
+    synthesisOperationFailed: "综合稿操作失败，请稍后重试。",
     unsavedChanges: "有未保存修改",
     unsavedChangesConfirmation: "仍有未保存修改，确定要离开吗？",
     deleteSynthesis: "删除综合稿",
@@ -351,6 +362,9 @@ const copy = {
     enterSynthesis: "Enter synthesis",
     comparisonCount: "{count} / 4 selected",
     selectedForComparison: "Selected",
+    discardReferenceEditTitle: "Unsaved reference edits",
+    discardReferenceEditConfirmation: "Starting a comparison will discard the unsaved reference edits. Continue?",
+    discardReferenceEditAndCompare: "Discard edits and compare",
     synthesisWorkspace: "Synthesis workspace",
     syntheses: "Syntheses",
     createSynthesis: "New synthesis",
@@ -376,6 +390,14 @@ const copy = {
     savingSynthesis: "Saving synthesis...",
     synthesisSaved: "Synthesis saved.",
     synthesisSaveFailed: "Synthesis save failed; draft contents were preserved.",
+    reselectSynthesisReferences: "Return to references and reselect",
+    synthesisValidationFailed: "Check the synthesis title, status, and field lengths, then try again.",
+    synthesisReferencesChanged: "The selected references changed. Your draft is preserved; return and reselect them.",
+    synthesisRelationNotFound: "This synthesis reference relation no longer exists. Reopen the synthesis.",
+    synthesisReferenceUnavailable: "The current reference is unavailable. The previous snapshot was kept.",
+    synthesisNotFound: "The synthesis no longer exists or could not be read.",
+    synthesisMigrationRequired: "Synthesis data is not ready. Apply the database migration and try again.",
+    synthesisOperationFailed: "The synthesis operation failed. Try again shortly.",
     unsavedChanges: "Unsaved changes",
     unsavedChangesConfirmation: "You have unsaved changes. Leave anyway?",
     deleteSynthesis: "Delete synthesis",
@@ -564,6 +586,39 @@ export function labelForPublicStatus(value: PublicStatus, language: Language = "
 
 export function labelForQualityStatus(value: QualityStatus, language: Language = "zh") {
   return qualityStatusLabels[language][value];
+}
+
+export type SynthesisErrorCode =
+  | "validation"
+  | "reference_not_found"
+  | "relation_not_found"
+  | "reference_unavailable"
+  | "not_found"
+  | "migration_required"
+  | "operation_failed";
+
+export function synthesisErrorMessage(
+  code: SynthesisErrorCode | string | undefined,
+  language: Language = "zh",
+) {
+  const copy = uiCopy(language);
+  switch (code) {
+    case "validation":
+      return copy.synthesisValidationFailed;
+    case "reference_not_found":
+      return copy.synthesisReferencesChanged;
+    case "relation_not_found":
+      return copy.synthesisRelationNotFound;
+    case "reference_unavailable":
+      return copy.synthesisReferenceUnavailable;
+    case "not_found":
+      return copy.synthesisNotFound;
+    case "migration_required":
+      return copy.synthesisMigrationRequired;
+    case "operation_failed":
+    default:
+      return copy.synthesisOperationFailed;
+  }
 }
 
 export function labelForSynthesisStatus(value: SynthesisStatus, language: Language = "zh") {

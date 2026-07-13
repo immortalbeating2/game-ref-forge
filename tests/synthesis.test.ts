@@ -155,10 +155,61 @@ describe("synthesis domain contract", () => {
     expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
   });
 
+  it.each([
+    ["top level", (snapshot: ReturnType<typeof createReferenceSnapshot>) => ({ ...snapshot, extra: true })],
+    ["scores", (snapshot: ReturnType<typeof createReferenceSnapshot>) => ({ ...snapshot, scores: { ...snapshot.scores, extra: 3 } })],
+    ["tags", (snapshot: ReturnType<typeof createReferenceSnapshot>) => ({ ...snapshot, tags: { ...snapshot.tags, extra: [] } })],
+    ["inspiration", (snapshot: ReturnType<typeof createReferenceSnapshot>) => ({ ...snapshot, inspiration: { ...snapshot.inspiration, extra: "unsafe" } })],
+    ["inspiration entry", (snapshot: ReturnType<typeof createReferenceSnapshot>) => ({
+      ...snapshot,
+      inspiration: {
+        ...snapshot.inspiration,
+        inspiration_entries: [{
+          id: "entry-1",
+          observation: "Observe",
+          principle: "Principle",
+          transferable_idea: "Transfer",
+          original_application: "Apply",
+          avoid_copying: "Avoid",
+          extra: { rendered: "object" },
+        }],
+      },
+    })],
+  ] as const)("rejects unknown keys at the %s", (_level, mutate) => {
+    const snapshot = createReferenceSnapshot(reference);
+    expect(parseReferenceSnapshot(JSON.stringify(mutate(snapshot)))).toBeNull();
+  });
+
+  it.each([
+    ["rating below range", { rating: 0 }],
+    ["rating above range", { rating: 6 }],
+    ["quality score below range", { reference_value_score: 0 }],
+    ["quality score above range", { transformability_score: 6 }],
+    ["quality score not integral", { copyright_risk_score: 1.5 }],
+  ])("rejects %s", (_label, scoreOverride) => {
+    const snapshot = createReferenceSnapshot(reference);
+    const malformed = { ...snapshot, scores: { ...snapshot.scores, ...scoreOverride } };
+    expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
+  });
+
   it("rejects snapshots with malformed tags", () => {
     const snapshot = createReferenceSnapshot(reference);
     const malformed = { ...snapshot, tags: { ...snapshot.tags, style_tags: ["aged", 42] } };
     expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
+  });
+
+  it("falls back before malformed nested objects can reach rendering", () => {
+    const snapshot = createReferenceSnapshot(reference);
+    const malformed = {
+      ...snapshot,
+      tags: { ...snapshot.tags, style_tags: [{ unsafe: "react child" }] },
+    };
+
+    const fallback = parseReferenceSnapshot(JSON.stringify(malformed), "ref-stored");
+
+    expect(fallback.reference_id).toBe("ref-stored");
+    expect(fallback.tags.style_tags).toEqual([]);
+    expect(fallback.inspiration.inspiration_entries).toEqual([]);
   });
 
   it("rejects snapshots with malformed inspiration", () => {
@@ -167,6 +218,27 @@ describe("synthesis domain contract", () => {
       ...snapshot,
       inspiration: { ...snapshot.inspiration, inspiration_entries: [{}] },
     };
+    expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["empty", ""],
+  ] as const)("rejects inspiration entries with a %s id", (_label, id) => {
+    const snapshot = createReferenceSnapshot(reference);
+    const entry = {
+      ...(id === undefined ? {} : { id }),
+      observation: "Observe",
+      principle: "Principle",
+      transferable_idea: "Transfer",
+      original_application: "Apply",
+      avoid_copying: "Avoid",
+    };
+    const malformed = {
+      ...snapshot,
+      inspiration: { ...snapshot.inspiration, inspiration_entries: [entry] },
+    };
+
     expect(parseReferenceSnapshot(JSON.stringify(malformed))).toBeNull();
   });
 

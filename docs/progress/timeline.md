@@ -1337,3 +1337,26 @@
   - No GitHub push, Sites migration/deployment, or production Round 11 CRUD result is claimed.
 - Next:
   - Commit the documentation sync, revalidate merged local `main`, then execute Task 9 external sync/deployment/production cleanup.
+
+### 2026-07-14
+
+- Branch: `codex/round-11-multi-reference-synthesis`
+- Mode: Round 11 two-pass independent final-review repair
+- Findings repaired:
+  - Refresh snapshot ownership/source TOCTOU with CAS, bounded retry, relation/source loss classification, and relation/synthesis timestamp consistency.
+  - Strict closed snapshot parsing at every nested level, including required non-empty inspiration entry IDs and stable malformed-storage fallback.
+  - Dirty reference-edit comparison confirmation, failed-create draft preservation/reselection, localized synthesis failures, refresh mutation busy state, accessible shared alertdialog, and relation-specific refresh loading.
+  - Create reference deletion race between initial read and batch persistence, with post-failure requery and exact missing IDs while preserving unrelated DB failures.
+- RED evidence:
+  - First-pass focused additions failed on snapshot/DB, page recovery/cache, localization, and refresh busy behavior before production changes.
+  - Second-pass tests first failed on batch-reject requery, missing/empty entry IDs, shared dialog/relation refresh helpers, and the absent production CAS condition export.
+- Verification:
+  - Focused final-review suite: 6 files / 88 tests passed.
+  - Full suite: 21 files / 187 tests passed.
+  - Typecheck, lint, production build, and `git diff --check` passed.
+  - Real in-memory SQLite execution rejected stale CAS writes and verified transaction rollback/success consistency for relation snapshot plus synthesis `updated_at`.
+- Delegation:
+  - Findings came from two independent review passes; the primary agent validated, repaired, integrated, and verified them without starting additional subagents.
+- Status:
+  - No schema, migration, dependency, merge, push, deployment, production D1 write, or production browser QA occurred in this repair.
+  - Round 11 remains locally verified and merge pending; production verification remains Task 9.

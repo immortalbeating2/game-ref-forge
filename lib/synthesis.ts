@@ -245,8 +245,22 @@ function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === "string";
 }
 
-function isScore(value: unknown): value is number | null {
-  return value === null || (typeof value === "number" && Number.isFinite(value));
+function isRating(value: unknown): value is number | null {
+  return value === null || (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= 1 &&
+    value <= 5
+  );
+}
+
+function isQualityScore(value: unknown): value is number | null {
+  return value === null || (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 1 &&
+    value <= 5
+  );
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -260,8 +274,72 @@ function includesValue<T extends readonly string[]>(
   return typeof value === "string" && values.includes(value as T[number]);
 }
 
+function hasOnlyKeys(
+  value: Record<string, unknown>,
+  allowedKeys: readonly string[],
+  requiredKeys: readonly string[] = allowedKeys,
+) {
+  const keys = Object.keys(value);
+  return keys.every((key) => allowedKeys.includes(key)) &&
+    requiredKeys.every((key) => Object.prototype.hasOwnProperty.call(value, key));
+}
+
+const SNAPSHOT_KEYS = [
+  "schema_version",
+  "reference_id",
+  "reference_updated_at",
+  "title",
+  "source_url",
+  "canonical_url",
+  "site_name",
+  "author",
+  "media_type",
+  "asset_category",
+  "license_status",
+  "public_status",
+  "quality_status",
+  "scores",
+  "tags",
+  "inspiration",
+] as const;
+
+const SCORE_KEYS = [
+  "rating",
+  "reference_value_score",
+  "transformability_score",
+  "copyright_risk_score",
+  "production_readiness_score",
+] as const;
+
+const TAG_KEYS = [
+  "style_tags",
+  "use_tags",
+  "mechanic_tags",
+  "mood_tags",
+  "visual_language_tags",
+] as const;
+
+const INSPIRATION_KEYS = [
+  "inspiration_points",
+  "inspiration_entries",
+  "deconstruction_notes",
+  "transformation_ideas",
+  "avoid_copying_notes",
+] as const;
+
+const INSPIRATION_ENTRY_KEYS = [
+  "id",
+  "observation",
+  "principle",
+  "transferable_idea",
+  "original_application",
+  "avoid_copying",
+] as const;
+
+const REQUIRED_INSPIRATION_ENTRY_KEYS = INSPIRATION_ENTRY_KEYS;
+
 function isSnapshot(value: unknown): value is SynthesisReferenceSnapshot {
-  if (!isObject(value) || value.schema_version !== 1) return false;
+  if (!isObject(value) || !hasOnlyKeys(value, SNAPSHOT_KEYS) || value.schema_version !== 1) return false;
   const scalarFields = [
     "reference_id",
     "reference_updated_at",
@@ -279,18 +357,22 @@ function isSnapshot(value: unknown): value is SynthesisReferenceSnapshot {
   ) return false;
 
   const scores = value.scores;
-  if (!isObject(scores)) return false;
-  if (!["rating", "reference_value_score", "transformability_score", "copyright_risk_score", "production_readiness_score"].every((field) => isScore(scores[field]))) return false;
+  if (!isObject(scores) || !hasOnlyKeys(scores, SCORE_KEYS)) return false;
+  if (!isRating(scores.rating)) return false;
+  if (!SCORE_KEYS.slice(1).every((field) => isQualityScore(scores[field]))) return false;
 
   const tags = value.tags;
-  if (!isObject(tags)) return false;
-  if (!["style_tags", "use_tags", "mechanic_tags", "mood_tags", "visual_language_tags"].every((field) => isStringArray(tags[field]))) return false;
+  if (!isObject(tags) || !hasOnlyKeys(tags, TAG_KEYS)) return false;
+  if (!TAG_KEYS.every((field) => isStringArray(tags[field]))) return false;
 
   const inspiration = value.inspiration;
-  if (!isObject(inspiration)) return false;
+  if (!isObject(inspiration) || !hasOnlyKeys(inspiration, INSPIRATION_KEYS)) return false;
   if (!isStringArray(inspiration.inspiration_points) || !Array.isArray(inspiration.inspiration_entries)) return false;
   if (!["deconstruction_notes", "transformation_ideas", "avoid_copying_notes"].every((field) => isNullableString(inspiration[field]))) return false;
   return inspiration.inspiration_entries.every((entry) => isObject(entry) &&
+    hasOnlyKeys(entry, INSPIRATION_ENTRY_KEYS, REQUIRED_INSPIRATION_ENTRY_KEYS) &&
+    typeof entry.id === "string" &&
+    entry.id.trim().length > 0 &&
     typeof entry.observation === "string" &&
     typeof entry.principle === "string" &&
     typeof entry.transferable_idea === "string" &&

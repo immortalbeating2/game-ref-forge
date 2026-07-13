@@ -7,6 +7,15 @@ export type ComparisonSelectionState = {
   referenceIds: string[];
 };
 
+export function getComparisonStartDecision(options: {
+  canStartComparison: boolean;
+  isSavingReference: boolean;
+  hasDirtyReferenceEdit: boolean;
+}): "blocked" | "confirm-discard" | "start" {
+  if (!options.canStartComparison || options.isSavingReference) return "blocked";
+  return options.hasDirtyReferenceEdit ? "confirm-discard" : "start";
+}
+
 export function getComparisonAvailability(
   source: ReferenceDataSource,
   referenceIds: string[],

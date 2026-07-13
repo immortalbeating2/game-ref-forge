@@ -7,6 +7,10 @@ import { labelForSynthesisStatus, uiCopy } from "../../lib/localization";
 import type { SynthesisDetail, SynthesisReferenceLink } from "../../lib/synthesis";
 import type { SynthesisDraft } from "../../lib/synthesis-draft";
 import { SynthesisReferenceCard } from "./synthesis-reference-card";
+import {
+  isEditorMutationBusy as getIsEditorMutationBusy,
+  isRefreshingRelation,
+} from "./synthesis-workspace-state";
 
 export type SynthesisEditorProps = {
   language: Language;
@@ -16,14 +20,17 @@ export type SynthesisEditorProps = {
   isSaving: boolean;
   isArchiving: boolean;
   isRefreshing: boolean;
+  refreshingRelationId: string | null;
   isDeleting: boolean;
   error: string | null;
   message: string | null;
+  needsReferenceReselection: boolean;
   onDraftChange: (draft: SynthesisDraft) => void;
   onSave: () => void;
   onRefresh: (link: SynthesisReferenceLink) => void;
   onExport: () => void;
   onDelete: () => void;
+  onReselectReferences: () => void;
 };
 
 export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element {
@@ -35,18 +42,28 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
     isSaving,
     isArchiving,
     isRefreshing,
+    refreshingRelationId,
     isDeleting,
     error,
     message,
+    needsReferenceReselection,
     onDraftChange,
     onSave,
     onRefresh,
     onExport,
     onDelete,
+    onReselectReferences,
   } = _props;
   const copy = uiCopy(language);
-  const isEditorMutationBusy = isSaving || isArchiving;
+  const isEditorMutationBusy = getIsEditorMutationBusy({ isSaving, isArchiving, isRefreshing });
   const archivingMessage = language === "zh" ? "归档中..." : "Archiving...";
+  const mutationMessage = isSaving
+    ? copy.savingSynthesis
+    : isArchiving
+      ? archivingMessage
+      : isRefreshing
+        ? copy.refreshingSnapshot
+        : null;
   const update = <K extends keyof SynthesisDraft>(field: K, value: SynthesisDraft[K]) => {
     onDraftChange({ ...draft, [field]: value });
   };
@@ -78,7 +95,7 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
           <details className="synthesis-secondary-actions">
             <summary>{copy.researchControls}</summary>
             <div>
-              <button className="ghost-button" type="button" onClick={onExport} disabled={!detail || isSaving}>{copy.exportSynthesisMarkdown}</button>
+              <button className="ghost-button" type="button" onClick={onExport} disabled={!detail || isEditorMutationBusy}>{copy.exportSynthesisMarkdown}</button>
               {mode === "edit" ? <button className="danger-button" type="button" onClick={onDelete} disabled={isDeleting || isEditorMutationBusy}>{copy.deleteSynthesis}</button> : null}
             </div>
           </details>
@@ -87,12 +104,17 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
 
       {detail ? (
         <section className="synthesis-reference-strip" aria-label={copy.referenceDeck}>
-          {detail.references.map((link) => <SynthesisReferenceCard key={link.id} language={language} link={link} isRefreshing={isRefreshing} isRefreshDisabled={isEditorMutationBusy} onRefresh={onRefresh} />)}
+          {detail.references.map((link) => <SynthesisReferenceCard key={link.id} language={language} link={link} isRefreshing={isRefreshingRelation(refreshingRelationId, link.id)} isRefreshDisabled={isEditorMutationBusy} onRefresh={onRefresh} />)}
         </section>
       ) : null}
 
       {message ? <p className="synthesis-message" role="status">{message}</p> : null}
       {error ? <p className="synthesis-error" role="alert">{error}</p> : null}
+      {needsReferenceReselection ? (
+        <button className="ghost-button" type="button" onClick={onReselectReferences} disabled={isEditorMutationBusy}>
+          {copy.reselectSynthesisReferences}
+        </button>
+      ) : null}
       <form className="synthesis-form" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
         <section className="synthesis-form-section">
           <h3>{language === "zh" ? "方向" : "Direction"}</h3>
@@ -117,8 +139,8 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
           <label>{fields[7].label}<textarea value={draft.additional_notes} maxLength={8000} onChange={(event) => update("additional_notes", event.target.value)} disabled={isEditorMutationBusy} /></label>
         </section>
         <div className="synthesis-save-bar">
-          <span>{isSaving ? copy.savingSynthesis : isArchiving ? archivingMessage : null}</span>
-          <button type="submit" disabled={isEditorMutationBusy}>{isSaving ? copy.savingSynthesis : isArchiving ? archivingMessage : copy.saveSynthesis}</button>
+          <span>{mutationMessage}</span>
+          <button type="submit" disabled={isEditorMutationBusy}>{mutationMessage ?? copy.saveSynthesis}</button>
         </div>
       </form>
     </section>

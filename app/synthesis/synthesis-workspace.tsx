@@ -1,26 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 
 import type { Language } from "../../lib/localization";
-import { uiCopy } from "../../lib/localization";
+import { synthesisErrorMessage, uiCopy } from "../../lib/localization";
 import type { SynthesisDetail, SynthesisInput, SynthesisReferenceLink, SynthesisStatus, SynthesisSummary } from "../../lib/synthesis";
 import { validateSynthesisInput } from "../../lib/synthesis";
 import { createEmptySynthesisDraft, detailToSynthesisDraft, draftToSynthesisInput, isSynthesisDraftDirty, type SynthesisDraft } from "../../lib/synthesis-draft";
 import { formatSynthesisMarkdown, safeSynthesisExportFilename } from "../../lib/synthesis-export";
 import { SynthesisEditor } from "./synthesis-editor";
 import { SynthesisList } from "./synthesis-list";
+import { SynthesisConfirmation } from "./synthesis-confirmation";
 import {
   applyArchiveResult,
   applyRefreshResult,
   type ArchiveWorkspaceState,
   canCommitController,
   consumeExternalBackRequest,
-  getDialogKeyboardAction,
   getInitialReferenceConsumption,
-  isEditorSaveBusy,
   runOwnedSynthesisMutation,
+  recoverMissingCreateReferences,
   type SynthesisMutationKind,
   tryAcquireOperationGuard,
 } from "./synthesis-workspace-state";
@@ -28,8 +28,11 @@ import {
 export type SynthesisWorkspaceProps = {
   language: Language;
   initialReferenceIds: string[];
+  initialDraft: SynthesisDraft | null;
   externalBackRequestToken: number;
   onInitialReferenceIdsConsumed: () => void;
+  onInitialDraftConsumed: () => void;
+  onReselectReferences: (draft: SynthesisDraft) => void;
   onBackToReferences: () => void;
 };
 
@@ -40,20 +43,22 @@ type PendingNavigation =
   | { kind: "archive"; id: string }
   | null;
 
-type ApiFailure = { message: string };
+type ApiFailure = { code: string };
 
 async function getResponsePayload<T>(response: Response): Promise<T> {
-  const payload = await response.json().catch(() => ({})) as { error?: string; errors?: string[] } & T;
+  const payload = await response.json().catch(() => ({})) as { error?: string; errors?: string[]; code?: string } & T;
   if (!response.ok) {
-    throw { message: payload.errors?.join(" ") || payload.error || `Request failed (${response.status})` } satisfies ApiFailure;
+    throw {
+      code: payload.code ?? (response.status === 400 ? "validation" : response.status === 404 ? "not_found" : "operation_failed"),
+    } satisfies ApiFailure;
   }
   return payload;
 }
 
-function errorMessage(error: unknown) {
-  return typeof error === "object" && error !== null && "message" in error && typeof error.message === "string"
-    ? error.message
-    : "Unexpected synthesis operation error";
+function failureCode(error: unknown) {
+  return typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
+    ? error.code
+    : "operation_failed";
 }
 
 function detailWithDraft(detail: SynthesisDetail, draft: SynthesisDraft): SynthesisDetail {
@@ -64,8 +69,11 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const {
     language,
     initialReferenceIds,
+    initialDraft,
     externalBackRequestToken,
     onInitialReferenceIdsConsumed,
+    onInitialDraftConsumed,
+    onReselectReferences,
     onBackToReferences,
   } = props;
   const copy = uiCopy(language);
@@ -81,13 +89,15 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const [savingId, setSavingId] = useState<string | null>(null);
   const [archivingIds, setArchivingIds] = useState<string[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshingId, setRefreshingId] = useState<string | null>(null);
+  const [refreshingSynthesisId, setRefreshingSynthesisId] = useState<string | null>(null);
+  const [refreshingRelationId, setRefreshingRelationId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<SynthesisSummary | null>(null);
   const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation>(null);
+  const [createNeedsReselection, setCreateNeedsReselection] = useState(false);
   const listAbort = useRef<AbortController | null>(null);
   const detailAbort = useRef<AbortController | null>(null);
   const createReferenceIds = useRef<string[]>([]);
@@ -115,9 +125,9 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const mutationBusyIds = useMemo(() => [
     savingId,
     ...archivingIds,
-    refreshingId,
+    refreshingSynthesisId,
     deletingId,
-  ].filter((id): id is string => id !== null), [archivingIds, deletingId, refreshingId, savingId]);
+  ].filter((id): id is string => id !== null), [archivingIds, deletingId, refreshingSynthesisId, savingId]);
 
   const fetchList = useCallback(async (status: SynthesisStatus | "all", signal?: AbortSignal) => {
     const query = new URLSearchParams({ sort: "recent" });
@@ -137,12 +147,12 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
       }
     } catch (requestError) {
       if ((requestError as Error).name !== "AbortError" && canCommitController(listAbort.current, controller)) {
-        setError(errorMessage(requestError));
+        setError(synthesisErrorMessage(failureCode(requestError), language));
       }
     } finally {
       if (canCommitController(listAbort.current, controller)) setIsListLoading(false);
     }
-  }, [fetchList, statusFilter]);
+  }, [fetchList, language, statusFilter]);
 
   const loadDetail = useCallback(async (id: string) => {
     detailAbort.current?.abort();
@@ -162,12 +172,12 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
       }
     } catch (requestError) {
       if ((requestError as Error).name !== "AbortError" && canCommitController(detailAbort.current, controller)) {
-        setError(errorMessage(requestError));
+        setError(synthesisErrorMessage(failureCode(requestError), language));
       }
     } finally {
       if (canCommitController(detailAbort.current, controller)) setIsDetailLoading(false);
     }
-  }, [commitWorkspaceState]);
+  }, [commitWorkspaceState, language]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -179,7 +189,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         if (canCommitController(listAbort.current, controller)) setSummaries(payload.syntheses);
       } catch (requestError) {
         if ((requestError as Error).name !== "AbortError" && canCommitController(listAbort.current, controller)) {
-          setError(errorMessage(requestError));
+          setError(synthesisErrorMessage(failureCode(requestError), language));
         }
       } finally {
         if (canCommitController(listAbort.current, controller)) setIsListLoading(false);
@@ -187,7 +197,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     };
     void readList();
     return () => controller.abort();
-  }, [fetchList, statusFilter]);
+  }, [fetchList, language, statusFilter]);
 
   useEffect(() => () => {
     listAbort.current?.abort();
@@ -199,12 +209,14 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     consumedInitialIds.current = consumption.nextSignature;
     if (!consumption.shouldConsume) return;
     createReferenceIds.current = [...initialReferenceIds];
-    commitWorkspaceState({ activeDetail: null, draft: createEmptySynthesisDraft() });
+    commitWorkspaceState({ activeDetail: null, draft: initialDraft ?? createEmptySynthesisDraft() });
     setMode("create");
+    setCreateNeedsReselection(false);
     setMessage(null);
     setError(null);
     onInitialReferenceIdsConsumed();
-  }, [commitWorkspaceState, initialReferenceIds, onInitialReferenceIdsConsumed]);
+    if (initialDraft) onInitialDraftConsumed();
+  }, [commitWorkspaceState, initialDraft, initialReferenceIds, onInitialDraftConsumed, onInitialReferenceIdsConsumed]);
 
   useEffect(() => {
     if (!isDraftDirty) return;
@@ -250,11 +262,11 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     const input = draftToSynthesisInput(draft);
     const validation = validateSynthesisInput(input);
     if (!validation.ok) {
-      setError(validation.errors.join(" "));
+      setError(synthesisErrorMessage("validation", language));
       return;
     }
     if (mode === "create" && createReferenceIds.current.length < 2) {
-      setError("Selected references are unavailable. Return to references and choose two to four records.");
+      setError(synthesisErrorMessage("reference_not_found", language));
       return;
     }
     const synthesisId = mode === "create" ? "__create__" : workspaceStateRef.current.activeDetail?.id;
@@ -274,11 +286,17 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
           draft: detailToSynthesisDraft(payload.synthesis),
         });
         setMode("edit");
+        setCreateNeedsReselection(false);
         createReferenceIds.current = [];
         setMessage(copy.synthesisSaved);
         await reloadList(statusFilter);
       } catch (requestError) {
-        setError(errorMessage(requestError));
+        if (mode === "create" && (requestError as ApiFailure).code === "reference_not_found") {
+          const recovery = recoverMissingCreateReferences(workspaceStateRef.current.draft);
+          createReferenceIds.current = recovery.referenceIds;
+          setCreateNeedsReselection(recovery.needsReselection);
+        }
+        setError(synthesisErrorMessage(failureCode(requestError), language));
       } finally {
         setSavingId(null);
         setIsSaving(false);
@@ -307,7 +325,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         }
         await reloadList(statusFilter);
       } catch (requestError) {
-        setError(errorMessage(requestError));
+        setError(synthesisErrorMessage(failureCode(requestError), language));
       } finally {
         setArchivingIds((current) => current.filter((currentId) => currentId !== id));
       }
@@ -319,7 +337,8 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     const requestSynthesisId = activeDetail.id;
     await runOwnedSynthesisMutation(mutationGuard, requestSynthesisId, "refresh", async () => {
       setIsRefreshing(true);
-      setRefreshingId(requestSynthesisId);
+      setRefreshingSynthesisId(requestSynthesisId);
+      setRefreshingRelationId(link.id);
       setError(null);
       try {
         const payload = await getResponsePayload<{ synthesis: SynthesisDetail }>(await fetch(`/api/syntheses/${requestSynthesisId}/references/${link.id}/refresh`, { method: "POST" }));
@@ -334,9 +353,10 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         });
         await reloadList(statusFilter);
       } catch (requestError) {
-        setError(errorMessage(requestError));
+        setError(synthesisErrorMessage(failureCode(requestError), language));
       } finally {
-        setRefreshingId(null);
+        setRefreshingSynthesisId(null);
+        setRefreshingRelationId(null);
         setIsRefreshing(false);
       }
     });
@@ -359,7 +379,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         setMessage(copy.synthesisDeleted);
         await reloadList(statusFilter);
       } catch (requestError) {
-        setError(errorMessage(requestError) || copy.synthesisDeleteFailed);
+        setError(synthesisErrorMessage(failureCode(requestError), language));
       } finally {
         setDeletingId(null);
         setIsDeleting(false);
@@ -411,20 +431,31 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         detail={activeDetail}
         draft={draft}
         mode={mode}
-        isSaving={isEditorSaveBusy(isSaving, isActiveArchiveBusy ? activeDetail?.id ?? null : null)}
+        isSaving={isSaving}
         isArchiving={isActiveArchiveBusy}
-        isRefreshing={isRefreshing && refreshingId === activeDetail?.id}
+        isRefreshing={isRefreshing && refreshingSynthesisId === activeDetail?.id}
+        refreshingRelationId={
+          isRefreshing && refreshingSynthesisId === activeDetail?.id
+            ? refreshingRelationId
+            : null
+        }
         isDeleting={isDeleting}
         error={error}
         message={message}
+        needsReferenceReselection={createNeedsReselection}
         onDraftChange={updateDraft}
         onSave={save}
         onRefresh={refresh}
         onExport={exportMarkdown}
         onDelete={() => activeDetail && setPendingDelete({ id: activeDetail.id, title: activeDetail.title, target_asset: activeDetail.target_asset, status: activeDetail.status, updated_at: activeDetail.updated_at, reference_count: activeDetail.references.length })}
+        onReselectReferences={() => {
+          const recovery = recoverMissingCreateReferences(workspaceStateRef.current.draft);
+          createReferenceIds.current = recovery.referenceIds;
+          onReselectReferences(recovery.draft);
+        }}
       />
       {pendingNavigation ? (
-        <Confirmation title={copy.unsavedChanges} body={copy.unsavedChangesConfirmation} cancelLabel={copy.cancel} confirmLabel={language === "zh" ? "离开" : "Leave"} onCancel={() => setPendingNavigation(null)} onConfirm={() => {
+        <SynthesisConfirmation title={copy.unsavedChanges} body={copy.unsavedChangesConfirmation} cancelLabel={copy.cancel} confirmLabel={language === "zh" ? "离开" : "Leave"} onCancel={() => setPendingNavigation(null)} onConfirm={() => {
           if (pendingNavigation.kind === "archive") {
             setPendingNavigation(null);
             void archive(pendingNavigation.id);
@@ -434,57 +465,8 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
         }} />
       ) : null}
       {pendingDelete ? (
-        <Confirmation title={copy.deleteSynthesis} body={`${copy.deleteSynthesisConfirmation} “${pendingDelete.title}”`} cancelLabel={copy.cancel} confirmLabel={copy.deleteSynthesis} destructive busy={isDeleting} onCancel={() => setPendingDelete(null)} onConfirm={() => void confirmDelete()} />
+        <SynthesisConfirmation title={copy.deleteSynthesis} body={`${copy.deleteSynthesisConfirmation} “${pendingDelete.title}”`} cancelLabel={copy.cancel} confirmLabel={copy.deleteSynthesis} destructive busy={isDeleting} onCancel={() => setPendingDelete(null)} onConfirm={() => void confirmDelete()} />
       ) : null}
     </section>
   );
-}
-
-function Confirmation({ title, body, cancelLabel, confirmLabel, destructive = false, busy = false, onCancel, onConfirm }: { title: string; body: string; cancelLabel: string; confirmLabel: string; destructive?: boolean; busy?: boolean; onCancel: () => void; onConfirm: () => void }): React.JSX.Element {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const cancelRef = useRef(onCancel);
-  const busyRef = useRef(busy);
-  const titleId = useId();
-  const descriptionId = useId();
-
-  useEffect(() => {
-    cancelRef.current = onCancel;
-    busyRef.current = busy;
-  }, [busy, onCancel]);
-
-  useEffect(() => {
-    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    const focusableSelector = "button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])";
-    const firstControl = dialog.querySelector<HTMLElement>(focusableSelector);
-    (firstControl ?? dialog).focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
-      const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
-      const action = getDialogKeyboardAction(event.key, event.shiftKey, activeIndex, focusable.length);
-      if (action?.kind === "cancel") {
-        if (!busyRef.current) {
-          event.preventDefault();
-          cancelRef.current();
-        }
-      } else if (action?.kind === "focus") {
-        event.preventDefault();
-        if (action.index < 0) {
-          dialog.focus();
-        } else {
-          focusable[action.index]?.focus();
-        }
-      }
-    };
-
-    dialog.addEventListener("keydown", handleKeyDown);
-    return () => {
-      dialog.removeEventListener("keydown", handleKeyDown);
-      trigger?.focus();
-    };
-  }, []);
-
-  return <div ref={dialogRef} className="synthesis-confirmation" role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} tabIndex={-1}><div><h2 id={titleId}>{title}</h2><p id={descriptionId}>{body}</p><div><button className="ghost-button" type="button" onClick={onCancel} disabled={busy}>{cancelLabel}</button><button className={destructive ? "danger-button" : ""} type="button" onClick={onConfirm} disabled={busy}>{confirmLabel}</button></div></div></div>;
 }
