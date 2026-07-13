@@ -5,6 +5,7 @@ import {
   PublicStatus,
   QualityStatus,
 } from "./reference";
+import type { SynthesisStatus } from "./synthesis";
 
 export const LANGUAGES = ["zh", "en"] as const;
 
@@ -107,6 +108,19 @@ const qualityStatusLabels: Record<Language, Record<QualityStatus, string>> = {
   },
 };
 
+const synthesisStatusLabels: Record<Language, Record<SynthesisStatus, string>> = {
+  zh: {
+    draft: "草稿",
+    actionable: "可执行",
+    archived: "已归档",
+  },
+  en: {
+    draft: "Draft",
+    actionable: "Actionable",
+    archived: "Archived",
+  },
+};
+
 const copy = {
   zh: {
     languageLabel: "语言",
@@ -121,6 +135,57 @@ const copy = {
     researchControls: "研究控制",
     referenceDeck: "参考卡组",
     inspirationWorkbench: "灵感提炼",
+    referencesView: "参考",
+    synthesesView: "综合稿",
+    startComparison: "开始对比",
+    cancelComparison: "取消对比",
+    enterSynthesis: "进入综合稿",
+    comparisonCount: "已选择 {count} / 4",
+    selectedForComparison: "已选择",
+    discardReferenceEditTitle: "未保存的参考编辑",
+    discardReferenceEditConfirmation: "开始对比会丢弃当前参考的未保存修改，是否继续？",
+    discardReferenceEditAndCompare: "丢弃修改并开始对比",
+    synthesisWorkspace: "综合稿工作区",
+    syntheses: "综合稿",
+    createSynthesis: "新建综合稿",
+    noSyntheses: "还没有综合稿。",
+    synthesisTitle: "综合稿标题",
+    targetAsset: "目标资产",
+    sharedPrinciples: "共同原则",
+    keyDifferences: "关键差异",
+    originalDirection: "原创方向",
+    synthesisAvoidCopying: "避免复制",
+    designConstraints: "设计约束",
+    experimentPlan: "实验计划",
+    nextActions: "下一步行动",
+    additionalNotes: "补充备注",
+    synthesisStatus: "综合稿状态",
+    synthesisStatusFilter: "按状态筛选",
+    allSynthesisStatuses: "全部综合稿状态",
+    staleReference: "参考快照已过期",
+    unavailableReference: "来源已不可用；历史快照仍保留。",
+    refreshSnapshot: "刷新快照",
+    refreshingSnapshot: "正在刷新快照...",
+    saveSynthesis: "保存综合稿",
+    savingSynthesis: "正在保存综合稿...",
+    synthesisSaved: "综合稿已保存。",
+    synthesisSaveFailed: "综合稿保存失败；草稿内容已保留。",
+    reselectSynthesisReferences: "返回参考并重新选择",
+    synthesisValidationFailed: "请检查综合稿标题、状态和字段长度后重试。",
+    synthesisReferencesChanged: "所选参考已发生变化；草稿已保留，请返回参考并重新选择。",
+    synthesisRelationNotFound: "这条综合稿参考关系已不存在，请重新打开综合稿。",
+    synthesisReferenceUnavailable: "当前参考已不可用，旧快照保持不变。",
+    synthesisNotFound: "综合稿已不存在或无法读取。",
+    synthesisMigrationRequired: "综合稿数据尚未就绪，请完成数据库迁移后重试。",
+    synthesisOperationFailed: "综合稿操作失败，请稍后重试。",
+    unsavedChanges: "有未保存修改",
+    unsavedChangesConfirmation: "仍有未保存修改，确定要离开吗？",
+    deleteSynthesis: "删除综合稿",
+    deleteSynthesisConfirmation: "确定删除这份综合稿吗？此操作无法撤销。",
+    synthesisDeleted: "综合稿已删除。",
+    synthesisDeleteFailed: "综合稿删除失败。",
+    exportSynthesisMarkdown: "导出综合稿 Markdown",
+    synthesisExportWarning: "导出内容包含未保存修改，仅供当前研究记录使用。",
     privateByDefault: "私有默认",
     sortBy: "排序",
     sortUpdated: "最近更新",
@@ -290,6 +355,57 @@ const copy = {
     researchControls: "Research controls",
     referenceDeck: "Reference deck",
     inspirationWorkbench: "Inspiration workbench",
+    referencesView: "References",
+    synthesesView: "Syntheses",
+    startComparison: "Start comparison",
+    cancelComparison: "Cancel comparison",
+    enterSynthesis: "Enter synthesis",
+    comparisonCount: "{count} / 4 selected",
+    selectedForComparison: "Selected",
+    discardReferenceEditTitle: "Unsaved reference edits",
+    discardReferenceEditConfirmation: "Starting a comparison will discard the unsaved reference edits. Continue?",
+    discardReferenceEditAndCompare: "Discard edits and compare",
+    synthesisWorkspace: "Synthesis workspace",
+    syntheses: "Syntheses",
+    createSynthesis: "New synthesis",
+    noSyntheses: "No syntheses yet.",
+    synthesisTitle: "Synthesis title",
+    targetAsset: "Target asset",
+    sharedPrinciples: "Shared principles",
+    keyDifferences: "Key differences",
+    originalDirection: "Original direction",
+    synthesisAvoidCopying: "Avoid copying",
+    designConstraints: "Design constraints",
+    experimentPlan: "Experiment plan",
+    nextActions: "Next actions",
+    additionalNotes: "Additional notes",
+    synthesisStatus: "Synthesis status",
+    synthesisStatusFilter: "Filter by status",
+    allSynthesisStatuses: "All synthesis statuses",
+    staleReference: "Reference snapshot is stale",
+    unavailableReference: "Source unavailable; historical snapshot retained.",
+    refreshSnapshot: "Refresh snapshot",
+    refreshingSnapshot: "Refreshing snapshot...",
+    saveSynthesis: "Save synthesis",
+    savingSynthesis: "Saving synthesis...",
+    synthesisSaved: "Synthesis saved.",
+    synthesisSaveFailed: "Synthesis save failed; draft contents were preserved.",
+    reselectSynthesisReferences: "Return to references and reselect",
+    synthesisValidationFailed: "Check the synthesis title, status, and field lengths, then try again.",
+    synthesisReferencesChanged: "The selected references changed. Your draft is preserved; return and reselect them.",
+    synthesisRelationNotFound: "This synthesis reference relation no longer exists. Reopen the synthesis.",
+    synthesisReferenceUnavailable: "The current reference is unavailable. The previous snapshot was kept.",
+    synthesisNotFound: "The synthesis no longer exists or could not be read.",
+    synthesisMigrationRequired: "Synthesis data is not ready. Apply the database migration and try again.",
+    synthesisOperationFailed: "The synthesis operation failed. Try again shortly.",
+    unsavedChanges: "Unsaved changes",
+    unsavedChangesConfirmation: "You have unsaved changes. Leave anyway?",
+    deleteSynthesis: "Delete synthesis",
+    deleteSynthesisConfirmation: "Delete this synthesis? This cannot be undone.",
+    synthesisDeleted: "Synthesis deleted.",
+    synthesisDeleteFailed: "Synthesis delete failed.",
+    exportSynthesisMarkdown: "Export synthesis Markdown",
+    synthesisExportWarning: "This export includes unsaved changes and is for the current research record only.",
     privateByDefault: "Private by default",
     sortBy: "Sort by",
     sortUpdated: "Recently updated",
@@ -470,4 +586,41 @@ export function labelForPublicStatus(value: PublicStatus, language: Language = "
 
 export function labelForQualityStatus(value: QualityStatus, language: Language = "zh") {
   return qualityStatusLabels[language][value];
+}
+
+export type SynthesisErrorCode =
+  | "validation"
+  | "reference_not_found"
+  | "relation_not_found"
+  | "reference_unavailable"
+  | "not_found"
+  | "migration_required"
+  | "operation_failed";
+
+export function synthesisErrorMessage(
+  code: SynthesisErrorCode | string | undefined,
+  language: Language = "zh",
+) {
+  const copy = uiCopy(language);
+  switch (code) {
+    case "validation":
+      return copy.synthesisValidationFailed;
+    case "reference_not_found":
+      return copy.synthesisReferencesChanged;
+    case "relation_not_found":
+      return copy.synthesisRelationNotFound;
+    case "reference_unavailable":
+      return copy.synthesisReferenceUnavailable;
+    case "not_found":
+      return copy.synthesisNotFound;
+    case "migration_required":
+      return copy.synthesisMigrationRequired;
+    case "operation_failed":
+    default:
+      return copy.synthesisOperationFailed;
+  }
+}
+
+export function labelForSynthesisStatus(value: SynthesisStatus, language: Language = "zh") {
+  return synthesisStatusLabels[language][value];
 }

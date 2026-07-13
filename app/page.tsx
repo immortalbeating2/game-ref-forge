@@ -70,6 +70,19 @@ import {
   uiCopy,
 } from "../lib/localization";
 import { buildReferenceSearchText, getVisibleDetailReference } from "../lib/ui-state";
+import {
+  getComparisonStartDecision,
+  getComparisonAvailability,
+  reconcileComparisonSelectionSource,
+  toggleSynthesisSelection,
+  type ComparisonSelectionState,
+  type ReferenceDataSource,
+} from "../lib/synthesis-selection";
+import type { SynthesisDraft } from "../lib/synthesis-draft";
+import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
+import { SynthesisConfirmation } from "./synthesis/synthesis-confirmation";
+
+type WorkspaceView = "references" | "syntheses";
 
 const seedReferences: ReferenceRecord[] = [
   {
@@ -180,6 +193,15 @@ function ensureInspirationEntryIds(entries: InspirationEntry[]) {
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("references");
+  const [comparisonSelection, setComparisonSelection] = useState<ComparisonSelectionState>({
+    isActive: false,
+    referenceIds: [],
+  });
+  const [pendingSynthesisReferenceIds, setPendingSynthesisReferenceIds] = useState<string[]>([]);
+  const [pendingSynthesisDraft, setPendingSynthesisDraft] = useState<SynthesisDraft | null>(null);
+  const [pendingComparisonStart, setPendingComparisonStart] = useState(false);
+  const [externalBackRequestToken, setExternalBackRequestToken] = useState(0);
   const [references, setReferences] = useState<ReferenceRecord[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -207,9 +229,13 @@ export default function Home() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isUsingSeedReferences, setIsUsingSeedReferences] = useState(false);
+  const [referenceDataSource, setReferenceDataSource] =
+    useState<ReferenceDataSource>("loading");
   const [message, setMessage] = useState<string | null>(null);
   const copy = uiCopy(language);
+  const isComparisonSelectionMode = comparisonSelection.isActive;
+  const comparisonReferenceIds = comparisonSelection.referenceIds;
+  const isUsingSeedReferences = referenceDataSource === "seed";
 
   function labelForReferenceSortMode(mode: ReferenceSortMode) {
     switch (mode) {
@@ -376,11 +402,18 @@ export default function Home() {
         }
 
         const rows = payload.references as ReferenceRecord[];
-        setIsUsingSeedReferences(rows.length === 0);
+        const nextSource = rows.length > 0 ? "persisted" : "seed";
+        setReferenceDataSource(nextSource);
+        setComparisonSelection((current) =>
+          reconcileComparisonSelectionSource(current, nextSource),
+        );
         setReferences(rows.length > 0 ? rows : seedReferences);
         setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
       } catch (error) {
-        setIsUsingSeedReferences(true);
+        setReferenceDataSource("seed");
+        setComparisonSelection((current) =>
+          reconcileComparisonSelectionSource(current, "seed"),
+        );
         setReferences(seedReferences);
         setSelectedId(seedReferences[0]?.id ?? null);
         setMessage(error instanceof Error ? error.message : null);
@@ -561,6 +594,122 @@ export default function Home() {
     }
   }
 
+  function beginComparisonSelection() {
+    setPendingComparisonStart(false);
+    setIsFormOpen(false);
+    setEditingId(null);
+    setEditDraft(null);
+    clearQualityEditSession();
+    setPendingDeleteId(null);
+    setSelectedId(null);
+    setComparisonSelection({ isActive: true, referenceIds: [] });
+    setMessage(null);
+  }
+
+  function startComparisonSelection() {
+    const availability = getComparisonAvailability(
+      referenceDataSource,
+      comparisonReferenceIds,
+    );
+    const editingReference = editingId === null
+      ? null
+      : references.find((reference) => reference.id === editingId) ?? null;
+    const decision = getComparisonStartDecision({
+      canStartComparison: availability.canStartComparison,
+      isSavingReference: isSavingEdit,
+      hasDirtyReferenceEdit: Boolean(
+        editingReference && editDraft && isReferenceDraftDirty(editDraft, editingReference),
+      ),
+    });
+    if (decision === "blocked") {
+      return;
+    }
+    if (decision === "confirm-discard") {
+      setPendingComparisonStart(true);
+      return;
+    }
+
+    beginComparisonSelection();
+  }
+
+  function cancelComparisonSelection() {
+    setComparisonSelection({ isActive: false, referenceIds: [] });
+    setMessage(null);
+  }
+
+  function toggleComparisonSelection(referenceId: string) {
+    setComparisonSelection((current) =>
+      current.isActive
+        ? {
+            ...current,
+            referenceIds: toggleSynthesisSelection(current.referenceIds, referenceId),
+          }
+        : current,
+    );
+  }
+
+  function enterSynthesisWorkspace() {
+    const availability = getComparisonAvailability(
+      referenceDataSource,
+      comparisonReferenceIds,
+    );
+    if (!availability.canHandoff) {
+      setComparisonSelection((current) =>
+        reconcileComparisonSelectionSource(current, referenceDataSource),
+      );
+      return;
+    }
+
+    setPendingSynthesisReferenceIds(comparisonReferenceIds);
+    setComparisonSelection({ isActive: false, referenceIds: [] });
+    setWorkspaceView("syntheses");
+  }
+
+  function requestReferencesWorkspace() {
+    if (workspaceView === "references") {
+      return;
+    }
+
+    setExternalBackRequestToken((current) => current + 1);
+  }
+
+  function openSynthesisWorkspace() {
+    cancelComparisonSelection();
+    setWorkspaceView("syntheses");
+  }
+
+  async function reselectSynthesisReferences(nextDraft: SynthesisDraft) {
+    setPendingSynthesisDraft(nextDraft);
+    setPendingSynthesisReferenceIds([]);
+    setWorkspaceView("references");
+    setReferenceDataSource("loading");
+    setComparisonSelection({ isActive: false, referenceIds: [] });
+
+    try {
+      const response = await fetch("/api/references");
+      const payload = await response.json();
+      if (!response.ok) throw new Error("reference reload failed");
+
+      const rows = payload.references as ReferenceRecord[];
+      const nextSource: ReferenceDataSource = rows.length > 0 ? "persisted" : "seed";
+      setReferenceDataSource(nextSource);
+      setReferences(rows.length > 0 ? rows : seedReferences);
+      setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
+      setComparisonSelection(
+        nextSource === "persisted"
+          ? { isActive: true, referenceIds: [] }
+          : { isActive: false, referenceIds: [] },
+      );
+      setMessage(nextSource === "persisted" ? null : seedFallbackMessage(language));
+    } catch {
+      setReferenceDataSource("seed");
+      setReferences(seedReferences);
+      setSelectedId(seedReferences[0]?.id ?? null);
+      setComparisonSelection({ isActive: false, referenceIds: [] });
+      setMessage(copy.synthesisOperationFailed);
+    }
+  }
+
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
       setPreviewStatus("failure");
@@ -622,7 +771,10 @@ export default function Home() {
 
       const reference = payload.reference as ReferenceRecord;
       setReferences((current) => [reference, ...current.filter((item) => !item.id.startsWith("seed-"))]);
-      setIsUsingSeedReferences(false);
+      setReferenceDataSource("persisted");
+      setComparisonSelection((current) =>
+        reconcileComparisonSelectionSource(current, "persisted"),
+      );
       setSelectedId(reference.id);
       setEditingId(null);
       setEditDraft(null);
@@ -751,8 +903,18 @@ export default function Home() {
         }
       }
 
-      setReferences((current) => current.filter((item) => item.id !== reference.id));
-      setSelectedId(null);
+      const remainingReferences = references.filter((item) => item.id !== reference.id);
+      if (referenceDataSource === "persisted" && remainingReferences.length === 0) {
+        setReferences(seedReferences);
+        setReferenceDataSource("seed");
+        setComparisonSelection((current) =>
+          reconcileComparisonSelectionSource(current, "seed"),
+        );
+        setSelectedId(seedReferences[0]?.id ?? null);
+      } else {
+        setReferences(remainingReferences);
+        setSelectedId(null);
+      }
       setPendingDeleteId(null);
       clearQualityEditSession();
       setMessage(copy.deleted);
@@ -801,6 +963,11 @@ export default function Home() {
     );
   }
 
+  const comparisonAvailability = getComparisonAvailability(
+    referenceDataSource,
+    comparisonReferenceIds,
+  );
+
   return (
     <main className="workspace">
       <aside className="sidebar" aria-label={copy.filtersLabel}>
@@ -819,8 +986,28 @@ export default function Home() {
               <option value="en">{copy.english}</option>
             </select>
           </label>
+          <div className="workspace-view-switch" role="group" aria-label={copy.synthesisWorkspace}>
+            <button
+              type="button"
+              className={workspaceView === "references" ? "is-active" : undefined}
+              aria-pressed={workspaceView === "references"}
+              onClick={requestReferencesWorkspace}
+            >
+              {copy.referencesView}
+            </button>
+            <button
+              type="button"
+              className={workspaceView === "syntheses" ? "is-active" : undefined}
+              aria-pressed={workspaceView === "syntheses"}
+              onClick={openSynthesisWorkspace}
+            >
+              {copy.synthesesView}
+            </button>
+          </div>
         </div>
 
+        {workspaceView === "references" ? (
+          <>
         <div className="filter-heading">
           <p className="panel-kicker">{copy.researchControls}</p>
           <span>{copy.privateByDefault}</span>
@@ -934,8 +1121,12 @@ export default function Home() {
         >
           {copy.clearFilters}
         </button>
+          </>
+        ) : null}
       </aside>
 
+      {workspaceView === "references" ? (
+        <>
       <section className="gallery-pane">
         <header className="toolbar">
           <div className="deck-heading">
@@ -972,7 +1163,23 @@ export default function Home() {
               <button className="ghost-button" type="button" onClick={exportLibraryJson}>
                 {copy.exportJson}
               </button>
-              <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
+              <button
+                className="ghost-button"
+                type="button"
+                onClick={startComparisonSelection}
+                disabled={
+                  !comparisonAvailability.canStartComparison ||
+                  isComparisonSelectionMode ||
+                  isSavingEdit
+                }
+              >
+                {copy.startComparison}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFormOpen((value) => !value)}
+                disabled={isComparisonSelectionMode}
+              >
                 {copy.addReference}
               </button>
             </div>
@@ -1310,22 +1517,57 @@ export default function Home() {
         <div className="reference-grid" aria-live="polite">
           {sortedReferences.map((reference) => {
             const quality = evaluateReferenceQuality(reference);
+            const isSelectedForComparison = comparisonReferenceIds.includes(reference.id);
+            const isComparisonSelectionAtLimit =
+              isComparisonSelectionMode &&
+              comparisonReferenceIds.length >= 4 &&
+              !isSelectedForComparison;
+            const isCardDisabled = isSavingEdit || isComparisonSelectionAtLimit;
 
             return (
               <article
-                className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
+                className={`reference-card ${
+                  isComparisonSelectionMode
+                    ? isSelectedForComparison
+                      ? "comparison-selected"
+                      : ""
+                    : reference.id === selectedReference?.id
+                      ? "selected"
+                      : ""
+                } ${isComparisonSelectionAtLimit ? "comparison-limit-reached" : ""}`}
                 key={reference.id}
-                onClick={() => selectReference(reference.id)}
+                onClick={() => {
+                  if (isCardDisabled) {
+                    return;
+                  }
+
+                  if (isComparisonSelectionMode) {
+                    toggleComparisonSelection(reference.id);
+                    return;
+                  }
+
+                  selectReference(reference.id);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
+                    if (isCardDisabled) {
+                      return;
+                    }
+
+                    if (isComparisonSelectionMode) {
+                      toggleComparisonSelection(reference.id);
+                      return;
+                    }
+
                     selectReference(reference.id);
                   }
                 }}
-                role="button"
-                tabIndex={isSavingEdit ? -1 : 0}
-                aria-pressed={reference.id === selectedReference?.id}
-                aria-disabled={isSavingEdit}
+                role={isComparisonSelectionMode ? "checkbox" : "button"}
+                tabIndex={isCardDisabled ? -1 : 0}
+                aria-checked={isComparisonSelectionMode ? isSelectedForComparison : undefined}
+                aria-pressed={isComparisonSelectionMode ? undefined : reference.id === selectedReference?.id}
+                aria-disabled={isCardDisabled}
               >
                 <div className={`thumbnail accent-${reference.asset_category}`}>
                   {reference.preview_url ? (
@@ -1337,12 +1579,20 @@ export default function Home() {
                 </div>
                 <div className="card-body">
                   <div className="card-topline">
-                    {pinnedReferenceIds.includes(reference.id) ? <span>{copy.pinned}</span> : <span />}
+                    {isComparisonSelectionMode ? (
+                      <span className="comparison-selection-indicator">
+                        {isSelectedForComparison ? copy.selectedForComparison : ""}
+                      </span>
+                    ) : pinnedReferenceIds.includes(reference.id) ? (
+                      <span>{copy.pinned}</span>
+                    ) : (
+                      <span />
+                    )}
                     <button
                       type="button"
                       className="pin-button"
                       aria-pressed={pinnedReferenceIds.includes(reference.id)}
-                      disabled={isSavingEdit}
+                      disabled={isSavingEdit || isComparisonSelectionMode}
                       onClick={(event) => {
                         event.stopPropagation();
                         togglePinnedReference(reference.id);
@@ -1388,6 +1638,33 @@ export default function Home() {
             );
           })}
         </div>
+        {isComparisonSelectionMode ? (
+          <div className="comparison-selection-bar" role="status" aria-live="polite">
+            <p>{copy.comparisonCount.replace("{count}", String(comparisonReferenceIds.length))}</p>
+            <div>
+              <button className="ghost-button" type="button" onClick={cancelComparisonSelection}>
+                {copy.cancelComparison}
+              </button>
+              <button
+                type="button"
+                onClick={enterSynthesisWorkspace}
+                disabled={!comparisonAvailability.canHandoff}
+              >
+                {copy.enterSynthesis}
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {pendingComparisonStart ? (
+          <SynthesisConfirmation
+            title={copy.discardReferenceEditTitle}
+            body={copy.discardReferenceEditConfirmation}
+            cancelLabel={copy.cancel}
+            confirmLabel={copy.discardReferenceEditAndCompare}
+            onCancel={() => setPendingComparisonStart(false)}
+            onConfirm={beginComparisonSelection}
+          />
+        ) : null}
       </section>
 
       <aside className="detail-panel" aria-label={copy.selectedReference}>
@@ -1969,6 +2246,19 @@ export default function Home() {
           </div>
         )}
       </aside>
+        </>
+      ) : (
+        <SynthesisWorkspace
+          language={language}
+          initialReferenceIds={pendingSynthesisReferenceIds}
+          initialDraft={pendingSynthesisDraft}
+          externalBackRequestToken={externalBackRequestToken}
+          onInitialReferenceIdsConsumed={() => setPendingSynthesisReferenceIds([])}
+          onInitialDraftConsumed={() => setPendingSynthesisDraft(null)}
+          onReselectReferences={reselectSynthesisReferences}
+          onBackToReferences={() => setWorkspaceView("references")}
+        />
+      )}
     </main>
   );
 }

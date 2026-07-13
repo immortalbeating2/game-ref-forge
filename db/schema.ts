@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const references = sqliteTable("references", {
   id: text("id").primaryKey(),
@@ -34,4 +34,37 @@ export const references = sqliteTable("references", {
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
+
+export const syntheses = sqliteTable("syntheses", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  targetAsset: text("target_asset"),
+  sharedPrinciples: text("shared_principles"),
+  keyDifferences: text("key_differences"),
+  originalDirection: text("original_direction"),
+  avoidCopyingNotes: text("avoid_copying_notes"),
+  designConstraints: text("design_constraints"),
+  experimentPlan: text("experiment_plan"),
+  nextActions: text("next_actions"),
+  additionalNotes: text("additional_notes"),
+  status: text("status").notNull().default("draft"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [
+  index("idx_syntheses_status").on(table.status),
+  index("idx_syntheses_updated_at").on(table.updatedAt),
+]);
+
+export const synthesisReferences = sqliteTable("synthesis_references", {
+  id: text("id").primaryKey(),
+  synthesisId: text("synthesis_id").notNull().references(() => syntheses.id, { onDelete: "cascade" }),
+  referenceId: text("reference_id").references(() => references.id, { onDelete: "set null" }),
+  position: integer("position").notNull(),
+  snapshotJson: text("snapshot_json").notNull(),
+  snapshotUpdatedAt: text("snapshot_updated_at").notNull(),
+}, (table) => [
+  index("idx_synthesis_references_synthesis_id").on(table.synthesisId),
+  uniqueIndex("uq_synthesis_references_position").on(table.synthesisId, table.position),
+  uniqueIndex("uq_synthesis_references_reference").on(table.synthesisId, table.referenceId),
+]);
 

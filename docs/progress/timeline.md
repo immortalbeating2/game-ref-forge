@@ -1310,3 +1310,87 @@
   - No application source, API, D1, dependency, deployment, or production-data change occurred.
 - Next:
   - Retry the same end-to-end smoke after an in-app Browser instance becomes available.
+
+### 2026-07-13
+
+- Branch: `codex/round-11-multi-reference-synthesis`
+- Mode: Round 11 Subagent-Driven implementation start
+- Action:
+  - Confirmed no existing feature worktree, `codex/*` branch, local dev process, or current-session subagent required cleanup.
+  - Created `.worktrees/round-11-multi-reference-synthesis` from synchronized `main` commit `153078b`.
+  - Selected serial Subagent-Driven execution with one implementer/reviewer at a time and prompt agent closure after each reviewed task.
+- Baseline verification:
+  - `npm test`: passed, 11 files / 71 tests.
+  - `npm run typecheck`: passed.
+  - `npm run lint`: passed.
+  - `npm run build`: passed.
+  - `npm install` emitted Windows `ENOTEMPTY`/`EPERM` cleanup warnings, but the installed toolchain executed all gates successfully.
+- Next:
+  - Dispatch Task 1 for the synthesis domain contract and snapshot rules.
+
+### 2026-07-14
+
+- Branch: `codex/round-11-multi-reference-synthesis`
+- Mode: Round 11 Task 8 documentation synchronization and feature-head self-review
+- Stage: `Round 11 implemented and locally verified; merge pending`
+- Task commit ranges:
+  - Task 1: `e86011b..19d2bfd` - synthesis domain contract and closed v1 snapshot validation.
+  - Task 2: `19d2bfd..89c15ae` - `syntheses` and `synthesis_references` schema/migration.
+  - Task 3: `89c15ae..0ccfb06` - synthesis D1 data access and mutation regressions.
+  - Task 4: `0ccfb06..29d5dc4` - synthesis API routes and strict query validation.
+  - Task 5: `29d5dc4..1b1bcb4` - draft, selection, Markdown export, localization, and interaction contracts.
+  - Task 6: `1b1bcb4..111be1e` - synthesis list/editor workspace and async/mutation hardening.
+  - Task 7: `111be1e..cbbc914` - main page comparison selection, handoff, and local QA evidence.
+- Documentation:
+  - Synchronized `docs/engineering/data-model.md` with the two-table schema, foreign-key delete semantics, 2-4 server constraint, immutable relations, and `schema_version: 1` snapshots.
+  - Synchronized `docs/engineering/architecture.md` with actual API routes, server snapshot trust boundary, stale/refresh lifecycle, module boundaries, Markdown scope, and migration order.
+  - Updated `AGENTS.md`, `docs/progress/status.md`, and this timeline to the merge-pending local-verification stage.
+- Verification evidence recorded from the feature head:
+  - 20 test files / 158 tests passed; typecheck, lint, build, and local D1 migration 2 passed.
+  - Local HTTP API CRUD and in-app browser CRUD passed, including stale/refresh, unavailable historical snapshots, archive/delete, bilingual UI, seed guard, and persistence.
+  - 1024px and 390x844 page-level horizontal overflow were 0; console application errors were 0; final references/syntheses/QA-title cleanup was 0.
+- Review and risk:
+  - Task 1-7 implementer/reviewer pairs remain recorded in the dated log; Task 8 performed a primary-agent self-review against the approved spec, plan, current schema/API, and QA evidence without changing application code.
+  - The in-app browser did not capture the programmatic Blob Markdown download event. Automated tests cover Markdown content, safe filename, source links, no media leakage, and unsaved warning; this is a non-blocking evidence gap for Task 9.
+  - No GitHub push, Sites migration/deployment, or production Round 11 CRUD result is claimed.
+- Next:
+  - Commit the documentation sync, revalidate merged local `main`, then execute Task 9 external sync/deployment/production cleanup.
+
+### 2026-07-14
+
+- Branch: `codex/round-11-multi-reference-synthesis`
+- Mode: Round 11 two-pass independent final-review repair
+- Findings repaired:
+  - Refresh snapshot ownership/source TOCTOU with CAS, bounded retry, relation/source loss classification, and relation/synthesis timestamp consistency.
+  - Strict closed snapshot parsing at every nested level, including required non-empty inspiration entry IDs and stable malformed-storage fallback.
+  - Dirty reference-edit comparison confirmation, failed-create draft preservation/reselection, localized synthesis failures, refresh mutation busy state, accessible shared alertdialog, and relation-specific refresh loading.
+  - Create reference deletion race between initial read and batch persistence, with post-failure requery and exact missing IDs while preserving unrelated DB failures.
+- RED evidence:
+  - First-pass focused additions failed on snapshot/DB, page recovery/cache, localization, and refresh busy behavior before production changes.
+  - Second-pass tests first failed on batch-reject requery, missing/empty entry IDs, shared dialog/relation refresh helpers, and the absent production CAS condition export.
+- Verification:
+  - Focused final-review suite: 6 files / 88 tests passed.
+  - Full suite: 21 files / 187 tests passed.
+  - Typecheck, lint, production build, and `git diff --check` passed.
+  - Real in-memory SQLite execution rejected stale CAS writes and verified transaction rollback/success consistency for relation snapshot plus synthesis `updated_at`.
+- Delegation:
+  - James performed the whole-branch review, Peirce implemented both TDD repair passes, and Locke performed the independent repair reviews; agents were used strictly one at a time and closed after each result.
+  - The primary agent validated findings, integrated evidence, ran full gates, and retained responsibility for browser QA, merge, deployment, and cleanup.
+- Status:
+  - No schema, migration, dependency, merge, push, deployment, production D1 write, or production browser QA occurred in this repair.
+  - Round 11 remains locally verified and merge pending; production verification remains Task 9.
+
+### 2026-07-14
+
+- Branch: `codex/round-11-multi-reference-synthesis`
+- Mode: Round 11 final-review approval and targeted local browser regression
+- Review:
+  - Final independent review of `1325505..d3909ef` reported no Critical or Important findings and marked the branch `Approved`.
+  - James, Peirce, and Locke were all closed; no temporary subagent remained active.
+- Verification:
+  - Fresh full gates passed: 21 test files / 187 tests, typecheck, lint, build, and `git diff --check`.
+  - Real browser alertdialog check passed for initial cancel focus, Escape close, trigger-focus restore, dirty-title preservation, and confirmed entry into comparison mode.
+  - 390x844 visual regression showed no incoherent overlap or horizontal clipping; two temporary references were deleted and final reference/QA-title residue was 0.
+  - This later successful browser run superseded the earlier same-day `iab` backend-unavailable state; the earlier diagnostic remains as historical evidence rather than current status.
+- Status:
+  - Merge to local `main`, GitHub/Sites sync, migration deployment, production CRUD, Markdown download, and production cleanup remain pending.

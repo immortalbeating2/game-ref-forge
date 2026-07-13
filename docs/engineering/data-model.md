@@ -2,11 +2,19 @@
 
 ## Overview
 
-The first version uses one `references` table.
+RefForge stores source research in `references` and Round 11 synthesis work in two separate D1 tables. A synthesis is a durable, manually authored research artifact. It does not replace or write back to a reference, and it does not use the reference table's record type to represent a different entity.
 
-The table stores source metadata, classification, public-safety fields, and inspiration extraction notes. Tags and note-like fields are stored as JSON text while the taxonomy is still evolving.
+The current schema is:
 
-## D1 Table Sketch
+- `references`: source metadata, classification, public-safety fields, scores, tags, and inspiration extraction notes.
+- `syntheses`: synthesis title, target asset, structured comparison and creation fields, status, and timestamps.
+- `synthesis_references`: the ordered links from one synthesis to its source references, together with creation-time snapshots.
+
+Tags and note-like fields remain JSON text while the taxonomy is still evolving. The data access layer parses reference JSON fields before returning `ReferenceRecord` values.
+
+## D1 Tables
+
+The existing `references` table continues to use the fields below:
 
 ```sql
 CREATE TABLE references (
@@ -43,12 +51,53 @@ CREATE TABLE references (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
-
-CREATE INDEX idx_references_asset_category ON references(asset_category);
-CREATE INDEX idx_references_license_status ON references(license_status);
-CREATE INDEX idx_references_public_status ON references(public_status);
-CREATE INDEX idx_references_created_at ON references(created_at);
 ```
+
+Round 11 adds `drizzle/0002_multi_reference_synthesis.sql`:
+
+```sql
+CREATE TABLE syntheses (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  target_asset TEXT,
+  shared_principles TEXT,
+  key_differences TEXT,
+  original_direction TEXT,
+  avoid_copying_notes TEXT,
+  design_constraints TEXT,
+  experiment_plan TEXT,
+  next_actions TEXT,
+  additional_notes TEXT,
+  status TEXT NOT NULL DEFAULT 'draft',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX idx_syntheses_status ON syntheses(status);
+CREATE INDEX idx_syntheses_updated_at ON syntheses(updated_at);
+
+CREATE TABLE synthesis_references (
+  id TEXT PRIMARY KEY,
+  synthesis_id TEXT NOT NULL,
+  reference_id TEXT,
+  position INTEGER NOT NULL,
+  snapshot_json TEXT NOT NULL,
+  snapshot_updated_at TEXT NOT NULL,
+  FOREIGN KEY (synthesis_id) REFERENCES syntheses(id) ON DELETE CASCADE,
+  FOREIGN KEY (reference_id) REFERENCES references(id) ON DELETE SET NULL,
+  UNIQUE (synthesis_id, position),
+  UNIQUE (synthesis_id, reference_id)
+);
+
+CREATE INDEX idx_synthesis_references_synthesis_id
+  ON synthesis_references(synthesis_id);
+```
+
+`synthesis_id` is required and cascades when its parent synthesis is deleted. `reference_id` is nullable and is set to `NULL` when the source reference is deleted; the relation row and its snapshot remain readable as historical evidence. SQLite's `UNIQUE` semantics allow more than one `NULL` `reference_id`, which is required for multiple unavailable source snapshots in one synthesis. The position and non-null reference uniqueness indexes prevent duplicate order positions or duplicate live references within a synthesis.
+
+The database does not encode the 2-4 cardinality or contiguous `position` range as a SQLite `CHECK`. The server validates a create request as 2-4 unique, real reference IDs and writes positions `0` through `n - 1` in the submitted order. Existing relation membership and order are immutable after creation; `PATCH` updates synthesis fields and status only.
+
+The migration is additive. It applies to a local D1 database that already contains `references` without rewriting that table or its rows.
 
 ## Enum Values
 
@@ -98,30 +147,40 @@ CREATE INDEX idx_references_created_at ON references(created_at);
 - `ready_for_use`
 - `blocked`
 
+`syntheses.status`:
+
+- `draft`
+- `actionable`
+- `archived`
+
 ## JSON Text Fields
 
-Store these as JSON strings in D1 and parse them in the data access layer:
+Reference JSON fields are parsed by `referenceRowToRecord` and returned as arrays or structured objects:
 
-- `style_tags`: string array.
-- `use_tags`: string array.
-- `mechanic_tags`: string array.
-- `mood_tags`: string array.
-- `visual_language_tags`: string array.
+- `style_tags`, `use_tags`, `mechanic_tags`, `mood_tags`, `visual_language_tags`: string arrays.
 - `inspiration_points`: string array.
 - `inspiration_entries`: structured inspiration entry array.
 
-Structured inspiration entry shape:
+The persisted `snapshot_json` is a closed, versioned `SynthesisReferenceSnapshot` with `schema_version: 1`. It includes:
 
-```ts
-type InspirationEntry = {
-  id: string;
-  observation: string;
-  principle: string;
-  transferable_idea: string;
-  original_application: string;
-  avoid_copying: string;
-};
-```
+- `reference_id` and the source `reference_updated_at` used for stale detection.
+- Title, source URL, canonical URL, site, author, media type, and asset category.
+- License, public-safety, and quality status.
+- Rating, reference value, transformability, copyright risk, and production readiness scores.
+- Style, use, mechanic, mood, and visual-language tags.
+- Inspiration points, structured inspiration entries, deconstruction notes, transformation ideas, and avoid-copying notes.
+
+The snapshot intentionally excludes preview media binary data and does not broaden the source's public or copyright boundary. The server creates it from the current `ReferenceRecord` during synthesis creation and explicit refresh; clients cannot submit or replace snapshot content.
+
+## Snapshot Lifecycle
+
+- A newly created relation stores a server-generated v1 snapshot and its `snapshot_updated_at`.
+- A detail response derives `available` and `stale`; neither state is persisted.
+- A live source is stale only when its current `updated_at` is later than the snapshot's source `reference_updated_at`.
+- A deleted source leaves the relation and snapshot in place, with `reference_id = NULL` and `available = false`.
+- `POST /api/syntheses/:id/references/:relationId/refresh` reads the current source, atomically replaces the snapshot and snapshot time, and updates the synthesis `updated_at`.
+- A refresh of an unavailable source fails without changing the old snapshot.
+- Malformed stored JSON is converted to a stable unavailable v1 placeholder rather than crashing detail rendering.
 
 ## Reference Response Shape
 
@@ -162,23 +221,37 @@ type ReferenceRecord = {
 };
 ```
 
+Round 11 adds these application-level shapes:
+
+```ts
+type SynthesisReferenceLink = {
+  id: string;
+  synthesis_id: string;
+  reference_id: string | null;
+  position: number;
+  snapshot: SynthesisReferenceSnapshot;
+  snapshot_updated_at: string;
+  available: boolean;
+  stale: boolean;
+};
+
+type SynthesisDetail = SynthesisRecord & {
+  references: SynthesisReferenceLink[];
+};
+
+type SynthesisSummary = Pick<
+  SynthesisRecord,
+  "id" | "title" | "target_asset" | "status" | "updated_at"
+> & { reference_count: number };
+```
+
 ## Validation Rules
 
-- `title`, `source_url`, `media_type`, `asset_category`, `license_status`, and `public_status` are required.
-- `source_url` must be an absolute URL.
-- New records default to `license_status = private_reference` unless explicitly changed.
-- New records default to `public_status = private` unless explicitly changed.
-- `rating` is optional and should be between 1 and 5 when present.
-- `reference_value_score`, `transformability_score`, `copyright_risk_score`, and `production_readiness_score` are optional and should be integers between 1 and 5 when present.
-- Higher `copyright_risk_score` means higher risk.
-- `style_tags`, `use_tags`, `mechanic_tags`, `mood_tags`, `visual_language_tags`, `inspiration_points`, and `inspiration_entries` should always return arrays to the frontend.
-- Blank structured inspiration entries should be removed before saving.
-- Missing `quality_status` should default to `captured`.
-
-## Migration
-
-Round 5 uses the existing Drizzle migration flow and adds:
-
-- `drizzle/0001_massive_zodiak.sql`
-
-The migration only appends nullable/defaulted columns to the existing `references` table.
+- Reference validation remains as defined by the existing model; new references default to private handling.
+- A synthesis title is 1-160 characters.
+- `target_asset` is optional and at most 240 characters.
+- The eight optional long-text synthesis fields are each at most 8000 characters.
+- Status must be `draft`, `actionable`, or `archived`; new records default to `draft`.
+- `reference_ids` must contain 2-4 non-blank, unique IDs that still exist at write time.
+- The client does not control snapshot content, relation IDs, saved relation membership, or relation order.
+- `actionable` has no hard completeness gate; the UI continues to surface missing target asset, original direction, experiment plan, and next actions.
