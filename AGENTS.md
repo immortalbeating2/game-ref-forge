@@ -170,7 +170,7 @@ Round 11 扩展边界：
 
 Round 11 当前本地证据：21 个测试文件 / 187 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0；Blob Markdown 下载事件仍有非阻塞证据缺口。
 
-Round 11 当前外部状态：Sites version 13 的已部署运行时代码和归档来自 `d7db34a`；GitHub `main` 在其后仅增加生产部署证据文档，不包含新的应用、migration 或依赖改动。生产只读 UI 已显示“参考 / 综合稿”“开始对比”和添加表单。生产写路径尚未通过，当前会话中内置浏览器 fill/type 连续超时、Chrome 扩展通道不可用，重新生成的 SIWC bypass token 仍在边缘层返回 403。
+Round 11 当前外部状态：Sites version 13 的已部署运行时代码和归档来自 `d7db34a`；GitHub `main` 在其后仅增加生产部署证据文档，不包含新的应用、migration 或依赖改动。生产只读 UI 已显示“参考 / 综合稿”“开始对比”和添加表单。2026-07-14 后续诊断确认内置浏览器的读取、非空 fill、工作区点击和状态回读可用，但每次操作受 Statsig 网络超时拖慢约 10-20 秒；多个跨浏览器动作放在一次 30 秒调用中会超时，且 `fill("")` 返回成功但不会清空。生产写路径仍未完整通过，Chrome 扩展通道不可用，重新生成的 SIWC bypass token 仍在边缘层返回 403。
 
 ## 来源与版权边界
 

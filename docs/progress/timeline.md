@@ -1443,3 +1443,22 @@
   - The existing and newly rotated SIWC bypass tokens both returned edge-layer `403` with the documented `OAI-Sites-Authorization` header, so identity-less API CRUD could not start.
 - Status:
   - Source synchronization and production deployment are complete. Production write CRUD, Markdown download, 390px evidence, and cleanup remain pending; Round 11 is not yet marked complete.
+
+### 2026-07-14
+
+- Branch: `main`
+- Mode: Production in-app Browser control follow-up diagnostic
+- Action:
+  - Reconnected to the existing signed-in production tab and tested read, input, click, state readback, cleanup, and page console logs without submitting production data.
+  - Kept every browser boundary crossing isolated after earlier multi-action calls exceeded their total timeout.
+- Verification:
+  - Browser discovery, tab claim, and production DOM snapshot succeeded.
+  - Non-empty search `fill("Kenney")` returned and read back correctly.
+  - Reference-to-synthesis workspace click returned; `aria-pressed=true` confirmed the transition. A scoped header button returned to the reference workspace and its group control read back `aria-pressed=true`.
+  - `fill("")` returned success but did not clear search or source URL. Replacing each value with one character and pressing Backspace produced verified empty values.
+  - Page console `error` logs were empty and no `R11 QA` title was present.
+- Diagnosis:
+  - Browser control is available, but its client repeatedly waits on failing Statsig network requests for about 10-20 seconds per operation. Multiple browser reads/actions in one 30-second call therefore time out even when an earlier action completed.
+  - Empty-string fill has a separate control-layer defect or incompatibility; keyboard clearing is the working fallback.
+- Status:
+  - The browser channel is usable with one operation per call and explicit readback. No production form was submitted and Round 11 production CRUD remains pending.
