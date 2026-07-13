@@ -98,4 +98,7 @@ Round 11 本地 migration、API CRUD、UI CRUD、快照生命周期、双语和�
 - RED 证据包括：第一轮 snapshot/DB 15 项、页面恢复 4 项与缓存重载 1 项、本地化/busy 5 项预期失败；第二轮 batch requery、entry ID、dialog/relation helper 均先失败；真实 SQLite CAS 首跑因生产条件构造器尚未导出而 1 项失败。
 - GREEN 证据：聚焦 6 文件 / 88 测试通过；全量 21 文件 / 187 测试通过；typecheck、lint、build、`git diff --check` 通过。
 - 真实内存 SQLite 测试直接执行生产 Drizzle CAS 条件，验证旧 refresh 不覆盖较新 snapshot、事务回滚无半更新、成功事务同步更新 relation snapshot 与 synthesis `updated_at`。未引入新依赖，未修改 migration。
-- 本补充仅为本地自动化终审证据，没有重新执行浏览器布局/CRUD，也没有执行 GitHub push、Sites deployment、生产 D1 migration 或生产 CRUD。生产验证仍未完成。
+- 最终独立复审对 `1325505..d3909ef` 给出 `Approved`，无 Critical/Important finding；所有临时代理均已关闭。
+- 修复后重新执行内置浏览器聚焦回归：alertdialog 初始焦点位于“取消”，Escape 关闭后焦点恢复到“开始对比”，dirty 标题保留；确认后成功进入对比选择模式。
+- 修复后 390x844 截图未见横向裁切、控件重叠或对比操作异常；两条临时 focus QA reference 均删除成功，最终 references 与 QA 标题残留为 0。
+- 本补充仍没有执行 GitHub push、Sites deployment、生产 D1 migration 或生产 CRUD。生产验证仍未完成。

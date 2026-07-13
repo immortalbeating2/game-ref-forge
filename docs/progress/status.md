@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: `codex/round-11-multi-reference-synthesis`; Task 1-8 is locally verified and merge to `main` is pending. No Task 9 GitHub push, Sites deployment, or production QA is claimed.
+- Current implementation branch: `codex/round-11-multi-reference-synthesis`; Task 1-8 is locally verified, final independent review is `Approved`, and merge to `main` is pending. No Task 9 GitHub push, Sites deployment, or production QA is claimed.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -37,7 +37,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - First-version research desk UI exists with filters, gallery, detail panel, add form, metadata preview, and seed fallback.
 - Round 11 adds temporary 2-4 reference comparison selection, a separate synthesis list/editor workspace, server snapshots, stale/refresh state, archive/delete controls, bilingual copy, and single-item Markdown export.
 - Local validation has passed for tests, typecheck, lint, and production build.
-- After two independent final-review repair rounds, the latest automated validation passed with 21 test files / 187 tests, typecheck, lint, and build. Earlier feature-head evidence covers migration 2, HTTP API CRUD, in-app browser CRUD, 1024px and 390px layout checks, console errors 0, and final local cleanup 0; those browser/API flows were not rerun after the review repairs.
+- After two independent final-review repair rounds, the latest automated validation passed with 21 test files / 187 tests, typecheck, lint, and build. Final independent review is `Approved`; a post-repair browser regression passed for alertdialog focus/Escape/restore, dirty-title preservation, comparison entry, 390x844 visual layout, and cleanup 0. Earlier full feature evidence still covers migration 2, HTTP/UI CRUD, exact 1024px/390px overflow metrics, and console errors 0.
 - Sites version 1 has been saved and deployed.
 - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
@@ -208,7 +208,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 11 application implementation is complete through Task 8 on the feature branch; the branch is not yet merged to `main`.
 - The Round 11 design baseline and TDD implementation plan were approved before implementation; Task 1-7 commits run from `153078b` to `cbbc914`.
 - The user approved Subagent-Driven execution. Branch `codex/round-11-multi-reference-synthesis` and the isolated worktree `.worktrees/round-11-multi-reference-synthesis` were created from synchronized commit `153078b`.
-- Round 11 baseline verification passed with 11 test files / 71 tests; after two independent final-review repair rounds the latest automated feature-head verification passed with 21 test files / 187 tests, typecheck, lint, and build. Local migration/API/browser QA, 1024px and 390px overflow 0, console errors 0, and cleanup 0 remain earlier pre-repair evidence and were not rerun in this repair.
+- Round 11 baseline verification passed with 11 test files / 71 tests; after two independent final-review repair rounds the latest automated feature-head verification passed with 21 test files / 187 tests, typecheck, lint, and build. Full migration/API/UI CRUD, exact 1024px/390px overflow metrics, and console errors 0 remain earlier evidence; post-repair browser regression additionally passed dirty-dialog focus/Escape/restore, confirmed comparison entry, 390x844 visual layout, and cleanup 0.
 - Final-review repairs cover refresh ownership/source CAS and atomic timestamp semantics, strict closed snapshot parsing, dirty reference-edit confirmation, failed-create draft reselection, localized synthesis failures, refresh mutation busy state, create batch deletion races, required non-empty inspiration entry IDs, alertdialog focus behavior, and relation-specific refresh loading.
 - A real in-memory SQLite test executes the production refresh CAS predicates and verifies stale-write rejection plus relation/synthesis transaction atomicity; no dependency or migration change was introduced.
 - Task commit ranges: Task 1 `e86011b..19d2bfd`; Task 2 `19d2bfd..89c15ae`; Task 3 `89c15ae..0ccfb06`; Task 4 `0ccfb06..29d5dc4`; Task 5 `29d5dc4..1b1bcb4`; Task 6 `1b1bcb4..111be1e`; Task 7 `111be1e..cbbc914`.
