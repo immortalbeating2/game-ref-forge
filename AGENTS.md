@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 11 spec approved; implementation plan review pending`
+- 当前阶段：`Round 11 implementation in progress`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,7 +142,7 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 11 spec approved; implementation plan review pending`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 书面规格已批准，应先复核并批准实现计划，再进入应用开发。
+本项目当前为 `Round 11 implementation in progress`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 书面规格和实现计划已批准，正在 `codex/round-11-multi-reference-synthesis` 隔离 worktree 中按 TDD 实施。
 
 当前默认目标：
 
