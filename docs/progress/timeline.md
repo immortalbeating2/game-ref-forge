@@ -1292,3 +1292,21 @@
   - Documentation only; no application source, API, D1 migration, dependency, branch, worktree, or Sites deployment change yet.
 - Next:
   - Review and approve the implementation plan, choose the execution mode, then create the feature worktree.
+
+## 2026-07-14
+
+### 2026-07-14
+
+- Branch: `main`
+- Mode: Browser Use tooling availability diagnostic
+- Action: attempted an end-to-end Browser Use smoke through the required Node REPL runtime and `iab` backend.
+- Verification:
+  - Browser Use plugin entry file exists.
+  - Node REPL JavaScript execution is callable.
+  - Two clean `iab` initialization attempts found no Codex in-app Browser backend.
+  - Browser navigation, DOM inspection, and interaction could not start.
+- Result:
+  - Browser Use is unavailable in the current Codex session.
+  - No application source, API, D1, dependency, deployment, or production-data change occurred.
+- Next:
+  - Retry the same end-to-end smoke after an in-app Browser instance becomes available.
