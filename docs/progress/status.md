@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-07-13
+Updated: 2026-07-14
 
 ## Current Stage
 
-`Round 11 implementation in progress`
+`Round 11 implemented and locally verified; merge pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,17 +25,19 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Current implementation branch: none; stable branch is `main` and Round 10 is deployed.
+- Current implementation branch: `codex/round-11-multi-reference-synthesis`; Task 1-8 is locally verified and merge to `main` is pending. No Task 9 GitHub push, Sites deployment, or production QA is claimed.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
 - Sites vinext/React starter has been scaffolded.
 - `.openai/hosting.json` declares D1 binding `DB` and no R2 binding.
-- D1 migration exists for the first-version `references` table.
-- CRUD API routes exist for references.
+- D1 migration exists for the first-version `references` table; additive migration 2 creates `syntheses` and `synthesis_references` without rewriting reference rows.
+- CRUD API routes exist for references and synthesis list/create/detail/update/delete plus explicit snapshot refresh.
 - Metadata preview API exists.
 - First-version research desk UI exists with filters, gallery, detail panel, add form, metadata preview, and seed fallback.
+- Round 11 adds temporary 2-4 reference comparison selection, a separate synthesis list/editor workspace, server snapshots, stale/refresh state, archive/delete controls, bilingual copy, and single-item Markdown export.
 - Local validation has passed for tests, typecheck, lint, and production build.
+- Round 11 local validation passed with 20 test files / 158 tests, typecheck, lint, build, migration 2, HTTP API CRUD, in-app browser CRUD, 1024px and 390px layout checks, console errors 0, and final local cleanup 0.
 - Sites version 1 has been saved and deployed.
 - Production URL: `https://game-ref-forge.yeep-6613.chatgpt-team.site`
 - Local GitHub CLI is installed and authenticated for `immortalbeating2`.
@@ -171,6 +173,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - The next main workspace upgrade should follow `docs/superpowers/specs/2026-06-21-workspace-ui-upgrade-design.md`, which incorporates the 2026-06-19 concept direction.
 - Round 7 is limited to frontend UI and copy. It does not change API behavior, D1 schema, or production QA infrastructure.
 - Round 10 uses quality-checklist anchor navigation into the existing edit form, keeps one manual save, and adds no D1 migration or API route.
+- Round 11 uses independent `syntheses` and `synthesis_references` tables, server-created `schema_version: 1` snapshots, fixed 2-4 ordered relations, explicit stale/refresh, and one Markdown document per synthesis.
 
 ## Current Risks
 
@@ -202,13 +205,14 @@ It helps collect source links from game asset and game design sites, normalize t
 - The new production-390px evidence commit is temporarily one local commit ahead of `origin/main` after three GitHub HTTPS attempts ended in connection reset or `github.com:443` connectivity failure; no application or production data change is pending.
 - On 2026-07-13, the Round 11 multi-reference synthesis direction and all four design sections were approved.
 - The Round 11 written design uses independent `syntheses` and `synthesis_references` tables, 2-4 ordered reference snapshots, manual structured synthesis, explicit snapshot refresh, full synthesis CRUD, and single-item Markdown export.
-- Round 11 application implementation has not started; the written spec must be reviewed and an implementation plan approved first.
-- The Round 11 design baseline is committed and synchronized at `b1ec341`; local `main`, `origin/main`, and `origin/HEAD` are aligned.
-- On 2026-07-13, the user approved the written Round 11 specification and requested the remaining Superpowers flow through implementation.
-- The detailed TDD implementation plan now exists at `docs/superpowers/plans/2026-07-13-multi-reference-synthesis.md`; application implementation remains gated on plan review.
+- Round 11 application implementation is complete through Task 8 on the feature branch; the branch is not yet merged to `main`.
+- The Round 11 design baseline and TDD implementation plan were approved before implementation; Task 1-7 commits run from `153078b` to `cbbc914`.
 - The user approved Subagent-Driven execution. Branch `codex/round-11-multi-reference-synthesis` and the isolated worktree `.worktrees/round-11-multi-reference-synthesis` were created from synchronized commit `153078b`.
-- Round 11 baseline verification passed with 11 test files / 71 tests, typecheck, lint, and production build.
+- Round 11 baseline verification passed with 11 test files / 71 tests; the final feature-head verification passed with 20 test files / 158 tests, typecheck, lint, build, local migration/API/browser QA, 1024px and 390px overflow 0, console errors 0, and cleanup 0.
+- Task commit ranges: Task 1 `e86011b..19d2bfd`; Task 2 `19d2bfd..89c15ae`; Task 3 `89c15ae..0ccfb06`; Task 4 `0ccfb06..29d5dc4`; Task 5 `29d5dc4..1b1bcb4`; Task 6 `1b1bcb4..111be1e`; Task 7 `111be1e..cbbc914`.
+- The in-app browser did not capture the programmatic Blob Markdown download event. Markdown content, filename, source-link, no-media, and unsaved-warning behavior are covered by automated tests; this is a non-blocking evidence gap for Task 9 production recheck.
+- Task 9 remains pending: merge to local `main`, then GitHub push, Sites migration/deployment, authenticated production CRUD, and production cleanup. No Round 11 production result is recorded.
 
 ## Next Suggested Step
 
-Execute the nine-task Round 11 TDD plan with one implementation subagent at a time, close each reviewed agent promptly, and keep the durable SDD ledger and required progress traces current.
+Merge the locally verified feature branch to `main` after merged-main revalidation, then execute Task 9 GitHub/Sites/production work while keeping the QA document and three progress traces current.

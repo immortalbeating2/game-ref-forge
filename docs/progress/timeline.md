@@ -1309,3 +1309,31 @@
   - `npm install` emitted Windows `ENOTEMPTY`/`EPERM` cleanup warnings, but the installed toolchain executed all gates successfully.
 - Next:
   - Dispatch Task 1 for the synthesis domain contract and snapshot rules.
+
+### 2026-07-14
+
+- Branch: `codex/round-11-multi-reference-synthesis`
+- Mode: Round 11 Task 8 documentation synchronization and feature-head self-review
+- Stage: `Round 11 implemented and locally verified; merge pending`
+- Task commit ranges:
+  - Task 1: `e86011b..19d2bfd` - synthesis domain contract and closed v1 snapshot validation.
+  - Task 2: `19d2bfd..89c15ae` - `syntheses` and `synthesis_references` schema/migration.
+  - Task 3: `89c15ae..0ccfb06` - synthesis D1 data access and mutation regressions.
+  - Task 4: `0ccfb06..29d5dc4` - synthesis API routes and strict query validation.
+  - Task 5: `29d5dc4..1b1bcb4` - draft, selection, Markdown export, localization, and interaction contracts.
+  - Task 6: `1b1bcb4..111be1e` - synthesis list/editor workspace and async/mutation hardening.
+  - Task 7: `111be1e..cbbc914` - main page comparison selection, handoff, and local QA evidence.
+- Documentation:
+  - Synchronized `docs/engineering/data-model.md` with the two-table schema, foreign-key delete semantics, 2-4 server constraint, immutable relations, and `schema_version: 1` snapshots.
+  - Synchronized `docs/engineering/architecture.md` with actual API routes, server snapshot trust boundary, stale/refresh lifecycle, module boundaries, Markdown scope, and migration order.
+  - Updated `AGENTS.md`, `docs/progress/status.md`, and this timeline to the merge-pending local-verification stage.
+- Verification evidence recorded from the feature head:
+  - 20 test files / 158 tests passed; typecheck, lint, build, and local D1 migration 2 passed.
+  - Local HTTP API CRUD and in-app browser CRUD passed, including stale/refresh, unavailable historical snapshots, archive/delete, bilingual UI, seed guard, and persistence.
+  - 1024px and 390x844 page-level horizontal overflow were 0; console application errors were 0; final references/syntheses/QA-title cleanup was 0.
+- Review and risk:
+  - Task 1-7 implementer/reviewer pairs remain recorded in the dated log; Task 8 performed a primary-agent self-review against the approved spec, plan, current schema/API, and QA evidence without changing application code.
+  - The in-app browser did not capture the programmatic Blob Markdown download event. Automated tests cover Markdown content, safe filename, source links, no media leakage, and unsaved warning; this is a non-blocking evidence gap for Task 9.
+  - No GitHub push, Sites migration/deployment, or production Round 11 CRUD result is claimed.
+- Next:
+  - Commit the documentation sync, revalidate merged local `main`, then execute Task 9 external sync/deployment/production cleanup.

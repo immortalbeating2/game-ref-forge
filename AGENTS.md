@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 11 implementation in progress`
+- 当前阶段：`Round 11 implemented and locally verified; merge pending`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,12 +142,12 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 11 implementation in progress`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 书面规格和实现计划已批准，正在 `codex/round-11-multi-reference-synthesis` 隔离 worktree 中按 TDD 实施。
+本项目当前为 `Round 11 implemented and locally verified; merge pending`。Round 10 已合并、推送并部署到 Sites version 12，生产临时 CRUD 已完成清理；Round 11 Task 1-8 已在 `codex/round-11-multi-reference-synthesis` 隔离 worktree 中完成本地验证。Task 9 的 GitHub 推送、Sites migration/deployment 和生产 CRUD 尚未执行，不得提前记录为完成。
 
 当前默认目标：
 
-- 保持 `main`、GitHub 和 Sites 生产版本同步。
-- 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现。
+- 将已验证的 Round 11 分支合并到 `main`，再按 Task 9 计划同步 GitHub、Sites 和生产环境。
+- 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。
 
@@ -160,6 +160,15 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 - 资产分类、用途标签、灵感提炼字段。
 - 搜索、筛选、编辑、删除。
 - D1 中的一张 `references` 表。
+
+Round 11 扩展边界：
+
+- 独立的 `syntheses` 与 `synthesis_references` 两表。
+- 2-4 条有序 reference 关联，服务端创建时快照，`schema_version: 1`。
+- 显式 stale/refresh、综合稿列表/编辑/归档/删除和单份 Markdown 导出。
+- 综合稿不写回 reference，不公开托管第三方媒体，不新增公开路由。
+
+Round 11 当前本地证据：20 个测试文件 / 158 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0；Blob Markdown 下载事件仍有非阻塞证据缺口。
 
 ## 来源与版权边界
 
