@@ -16,11 +16,12 @@ export type SynthesisReferenceCardProps = {
   language: Language;
   link: SynthesisReferenceLink;
   isRefreshing: boolean;
+  isRefreshDisabled: boolean;
   onRefresh: (link: SynthesisReferenceLink) => void;
 };
 
 export function SynthesisReferenceCard(_props: SynthesisReferenceCardProps): React.JSX.Element {
-  const { language, link, isRefreshing, onRefresh } = _props;
+  const { language, link, isRefreshing, isRefreshDisabled, onRefresh } = _props;
   const copy = uiCopy(language);
   const { snapshot } = link;
   const sourceMissing = !snapshot.source_url || !snapshot.site_name || !snapshot.author;
@@ -67,7 +68,7 @@ export function SynthesisReferenceCard(_props: SynthesisReferenceCardProps): Rea
       {link.stale ? <p className="synthesis-reference-warning" role="status">{copy.staleReference}</p> : null}
       {!link.available ? <p className="synthesis-reference-warning" role="status">{copy.unavailableReference}</p> : null}
       {link.available ? (
-        <button className="ghost-button" type="button" onClick={() => onRefresh(link)} disabled={isRefreshing}>
+        <button className="ghost-button" type="button" onClick={() => onRefresh(link)} disabled={isRefreshing || isRefreshDisabled}>
           {isRefreshing ? copy.refreshingSnapshot : copy.refreshSnapshot}
         </button>
       ) : null}

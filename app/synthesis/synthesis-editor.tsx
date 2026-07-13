@@ -14,6 +14,7 @@ export type SynthesisEditorProps = {
   draft: SynthesisDraft;
   mode: "create" | "edit";
   isSaving: boolean;
+  isArchiving: boolean;
   isRefreshing: boolean;
   isDeleting: boolean;
   error: string | null;
@@ -32,6 +33,7 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
     draft,
     mode,
     isSaving,
+    isArchiving,
     isRefreshing,
     isDeleting,
     error,
@@ -43,6 +45,8 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
     onDelete,
   } = _props;
   const copy = uiCopy(language);
+  const isEditorMutationBusy = isSaving || isArchiving;
+  const archivingMessage = language === "zh" ? "归档中..." : "Archiving...";
   const update = <K extends keyof SynthesisDraft>(field: K, value: SynthesisDraft[K]) => {
     onDraftChange({ ...draft, [field]: value });
   };
@@ -67,7 +71,7 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
         <div className="synthesis-toolbar-actions">
           <label>
             {copy.synthesisStatus}
-            <select value={draft.status} onChange={(event) => update("status", event.target.value as SynthesisDraft["status"])} disabled={isSaving}>
+            <select value={draft.status} onChange={(event) => update("status", event.target.value as SynthesisDraft["status"])} disabled={isEditorMutationBusy}>
               {(["draft", "actionable", "archived"] as const).map((status) => <option key={status} value={status}>{labelForSynthesisStatus(status, language)}</option>)}
             </select>
           </label>
@@ -75,7 +79,7 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
             <summary>{copy.researchControls}</summary>
             <div>
               <button className="ghost-button" type="button" onClick={onExport} disabled={!detail || isSaving}>{copy.exportSynthesisMarkdown}</button>
-              {mode === "edit" ? <button className="danger-button" type="button" onClick={onDelete} disabled={isDeleting}>{copy.deleteSynthesis}</button> : null}
+              {mode === "edit" ? <button className="danger-button" type="button" onClick={onDelete} disabled={isDeleting || isEditorMutationBusy}>{copy.deleteSynthesis}</button> : null}
             </div>
           </details>
         </div>
@@ -83,7 +87,7 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
 
       {detail ? (
         <section className="synthesis-reference-strip" aria-label={copy.referenceDeck}>
-          {detail.references.map((link) => <SynthesisReferenceCard key={link.id} language={language} link={link} isRefreshing={isRefreshing} onRefresh={onRefresh} />)}
+          {detail.references.map((link) => <SynthesisReferenceCard key={link.id} language={language} link={link} isRefreshing={isRefreshing} isRefreshDisabled={isEditorMutationBusy} onRefresh={onRefresh} />)}
         </section>
       ) : null}
 
@@ -92,29 +96,29 @@ export function SynthesisEditor(_props: SynthesisEditorProps): React.JSX.Element
       <form className="synthesis-form" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
         <section className="synthesis-form-section">
           <h3>{language === "zh" ? "方向" : "Direction"}</h3>
-          <label>{copy.synthesisTitle}<input value={draft.title} maxLength={160} onChange={(event) => update("title", event.target.value)} disabled={isSaving} required /></label>
-          <label>{copy.targetAsset}<input value={draft.target_asset} maxLength={240} onChange={(event) => update("target_asset", event.target.value)} disabled={isSaving} /></label>
-          <label>{fields[0].label}<textarea value={draft.original_direction} maxLength={8000} onChange={(event) => update("original_direction", event.target.value)} disabled={isSaving} /></label>
+          <label>{copy.synthesisTitle}<input value={draft.title} maxLength={160} onChange={(event) => update("title", event.target.value)} disabled={isEditorMutationBusy} required /></label>
+          <label>{copy.targetAsset}<input value={draft.target_asset} maxLength={240} onChange={(event) => update("target_asset", event.target.value)} disabled={isEditorMutationBusy} /></label>
+          <label>{fields[0].label}<textarea value={draft.original_direction} maxLength={8000} onChange={(event) => update("original_direction", event.target.value)} disabled={isEditorMutationBusy} /></label>
         </section>
         <section className="synthesis-form-section">
           <h3>{language === "zh" ? "对比" : "Comparison"}</h3>
-          {fields.slice(1, 3).map(({ field, label }) => <label key={field}>{label}<textarea value={draft[field]} maxLength={8000} onChange={(event) => update(field, event.target.value)} disabled={isSaving} /></label>)}
+          {fields.slice(1, 3).map(({ field, label }) => <label key={field}>{label}<textarea value={draft[field]} maxLength={8000} onChange={(event) => update(field, event.target.value)} disabled={isEditorMutationBusy} /></label>)}
         </section>
         <section className="synthesis-form-section">
           <h3>{language === "zh" ? "边界" : "Boundaries"}</h3>
-          {fields.slice(3, 5).map(({ field, label }) => <label key={field}>{label}<textarea value={draft[field]} maxLength={8000} onChange={(event) => update(field, event.target.value)} disabled={isSaving} /></label>)}
+          {fields.slice(3, 5).map(({ field, label }) => <label key={field}>{label}<textarea value={draft[field]} maxLength={8000} onChange={(event) => update(field, event.target.value)} disabled={isEditorMutationBusy} /></label>)}
         </section>
         <section className="synthesis-form-section">
           <h3>{language === "zh" ? "执行" : "Execution"}</h3>
-          {fields.slice(5, 7).map(({ field, label }) => <label key={field}>{label}<textarea value={draft[field]} maxLength={8000} onChange={(event) => update(field, event.target.value)} disabled={isSaving} /></label>)}
+          {fields.slice(5, 7).map(({ field, label }) => <label key={field}>{label}<textarea value={draft[field]} maxLength={8000} onChange={(event) => update(field, event.target.value)} disabled={isEditorMutationBusy} /></label>)}
         </section>
         <section className="synthesis-form-section">
           <h3>{language === "zh" ? "记录" : "Notes"}</h3>
-          <label>{fields[7].label}<textarea value={draft.additional_notes} maxLength={8000} onChange={(event) => update("additional_notes", event.target.value)} disabled={isSaving} /></label>
+          <label>{fields[7].label}<textarea value={draft.additional_notes} maxLength={8000} onChange={(event) => update("additional_notes", event.target.value)} disabled={isEditorMutationBusy} /></label>
         </section>
         <div className="synthesis-save-bar">
-          <span>{isSaving ? copy.savingSynthesis : null}</span>
-          <button type="submit" disabled={isSaving}>{isSaving ? copy.savingSynthesis : copy.saveSynthesis}</button>
+          <span>{isSaving ? copy.savingSynthesis : isArchiving ? archivingMessage : null}</span>
+          <button type="submit" disabled={isEditorMutationBusy}>{isSaving ? copy.savingSynthesis : isArchiving ? archivingMessage : copy.saveSynthesis}</button>
         </div>
       </form>
     </section>

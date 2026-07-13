@@ -1,6 +1,31 @@
 import type { SynthesisDetail } from "../../lib/synthesis";
 import { detailToSynthesisDraft, type SynthesisDraft } from "../../lib/synthesis-draft";
 
+export type SynthesisMutationKind = "save" | "archive" | "refresh" | "delete";
+export type SynthesisMutationGuard = {
+  current: Map<string, SynthesisMutationKind>;
+};
+
+export async function runOwnedSynthesisMutation<T>(
+  guard: SynthesisMutationGuard,
+  synthesisId: string,
+  kind: SynthesisMutationKind,
+  operation: () => Promise<T>,
+): Promise<{ started: false } | { started: true; value: T }> {
+  if (guard.current.has(synthesisId)) {
+    return { started: false };
+  }
+
+  guard.current.set(synthesisId, kind);
+  try {
+    return { started: true, value: await operation() };
+  } finally {
+    if (guard.current.get(synthesisId) === kind) {
+      guard.current.delete(synthesisId);
+    }
+  }
+}
+
 export type ArchiveWorkspaceState = {
   activeDetail: SynthesisDetail | null;
   draft: SynthesisDraft;

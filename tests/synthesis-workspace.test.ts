@@ -11,6 +11,7 @@ import {
   getDialogKeyboardAction,
   getInitialReferenceConsumption,
   isEditorSaveBusy,
+  runOwnedSynthesisMutation,
   tryAcquireOperationGuard,
 } from "../app/synthesis/synthesis-workspace-state";
 
@@ -86,6 +87,46 @@ describe("synthesis workspace state regressions", () => {
     expect(isEditorSaveBusy(true, null)).toBe(true);
   });
 
+  it("does not start Save A while Archive A is pending", async () => {
+    const guard = { current: new Map() };
+    const requests: string[] = [];
+    let finishArchive = () => {};
+    const archivePending = new Promise<void>((resolve) => { finishArchive = resolve; });
+    const archive = runOwnedSynthesisMutation(guard, "syn-a", "archive", async () => {
+      requests.push("archive");
+      await archivePending;
+    });
+
+    const save = await runOwnedSynthesisMutation(guard, "syn-a", "save", async () => {
+      requests.push("save");
+    });
+
+    expect(save).toEqual({ started: false });
+    expect(requests).toEqual(["archive"]);
+    finishArchive();
+    await archive;
+  });
+
+  it("does not start Archive A while Save A is pending", async () => {
+    const guard = { current: new Map() };
+    const requests: string[] = [];
+    let finishSave = () => {};
+    const savePending = new Promise<void>((resolve) => { finishSave = resolve; });
+    const save = runOwnedSynthesisMutation(guard, "syn-a", "save", async () => {
+      requests.push("save");
+      await savePending;
+    });
+
+    const archive = await runOwnedSynthesisMutation(guard, "syn-a", "archive", async () => {
+      requests.push("archive");
+    });
+
+    expect(archive).toEqual({ started: false });
+    expect(requests).toEqual(["save"]);
+    finishSave();
+    await save;
+  });
+
   it("preserves edits made to A while its archive request is pending", () => {
     const original = makeDetail("syn-a", "A");
     const baseline = detailToSynthesisDraft(original);
@@ -114,7 +155,7 @@ describe("synthesis workspace state regressions", () => {
   });
 
   it("applies archived A and rebuilds a clean draft without concurrent edits", () => {
-    const original = makeDetail("syn-a", "A");
+    const original = { ...makeDetail("syn-a", "A"), original_direction: "Keep this field" };
     const baseline = detailToSynthesisDraft(original);
     const archived = { ...original, status: "archived" as const };
 
@@ -122,6 +163,7 @@ describe("synthesis workspace state regressions", () => {
 
     expect(result.activeDetail).toBe(archived);
     expect(result.draft.status).toBe("archived");
+    expect(result.draft.original_direction).toBe("Keep this field");
     expect(isSynthesisDraftDirty(result.draft, archived)).toBe(false);
   });
 

@@ -11,8 +11,8 @@ export type SynthesisListProps = {
   summaries: SynthesisSummary[];
   statusFilter: SynthesisStatus | "all";
   isLoading: boolean;
-  isMutating: boolean;
-  archivingId: string | null;
+  mutationBusyIds: string[];
+  archivingIds: string[];
   activeId: string | null;
   onStatusFilterChange: (status: SynthesisStatus | "all") => void;
   onOpen: (id: string) => void;
@@ -26,8 +26,8 @@ export function SynthesisList(_props: SynthesisListProps): React.JSX.Element {
     summaries,
     statusFilter,
     isLoading,
-    isMutating,
-    archivingId,
+    mutationBusyIds,
+    archivingIds,
     activeId,
     onStatusFilterChange,
     onOpen,
@@ -64,9 +64,9 @@ export function SynthesisList(_props: SynthesisListProps): React.JSX.Element {
             </button>
             <div className="synthesis-row-actions">
               {summary.status !== "archived" ? (
-                <button className="ghost-button" type="button" onClick={() => onArchive(summary.id)} disabled={isMutating}>{archivingId === summary.id ? `${labelForSynthesisStatus("archived", language)}...` : labelForSynthesisStatus("archived", language)}</button>
+                <button className="ghost-button" type="button" onClick={() => onArchive(summary.id)} disabled={mutationBusyIds.includes(summary.id)}>{archivingIds.includes(summary.id) ? (language === "zh" ? "归档中..." : "Archiving...") : labelForSynthesisStatus("archived", language)}</button>
               ) : null}
-              <button className="ghost-button synthesis-delete-trigger" type="button" onClick={() => onDelete(summary)} disabled={isMutating}>{copy.deleteSynthesis}</button>
+              <button className="ghost-button synthesis-delete-trigger" type="button" onClick={() => onDelete(summary)} disabled={mutationBusyIds.includes(summary.id)}>{copy.deleteSynthesis}</button>
             </div>
           </article>
         ))}
