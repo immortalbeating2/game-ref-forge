@@ -86,6 +86,17 @@ export function getInitialReferenceConsumption(
   };
 }
 
+export function consumeExternalBackRequest(
+  handledToken: number,
+  requestToken: number,
+) {
+  if (requestToken <= handledToken) {
+    return { nextHandledToken: handledToken, shouldHandle: false };
+  }
+
+  return { nextHandledToken: requestToken, shouldHandle: true };
+}
+
 export function tryAcquireOperationGuard(guard: { current: boolean }) {
   if (guard.current) {
     return false;

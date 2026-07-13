@@ -16,6 +16,7 @@ import {
   applyRefreshResult,
   type ArchiveWorkspaceState,
   canCommitController,
+  consumeExternalBackRequest,
   getDialogKeyboardAction,
   getInitialReferenceConsumption,
   isEditorSaveBusy,
@@ -27,6 +28,7 @@ import {
 export type SynthesisWorkspaceProps = {
   language: Language;
   initialReferenceIds: string[];
+  externalBackRequestToken: number;
   onInitialReferenceIdsConsumed: () => void;
   onBackToReferences: () => void;
 };
@@ -59,7 +61,13 @@ function detailWithDraft(detail: SynthesisDetail, draft: SynthesisDraft): Synthe
 }
 
 export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.Element {
-  const { language, initialReferenceIds, onInitialReferenceIdsConsumed, onBackToReferences } = props;
+  const {
+    language,
+    initialReferenceIds,
+    externalBackRequestToken,
+    onInitialReferenceIdsConsumed,
+    onBackToReferences,
+  } = props;
   const copy = uiCopy(language);
   const [summaries, setSummaries] = useState<SynthesisSummary[]>([]);
   const [statusFilter, setStatusFilter] = useState<SynthesisStatus | "all">("all");
@@ -84,6 +92,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const detailAbort = useRef<AbortController | null>(null);
   const createReferenceIds = useRef<string[]>([]);
   const consumedInitialIds = useRef<string | null>(null);
+  const handledExternalBackRequestToken = useRef(externalBackRequestToken);
   const deleteGuard = useRef(false);
   const mutationGuard = useRef(new Map<string, SynthesisMutationKind>());
 
@@ -217,13 +226,25 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     }
   }, [loadDetail, onBackToReferences]);
 
-  const requestNavigation = (next: Exclude<PendingNavigation, null>) => {
+  const requestNavigation = useCallback((next: Exclude<PendingNavigation, null>) => {
     if (isDraftDirty) {
       setPendingNavigation(next);
       return;
     }
     runNavigation(next);
-  };
+  }, [isDraftDirty, runNavigation]);
+
+  useEffect(() => {
+    const consumption = consumeExternalBackRequest(
+      handledExternalBackRequestToken.current,
+      externalBackRequestToken,
+    );
+    handledExternalBackRequestToken.current = consumption.nextHandledToken;
+
+    if (consumption.shouldHandle) {
+      requestNavigation({ kind: "back" });
+    }
+  }, [externalBackRequestToken, requestNavigation]);
 
   const save = async () => {
     const input = draftToSynthesisInput(draft);

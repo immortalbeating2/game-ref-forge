@@ -1,5 +1,40 @@
 const MAX_SYNTHESIS_REFERENCES = 4;
 
+export type ReferenceDataSource = "loading" | "persisted" | "seed";
+
+export type ComparisonSelectionState = {
+  isActive: boolean;
+  referenceIds: string[];
+};
+
+export function getComparisonAvailability(
+  source: ReferenceDataSource,
+  referenceIds: string[],
+) {
+  const hasPersistedReferences = source === "persisted";
+
+  return {
+    canStartComparison: hasPersistedReferences,
+    canHandoff:
+      hasPersistedReferences && canEnterSynthesisComparison(referenceIds),
+  };
+}
+
+export function reconcileComparisonSelectionSource(
+  state: ComparisonSelectionState,
+  source: ReferenceDataSource,
+): ComparisonSelectionState {
+  if (source === "persisted") {
+    return state;
+  }
+
+  if (!state.isActive && state.referenceIds.length === 0) {
+    return state;
+  }
+
+  return { isActive: false, referenceIds: [] };
+}
+
 export function toggleSynthesisSelection(
   selectedIds: string[],
   referenceId: string,

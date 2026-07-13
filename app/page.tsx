@@ -71,23 +71,15 @@ import {
 } from "../lib/localization";
 import { buildReferenceSearchText, getVisibleDetailReference } from "../lib/ui-state";
 import {
-  canEnterSynthesisComparison,
+  getComparisonAvailability,
+  reconcileComparisonSelectionSource,
   toggleSynthesisSelection,
+  type ComparisonSelectionState,
+  type ReferenceDataSource,
 } from "../lib/synthesis-selection";
 import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
 
 type WorkspaceView = "references" | "syntheses";
-
-export function getComparisonSelectionControls(
-  comparisonReferenceIds: string[],
-  isUsingSeedReferences: boolean,
-) {
-  return {
-    comparisonReferenceIds,
-    isStartComparisonDisabled: isUsingSeedReferences,
-    canEnterSynthesis: canEnterSynthesisComparison(comparisonReferenceIds),
-  };
-}
 
 const seedReferences: ReferenceRecord[] = [
   {
@@ -199,9 +191,12 @@ function ensureInspirationEntryIds(entries: InspirationEntry[]) {
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("references");
-  const [isComparisonSelectionMode, setIsComparisonSelectionMode] = useState(false);
-  const [comparisonReferenceIds, setComparisonReferenceIds] = useState<string[]>([]);
+  const [comparisonSelection, setComparisonSelection] = useState<ComparisonSelectionState>({
+    isActive: false,
+    referenceIds: [],
+  });
   const [pendingSynthesisReferenceIds, setPendingSynthesisReferenceIds] = useState<string[]>([]);
+  const [externalBackRequestToken, setExternalBackRequestToken] = useState(0);
   const [references, setReferences] = useState<ReferenceRecord[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -229,9 +224,13 @@ export default function Home() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isUsingSeedReferences, setIsUsingSeedReferences] = useState(false);
+  const [referenceDataSource, setReferenceDataSource] =
+    useState<ReferenceDataSource>("loading");
   const [message, setMessage] = useState<string | null>(null);
   const copy = uiCopy(language);
+  const isComparisonSelectionMode = comparisonSelection.isActive;
+  const comparisonReferenceIds = comparisonSelection.referenceIds;
+  const isUsingSeedReferences = referenceDataSource === "seed";
 
   function labelForReferenceSortMode(mode: ReferenceSortMode) {
     switch (mode) {
@@ -398,11 +397,18 @@ export default function Home() {
         }
 
         const rows = payload.references as ReferenceRecord[];
-        setIsUsingSeedReferences(rows.length === 0);
+        const nextSource = rows.length > 0 ? "persisted" : "seed";
+        setReferenceDataSource(nextSource);
+        setComparisonSelection((current) =>
+          reconcileComparisonSelectionSource(current, nextSource),
+        );
         setReferences(rows.length > 0 ? rows : seedReferences);
         setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
       } catch (error) {
-        setIsUsingSeedReferences(true);
+        setReferenceDataSource("seed");
+        setComparisonSelection((current) =>
+          reconcileComparisonSelectionSource(current, "seed"),
+        );
         setReferences(seedReferences);
         setSelectedId(seedReferences[0]?.id ?? null);
         setMessage(error instanceof Error ? error.message : null);
@@ -584,7 +590,11 @@ export default function Home() {
   }
 
   function startComparisonSelection() {
-    if (isUsingSeedReferences || isSavingEdit) {
+    const availability = getComparisonAvailability(
+      referenceDataSource,
+      comparisonReferenceIds,
+    );
+    if (!availability.canStartComparison || isSavingEdit) {
       return;
     }
 
@@ -594,30 +604,49 @@ export default function Home() {
     clearQualityEditSession();
     setPendingDeleteId(null);
     setSelectedId(null);
-    setComparisonReferenceIds([]);
-    setIsComparisonSelectionMode(true);
+    setComparisonSelection({ isActive: true, referenceIds: [] });
     setMessage(null);
   }
 
   function cancelComparisonSelection() {
-    setComparisonReferenceIds([]);
-    setIsComparisonSelectionMode(false);
+    setComparisonSelection({ isActive: false, referenceIds: [] });
     setMessage(null);
   }
 
   function toggleComparisonSelection(referenceId: string) {
-    setComparisonReferenceIds((current) => toggleSynthesisSelection(current, referenceId));
+    setComparisonSelection((current) =>
+      current.isActive
+        ? {
+            ...current,
+            referenceIds: toggleSynthesisSelection(current.referenceIds, referenceId),
+          }
+        : current,
+    );
   }
 
   function enterSynthesisWorkspace() {
-    if (!canEnterSynthesisComparison(comparisonReferenceIds)) {
+    const availability = getComparisonAvailability(
+      referenceDataSource,
+      comparisonReferenceIds,
+    );
+    if (!availability.canHandoff) {
+      setComparisonSelection((current) =>
+        reconcileComparisonSelectionSource(current, referenceDataSource),
+      );
       return;
     }
 
     setPendingSynthesisReferenceIds(comparisonReferenceIds);
-    setComparisonReferenceIds([]);
-    setIsComparisonSelectionMode(false);
+    setComparisonSelection({ isActive: false, referenceIds: [] });
     setWorkspaceView("syntheses");
+  }
+
+  function requestReferencesWorkspace() {
+    if (workspaceView === "references") {
+      return;
+    }
+
+    setExternalBackRequestToken((current) => current + 1);
   }
 
   function openSynthesisWorkspace() {
@@ -686,7 +715,10 @@ export default function Home() {
 
       const reference = payload.reference as ReferenceRecord;
       setReferences((current) => [reference, ...current.filter((item) => !item.id.startsWith("seed-"))]);
-      setIsUsingSeedReferences(false);
+      setReferenceDataSource("persisted");
+      setComparisonSelection((current) =>
+        reconcileComparisonSelectionSource(current, "persisted"),
+      );
       setSelectedId(reference.id);
       setEditingId(null);
       setEditDraft(null);
@@ -815,8 +847,18 @@ export default function Home() {
         }
       }
 
-      setReferences((current) => current.filter((item) => item.id !== reference.id));
-      setSelectedId(null);
+      const remainingReferences = references.filter((item) => item.id !== reference.id);
+      if (referenceDataSource === "persisted" && remainingReferences.length === 0) {
+        setReferences(seedReferences);
+        setReferenceDataSource("seed");
+        setComparisonSelection((current) =>
+          reconcileComparisonSelectionSource(current, "seed"),
+        );
+        setSelectedId(seedReferences[0]?.id ?? null);
+      } else {
+        setReferences(remainingReferences);
+        setSelectedId(null);
+      }
       setPendingDeleteId(null);
       clearQualityEditSession();
       setMessage(copy.deleted);
@@ -865,9 +907,9 @@ export default function Home() {
     );
   }
 
-  const comparisonSelectionControls = getComparisonSelectionControls(
+  const comparisonAvailability = getComparisonAvailability(
+    referenceDataSource,
     comparisonReferenceIds,
-    isUsingSeedReferences,
   );
 
   return (
@@ -893,7 +935,7 @@ export default function Home() {
               type="button"
               className={workspaceView === "references" ? "is-active" : undefined}
               aria-pressed={workspaceView === "references"}
-              onClick={() => setWorkspaceView("references")}
+              onClick={requestReferencesWorkspace}
             >
               {copy.referencesView}
             </button>
@@ -1070,7 +1112,7 @@ export default function Home() {
                 type="button"
                 onClick={startComparisonSelection}
                 disabled={
-                  comparisonSelectionControls.isStartComparisonDisabled ||
+                  !comparisonAvailability.canStartComparison ||
                   isComparisonSelectionMode ||
                   isSavingEdit
                 }
@@ -1550,7 +1592,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={enterSynthesisWorkspace}
-                disabled={!comparisonSelectionControls.canEnterSynthesis}
+                disabled={!comparisonAvailability.canHandoff}
               >
                 {copy.enterSynthesis}
               </button>
@@ -2143,6 +2185,7 @@ export default function Home() {
         <SynthesisWorkspace
           language={language}
           initialReferenceIds={pendingSynthesisReferenceIds}
+          externalBackRequestToken={externalBackRequestToken}
           onInitialReferenceIdsConsumed={() => setPendingSynthesisReferenceIds([])}
           onBackToReferences={() => setWorkspaceView("references")}
         />
