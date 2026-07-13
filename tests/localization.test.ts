@@ -5,8 +5,52 @@ import {
   labelForMediaType,
   labelForPublicStatus,
   labelForQualityStatus,
+  labelForSynthesisStatus,
   uiCopy,
 } from "../lib/localization";
+
+const synthesisCopyKeys = [
+  "referencesView",
+  "synthesesView",
+  "startComparison",
+  "cancelComparison",
+  "enterSynthesis",
+  "comparisonCount",
+  "selectedForComparison",
+  "synthesisWorkspace",
+  "syntheses",
+  "createSynthesis",
+  "noSyntheses",
+  "synthesisTitle",
+  "targetAsset",
+  "sharedPrinciples",
+  "keyDifferences",
+  "originalDirection",
+  "synthesisAvoidCopying",
+  "designConstraints",
+  "experimentPlan",
+  "nextActions",
+  "additionalNotes",
+  "synthesisStatus",
+  "synthesisStatusFilter",
+  "allSynthesisStatuses",
+  "staleReference",
+  "unavailableReference",
+  "refreshSnapshot",
+  "refreshingSnapshot",
+  "saveSynthesis",
+  "savingSynthesis",
+  "synthesisSaved",
+  "synthesisSaveFailed",
+  "unsavedChanges",
+  "unsavedChangesConfirmation",
+  "deleteSynthesis",
+  "deleteSynthesisConfirmation",
+  "synthesisDeleted",
+  "synthesisDeleteFailed",
+  "exportSynthesisMarkdown",
+  "synthesisExportWarning",
+] as const;
 
 describe("localized enum labels", () => {
   it("uses Chinese labels by default", () => {
@@ -27,6 +71,22 @@ describe("localized enum labels", () => {
 });
 
 describe("uiCopy", () => {
+  it.each(["zh", "en"] as const)("provides complete synthesis copy in %s", (language) => {
+    for (const key of synthesisCopyKeys) {
+      expect(uiCopy(language)[key], `${language}.${key}`).toBeTypeOf("string");
+      expect(uiCopy(language)[key].trim(), `${language}.${key}`).not.toBe("");
+    }
+  });
+
+  it("labels synthesis statuses explicitly in both languages", () => {
+    expect(labelForSynthesisStatus("draft")).toBe("草稿");
+    expect(labelForSynthesisStatus("actionable")).toBe("可执行");
+    expect(labelForSynthesisStatus("archived")).toBe("已归档");
+    expect(labelForSynthesisStatus("draft", "en")).toBe("Draft");
+    expect(labelForSynthesisStatus("actionable", "en")).toBe("Actionable");
+    expect(labelForSynthesisStatus("archived", "en")).toBe("Archived");
+  });
+
   it("defaults to Chinese interface copy", () => {
     expect(uiCopy().addReference).toBe("+ 添加参考");
     expect(uiCopy().metadataPreviewSuccess).toBe("元数据预览已就绪。保存前请检查字段。");
