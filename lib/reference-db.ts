@@ -14,7 +14,7 @@ import {
 
 type ReferenceRow = typeof references.$inferSelect;
 
-function rowToRecord(row: ReferenceRow): ReferenceRecord {
+export function referenceRowToRecord(row: ReferenceRow): ReferenceRecord {
   return {
     id: row.id,
     title: row.title,
@@ -93,7 +93,7 @@ export async function listReferences() {
     .select()
     .from(references)
     .orderBy(desc(references.updatedAt), desc(references.createdAt));
-  return rows.map(rowToRecord);
+  return rows.map(referenceRowToRecord);
 }
 
 export async function createReference(input: ReferenceInput) {
@@ -108,7 +108,7 @@ export async function createReference(input: ReferenceInput) {
     .values(recordToRow(record))
     .returning();
 
-  return { ok: true as const, reference: rowToRecord(row) };
+  return { ok: true as const, reference: referenceRowToRecord(row) };
 }
 
 export async function updateReference(id: string, input: ReferenceInput) {
@@ -140,7 +140,7 @@ export async function updateReference(id: string, input: ReferenceInput) {
     .where(eq(references.id, id))
     .returning();
 
-  return { ok: true as const, reference: rowToRecord(row) };
+  return { ok: true as const, reference: referenceRowToRecord(row) };
 }
 
 export async function deleteReference(id: string) {

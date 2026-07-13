@@ -72,6 +72,21 @@ describe("synthesis domain contract", () => {
     expect(validateSynthesisInput({ title: "Valid", status: "unknown" as "draft" }).ok).toBe(false);
   });
 
+  it("normalizes a synthesis record with an injected server timestamp", () => {
+    expect(createSynthesisRecord({
+      title: "  Study  ",
+      status: "draft",
+      target_asset: "  Prop  ",
+    }, "2026-07-13T00:00:00.000Z")).toMatchObject({
+      title: "Study",
+      target_asset: "Prop",
+      shared_principles: null,
+      status: "draft",
+      created_at: "2026-07-13T00:00:00.000Z",
+      updated_at: "2026-07-13T00:00:00.000Z",
+    });
+  });
+
   it("creates a versioned snapshot and safely parses it", () => {
     const snapshot = createReferenceSnapshot(reference);
     expect(snapshot).toMatchObject({ schema_version: 1, reference_id: "ref-1", title: "Material Study" });
@@ -82,6 +97,45 @@ describe("synthesis domain contract", () => {
   it("rejects snapshots with the wrong schema version", () => {
     const snapshot = createReferenceSnapshot(reference);
     expect(parseReferenceSnapshot(JSON.stringify({ ...snapshot, schema_version: 2 }))).toBeNull();
+  });
+
+  it("falls back to an unavailable snapshot when stored data is malformed", () => {
+    expect(parseReferenceSnapshot("not-json", "ref-1")).toEqual({
+      schema_version: 1,
+      reference_id: "ref-1",
+      reference_updated_at: "",
+      title: "Unavailable snapshot",
+      source_url: "",
+      canonical_url: null,
+      site_name: null,
+      author: null,
+      media_type: "mixed",
+      asset_category: "prop",
+      license_status: "unknown_license",
+      public_status: "private",
+      quality_status: "captured",
+      scores: {
+        rating: null,
+        reference_value_score: null,
+        transformability_score: null,
+        copyright_risk_score: null,
+        production_readiness_score: null,
+      },
+      tags: {
+        style_tags: [],
+        use_tags: [],
+        mechanic_tags: [],
+        mood_tags: [],
+        visual_language_tags: [],
+      },
+      inspiration: {
+        inspiration_points: [],
+        inspiration_entries: [],
+        deconstruction_notes: null,
+        transformation_ideas: null,
+        avoid_copying_notes: null,
+      },
+    });
   });
 
   it.each([

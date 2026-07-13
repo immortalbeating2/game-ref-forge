@@ -179,8 +179,7 @@ export function validateCreateSynthesisInput(input: CreateSynthesisInput): Valid
   return errors.length > 0 ? { ok: false, errors } : { ok: true, errors: [] };
 }
 
-export function createSynthesisRecord(input: SynthesisInput): SynthesisRecord {
-  const now = new Date().toISOString();
+export function createSynthesisRecord(input: SynthesisInput, now = new Date().toISOString()): SynthesisRecord {
   return {
     id: crypto.randomUUID(),
     title: input.title.trim(),
@@ -300,13 +299,59 @@ function isSnapshot(value: unknown): value is SynthesisReferenceSnapshot {
     (entry.id === undefined || typeof entry.id === "string"));
 }
 
-export function parseReferenceSnapshot(value: string): SynthesisReferenceSnapshot | null {
+function unavailableSnapshot(referenceId: string): SynthesisReferenceSnapshot {
+  return {
+    schema_version: 1,
+    reference_id: referenceId,
+    reference_updated_at: "",
+    title: "Unavailable snapshot",
+    source_url: "",
+    canonical_url: null,
+    site_name: null,
+    author: null,
+    media_type: "mixed",
+    asset_category: "prop",
+    license_status: "unknown_license",
+    public_status: "private",
+    quality_status: "captured",
+    scores: {
+      rating: null,
+      reference_value_score: null,
+      transformability_score: null,
+      copyright_risk_score: null,
+      production_readiness_score: null,
+    },
+    tags: {
+      style_tags: [],
+      use_tags: [],
+      mechanic_tags: [],
+      mood_tags: [],
+      visual_language_tags: [],
+    },
+    inspiration: {
+      inspiration_points: [],
+      inspiration_entries: [],
+      deconstruction_notes: null,
+      transformation_ideas: null,
+      avoid_copying_notes: null,
+    },
+  };
+}
+
+export function parseReferenceSnapshot(value: string): SynthesisReferenceSnapshot | null;
+export function parseReferenceSnapshot(value: string, fallbackReferenceId: string): SynthesisReferenceSnapshot;
+export function parseReferenceSnapshot(
+  value: string,
+  fallbackReferenceId?: string,
+): SynthesisReferenceSnapshot | null {
   try {
     const parsed: unknown = JSON.parse(value);
-    return isSnapshot(parsed) ? parsed : null;
+    if (isSnapshot(parsed)) return parsed;
   } catch {
-    return null;
+    // Fall through to the stable stored-snapshot placeholder when requested.
   }
+
+  return fallbackReferenceId === undefined ? null : unavailableSnapshot(fallbackReferenceId);
 }
 
 export function deriveSnapshotState(
