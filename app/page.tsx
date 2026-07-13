@@ -70,6 +70,24 @@ import {
   uiCopy,
 } from "../lib/localization";
 import { buildReferenceSearchText, getVisibleDetailReference } from "../lib/ui-state";
+import {
+  canEnterSynthesisComparison,
+  toggleSynthesisSelection,
+} from "../lib/synthesis-selection";
+import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
+
+type WorkspaceView = "references" | "syntheses";
+
+export function getComparisonSelectionControls(
+  comparisonReferenceIds: string[],
+  isUsingSeedReferences: boolean,
+) {
+  return {
+    comparisonReferenceIds,
+    isStartComparisonDisabled: isUsingSeedReferences,
+    canEnterSynthesis: canEnterSynthesisComparison(comparisonReferenceIds),
+  };
+}
 
 const seedReferences: ReferenceRecord[] = [
   {
@@ -180,6 +198,10 @@ function ensureInspirationEntryIds(entries: InspirationEntry[]) {
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("references");
+  const [isComparisonSelectionMode, setIsComparisonSelectionMode] = useState(false);
+  const [comparisonReferenceIds, setComparisonReferenceIds] = useState<string[]>([]);
+  const [pendingSynthesisReferenceIds, setPendingSynthesisReferenceIds] = useState<string[]>([]);
   const [references, setReferences] = useState<ReferenceRecord[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -561,6 +583,48 @@ export default function Home() {
     }
   }
 
+  function startComparisonSelection() {
+    if (isUsingSeedReferences || isSavingEdit) {
+      return;
+    }
+
+    setIsFormOpen(false);
+    setEditingId(null);
+    setEditDraft(null);
+    clearQualityEditSession();
+    setPendingDeleteId(null);
+    setSelectedId(null);
+    setComparisonReferenceIds([]);
+    setIsComparisonSelectionMode(true);
+    setMessage(null);
+  }
+
+  function cancelComparisonSelection() {
+    setComparisonReferenceIds([]);
+    setIsComparisonSelectionMode(false);
+    setMessage(null);
+  }
+
+  function toggleComparisonSelection(referenceId: string) {
+    setComparisonReferenceIds((current) => toggleSynthesisSelection(current, referenceId));
+  }
+
+  function enterSynthesisWorkspace() {
+    if (!canEnterSynthesisComparison(comparisonReferenceIds)) {
+      return;
+    }
+
+    setPendingSynthesisReferenceIds(comparisonReferenceIds);
+    setComparisonReferenceIds([]);
+    setIsComparisonSelectionMode(false);
+    setWorkspaceView("syntheses");
+  }
+
+  function openSynthesisWorkspace() {
+    cancelComparisonSelection();
+    setWorkspaceView("syntheses");
+  }
+
   async function previewMetadata() {
     if (!draft.source_url.trim()) {
       setPreviewStatus("failure");
@@ -801,6 +865,11 @@ export default function Home() {
     );
   }
 
+  const comparisonSelectionControls = getComparisonSelectionControls(
+    comparisonReferenceIds,
+    isUsingSeedReferences,
+  );
+
   return (
     <main className="workspace">
       <aside className="sidebar" aria-label={copy.filtersLabel}>
@@ -819,8 +888,28 @@ export default function Home() {
               <option value="en">{copy.english}</option>
             </select>
           </label>
+          <div className="workspace-view-switch" role="group" aria-label={copy.synthesisWorkspace}>
+            <button
+              type="button"
+              className={workspaceView === "references" ? "is-active" : undefined}
+              aria-pressed={workspaceView === "references"}
+              onClick={() => setWorkspaceView("references")}
+            >
+              {copy.referencesView}
+            </button>
+            <button
+              type="button"
+              className={workspaceView === "syntheses" ? "is-active" : undefined}
+              aria-pressed={workspaceView === "syntheses"}
+              onClick={openSynthesisWorkspace}
+            >
+              {copy.synthesesView}
+            </button>
+          </div>
         </div>
 
+        {workspaceView === "references" ? (
+          <>
         <div className="filter-heading">
           <p className="panel-kicker">{copy.researchControls}</p>
           <span>{copy.privateByDefault}</span>
@@ -934,8 +1023,12 @@ export default function Home() {
         >
           {copy.clearFilters}
         </button>
+          </>
+        ) : null}
       </aside>
 
+      {workspaceView === "references" ? (
+        <>
       <section className="gallery-pane">
         <header className="toolbar">
           <div className="deck-heading">
@@ -972,7 +1065,23 @@ export default function Home() {
               <button className="ghost-button" type="button" onClick={exportLibraryJson}>
                 {copy.exportJson}
               </button>
-              <button type="button" onClick={() => setIsFormOpen((value) => !value)}>
+              <button
+                className="ghost-button"
+                type="button"
+                onClick={startComparisonSelection}
+                disabled={
+                  comparisonSelectionControls.isStartComparisonDisabled ||
+                  isComparisonSelectionMode ||
+                  isSavingEdit
+                }
+              >
+                {copy.startComparison}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFormOpen((value) => !value)}
+                disabled={isComparisonSelectionMode}
+              >
                 {copy.addReference}
               </button>
             </div>
@@ -1310,22 +1419,57 @@ export default function Home() {
         <div className="reference-grid" aria-live="polite">
           {sortedReferences.map((reference) => {
             const quality = evaluateReferenceQuality(reference);
+            const isSelectedForComparison = comparisonReferenceIds.includes(reference.id);
+            const isComparisonSelectionAtLimit =
+              isComparisonSelectionMode &&
+              comparisonReferenceIds.length >= 4 &&
+              !isSelectedForComparison;
+            const isCardDisabled = isSavingEdit || isComparisonSelectionAtLimit;
 
             return (
               <article
-                className={`reference-card ${reference.id === selectedReference?.id ? "selected" : ""}`}
+                className={`reference-card ${
+                  isComparisonSelectionMode
+                    ? isSelectedForComparison
+                      ? "comparison-selected"
+                      : ""
+                    : reference.id === selectedReference?.id
+                      ? "selected"
+                      : ""
+                } ${isComparisonSelectionAtLimit ? "comparison-limit-reached" : ""}`}
                 key={reference.id}
-                onClick={() => selectReference(reference.id)}
+                onClick={() => {
+                  if (isCardDisabled) {
+                    return;
+                  }
+
+                  if (isComparisonSelectionMode) {
+                    toggleComparisonSelection(reference.id);
+                    return;
+                  }
+
+                  selectReference(reference.id);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
+                    if (isCardDisabled) {
+                      return;
+                    }
+
+                    if (isComparisonSelectionMode) {
+                      toggleComparisonSelection(reference.id);
+                      return;
+                    }
+
                     selectReference(reference.id);
                   }
                 }}
-                role="button"
-                tabIndex={isSavingEdit ? -1 : 0}
-                aria-pressed={reference.id === selectedReference?.id}
-                aria-disabled={isSavingEdit}
+                role={isComparisonSelectionMode ? "checkbox" : "button"}
+                tabIndex={isCardDisabled ? -1 : 0}
+                aria-checked={isComparisonSelectionMode ? isSelectedForComparison : undefined}
+                aria-pressed={isComparisonSelectionMode ? undefined : reference.id === selectedReference?.id}
+                aria-disabled={isCardDisabled}
               >
                 <div className={`thumbnail accent-${reference.asset_category}`}>
                   {reference.preview_url ? (
@@ -1337,12 +1481,20 @@ export default function Home() {
                 </div>
                 <div className="card-body">
                   <div className="card-topline">
-                    {pinnedReferenceIds.includes(reference.id) ? <span>{copy.pinned}</span> : <span />}
+                    {isComparisonSelectionMode ? (
+                      <span className="comparison-selection-indicator">
+                        {isSelectedForComparison ? copy.selectedForComparison : ""}
+                      </span>
+                    ) : pinnedReferenceIds.includes(reference.id) ? (
+                      <span>{copy.pinned}</span>
+                    ) : (
+                      <span />
+                    )}
                     <button
                       type="button"
                       className="pin-button"
                       aria-pressed={pinnedReferenceIds.includes(reference.id)}
-                      disabled={isSavingEdit}
+                      disabled={isSavingEdit || isComparisonSelectionMode}
                       onClick={(event) => {
                         event.stopPropagation();
                         togglePinnedReference(reference.id);
@@ -1388,6 +1540,23 @@ export default function Home() {
             );
           })}
         </div>
+        {isComparisonSelectionMode ? (
+          <div className="comparison-selection-bar" role="status" aria-live="polite">
+            <p>{copy.comparisonCount.replace("{count}", String(comparisonReferenceIds.length))}</p>
+            <div>
+              <button className="ghost-button" type="button" onClick={cancelComparisonSelection}>
+                {copy.cancelComparison}
+              </button>
+              <button
+                type="button"
+                onClick={enterSynthesisWorkspace}
+                disabled={!comparisonSelectionControls.canEnterSynthesis}
+              >
+                {copy.enterSynthesis}
+              </button>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <aside className="detail-panel" aria-label={copy.selectedReference}>
@@ -1969,6 +2138,15 @@ export default function Home() {
           </div>
         )}
       </aside>
+        </>
+      ) : (
+        <SynthesisWorkspace
+          language={language}
+          initialReferenceIds={pendingSynthesisReferenceIds}
+          onInitialReferenceIdsConsumed={() => setPendingSynthesisReferenceIds([])}
+          onBackToReferences={() => setWorkspaceView("references")}
+        />
+      )}
     </main>
   );
 }
