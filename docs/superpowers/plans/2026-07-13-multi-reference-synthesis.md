@@ -919,7 +919,7 @@ git commit -m "docs: 记录第十一轮综合实现 / record round 11 synthesis 
 - Modify: `docs/progress/timeline.md`
 - Modify: `docs/progress/2026-07-13.md`
 
-- [ ] **Step 1: 外部写入前验证合并主线**
+- [x] **Step 1: 外部写入前验证合并主线**
 
 ```powershell
 git status --short --branch
@@ -932,7 +932,7 @@ npm run build
 
 Expected: clean `main`, all gates exit 0.
 
-- [ ] **Step 2: 推送 GitHub `main`**
+- [x] **Step 2: 推送 GitHub `main`**
 
 ```powershell
 git push origin main
@@ -942,7 +942,7 @@ git rev-parse origin/main
 
 Expected: both SHAs match. If DNS or connection reset recurs, record the exact error and do not claim remote sync.
 
-- [ ] **Step 3: 同步 Sites source 并部署带 migration 的新版本**
+- [x] **Step 3: 同步 Sites source 并部署带 migration 的新版本**
 
 Use `sites:sites-hosting` and the available Sites connector to:
 
@@ -955,7 +955,7 @@ Use `sites:sites-hosting` and the available Sites connector to:
 
 Do not manually apply remote SQL before the Sites version is ready unless the hosting flow explicitly requires it. Never deploy an app expecting the new tables before the corresponding remote migration succeeds.
 
-- [ ] **Step 4: 运行生产临时 reference + synthesis CRUD**
+- [x] **Step 4: 运行生产临时 reference + synthesis CRUD**
 
 Against the authenticated production URL `https://game-ref-forge.yeep-6613.chatgpt.site/`:
 
@@ -972,7 +972,7 @@ Against the authenticated production URL `https://game-ref-forge.yeep-6613.chatg
 
 If browser automation times out after a write, first re-read UI/API state before retrying to avoid duplicate data. If cleanup must use the authenticated API, record that separately. Do not claim full production CRUD unless UI create, edit, refresh, delete and persistence assertions all pass.
 
-- [ ] **Step 5: 完成阶段与部署留痕**
+- [x] **Step 5: 完成阶段与部署留痕**
 
 Update stage to `Round 11 complete; Round 12 design-ready`. Record exact GitHub SHA, Sites source SHA, version/deployment IDs, migration result, production QA IDs/titles, Markdown result, 390px evidence and cleanup proof in the QA document and all three progress files.
 

@@ -119,3 +119,24 @@ Round 11 本地 migration、API CRUD、UI CRUD、快照生命周期、双语和�
 - 控制客户端的 Statsig 网络请求每次超时约 10-20 秒；当一次调用包含多个浏览器操作时，会超过 30 秒总时限并重置连接。生产复测应限制为每次调用一个浏览器动作并立即单独回读。
 - `fill("")` 会返回成功但不清空字段；已验证的清理方式是先覆盖为单字符，再发送 Backspace。
 - 诊断后已恢复参考工作区，搜索和来源字段均为空，没有 `R11 QA` 标题，也未提交任何生产表单。
+
+## 生产完整收尾（2026-07-20）
+
+- 生产基线：Sites version 13，version ID `appgprj_6a246b271d848191b88b60d1633030c7~appgver_bd1b020d6b9c8191bf4e1c615816d208`，deployment ID `appgdep_6a554351cd608191b6b8348439729684`，运行时来源 `d7db34a48b02ad679b96776b044983498f561a3c`。
+- 生产批次：`20260720-164438`。
+- 临时 reference：`Round 11 Production Ref A 20260720-164438` 与 `Round 11 Production Ref B 20260720-164438`；生产 DOM 不暴露 D1 ID，以唯一标题和状态回读追踪。
+- 临时 synthesis：`Round 11 Production Synthesis 20260720-164438`，更新后为 `Round 11 Production Synthesis 20260720-164438 Edited`；生产 DOM 不暴露 D1 ID。
+- 两条 reference 通过 UI 创建，页面刷新后仍存在；真实数据集替换 seed examples，计数为 2。
+- 选择两条 reference 后进入综合稿编辑器，方向、对比、边界、执行、记录五组共十个文本字段全部填写并保存；刷新后列表、2 条有序快照和全部字段值保持。
+- 综合稿标题、状态和下一步行动更新后保存；刷新并重新打开后标题、`actionable` 状态和新行动文本保持。
+- Reference A 更新为 `Round 11 Production Ref A 20260720-164438 Updated` 后，综合稿出现“参考快照已过期”；刷新对应快照后显示更新标题且过期提示消失。
+- 删除 Reference B 后，综合稿仍保留原始标题与来源链接，并显示“来源已不可用；历史快照仍保留”。
+- 综合稿归档成功；切换到 `archived` 筛选后仍可见，随后通过应用内确认删除。
+- 删除剩余 Reference A 并刷新；批次时间戳、两个 reference 标题和 synthesis 标题均为 0 残留，页面恢复 2 条 seed examples。
+- 生产保存态“导出综合稿 Markdown”按钮可见、启用并已点击。浏览器控制通道在 30 秒内未捕获程序化 Blob `download` 事件；`tests/synthesis-export.test.ts` 覆盖来源链接、saved/unsaved 标记、不可用快照、无媒体泄漏和安全文件名，此项保持非阻塞工具证据边界。
+- 390x844：`innerWidth=390`、document/body `clientWidth=375`、`scrollWidth=375`、横向溢出均为 0；首屏截图未见控件重叠或裁切。
+- 1280x900：`innerWidth=1280`、document/body `clientWidth=1265`、`scrollWidth=1265`、横向溢出均为 0；工作台、卡片和操作栏无明显重叠。
+- 生产页面 console error 为 0。控制客户端仍产生 Statsig 遥测超时/丢弃告警，但它们未进入页面 console，也未阻断任何独立 UI 动作。
+- 收尾后重新运行：`npm test` 为 21 个文件 / 187 项测试通过，`npm run typecheck`、`npm run lint`、`npm run build` 均退出 0。
+
+最终结论：Round 11 的本地门禁、部署、认证生产 CRUD、快照生命周期、归档、响应式布局和清理均已闭环，阶段更新为 `Round 11 complete; Round 12 design-ready`。Blob 下载事件未被控制通道捕获是已测试内容契约之外的非阻塞自动化证据边界。

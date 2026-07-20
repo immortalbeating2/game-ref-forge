@@ -4,7 +4,7 @@
 
 本文件面向在 `game-ref-forge` 仓库中工作的智能编码代理与后续开发 session。
 
-项目已完成 RefForge / `灵感锻造台` 的文档基线、Sites 基础实现和 Round 1-10 迭代。开发重心是保持私有研究工作台稳定，小步提升人工整理效率，并持续验证真实生产可用性。
+项目已完成 RefForge / `灵感锻造台` 的文档基线、Sites 基础实现和 Round 1-11 迭代。开发重心是保持私有研究工作台稳定，小步提升人工整理效率，并持续验证真实生产可用性。
 
 优先做小而准、可验证、可追溯的改动。不要跳过设计、来源策略和留痕直接扩张实现范围。
 
@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 11 deployed to Sites version 13; production write-path QA pending`
+- 当前阶段：`Round 11 complete; Round 12 design-ready`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,11 +142,12 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 11 deployed to Sites version 13; production write-path QA pending`。Round 11 已合并、通过本地完整门禁、同步到 GitHub，并以包含 migration 2 的 Sites version 13 成功部署。生产已确认显示 Round 11 工作区与添加表单；真实写入 CRUD、Markdown 下载和 390px 生产证据仍因当前浏览器写入控制超时及 SIWC bypass 403 而待复测，不得提前记录为完成。
+本项目当前为 `Round 11 complete; Round 12 design-ready`。Round 11 已合并、通过本地完整门禁、同步到 GitHub，并以包含 migration 2 的 Sites version 13 成功部署。2026-07-20 已在认证生产站完成 reference 与 synthesis 的真实 UI CRUD、刷新持久化、stale/refresh、来源删除后的历史快照、归档筛选、桌面与 390px 布局、控制台和最终清理验证。
 
 当前默认目标：
 
-- 在已部署的 version 13 上完成生产 CRUD、Markdown、390px 和清理验证；优先恢复可写浏览器控制或由用户在已登录页面执行最小人工步骤。
+- Round 12 开始前先完成设计确认和实现计划，不直接扩张代码范围。
+- 将 Sites version 13 作为当前稳定生产基线；后续修改继续执行真实生产回归与临时数据清理。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。
@@ -168,9 +169,9 @@ Round 11 扩展边界：
 - 显式 stale/refresh、综合稿列表/编辑/归档/删除和单份 Markdown 导出。
 - 综合稿不写回 reference，不公开托管第三方媒体，不新增公开路由。
 
-Round 11 当前本地证据：21 个测试文件 / 187 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0；Blob Markdown 下载事件仍有非阻塞证据缺口。
+Round 11 最终本地证据：21 个测试文件 / 187 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0。
 
-Round 11 当前外部状态：Sites version 13 的已部署运行时代码和归档来自 `d7db34a`；GitHub `main` 在其后仅增加生产部署证据文档，不包含新的应用、migration 或依赖改动。生产只读 UI 已显示“参考 / 综合稿”“开始对比”和添加表单。2026-07-14 后续诊断确认内置浏览器的读取、非空 fill、工作区点击和状态回读可用，但每次操作受 Statsig 网络超时拖慢约 10-20 秒；多个跨浏览器动作放在一次 30 秒调用中会超时，且 `fill("")` 返回成功但不会清空。生产写路径仍未完整通过，Chrome 扩展通道不可用，重新生成的 SIWC bypass token 仍在边缘层返回 403。
+Round 11 最终外部状态：Sites version 13 的已部署运行时代码和归档来自 `d7db34a`；GitHub `main` 在其后仅增加部署与生产 QA 证据文档，不包含新的应用、migration 或依赖改动。生产批次 `20260720-164438` 已完成两条 reference 和一份全字段 synthesis 的创建、刷新持久化、编辑、stale/refresh、删除后快照、归档筛选、删除和零残留回读。1280x900 与 390x844 的 document/body 横向溢出均为 0，console error 为 0。生产 Markdown 导出按钮已触发；控制通道仍无法捕获程序化 Blob `download` 事件，文件内容、来源链接、unsaved 标记、无媒体泄漏和安全文件名由自动化测试覆盖，该工具证据边界不阻塞 Round 11 收口。
 
 ## 来源与版权边界
 

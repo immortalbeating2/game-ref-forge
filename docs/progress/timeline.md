@@ -1462,3 +1462,24 @@
   - Empty-string fill has a separate control-layer defect or incompatibility; keyboard clearing is the working fallback.
 - Status:
   - The browser channel is usable with one operation per call and explicit readback. No production form was submitted and Round 11 production CRUD remains pending.
+
+## 2026-07-20 - Round 11 生产闭环
+
+- Stage: `Round 11 complete; Round 12 design-ready`
+- Mode: authenticated production UI CRUD and final verification
+- Production batch: `20260720-164438`
+- Actions:
+  - Created two uniquely named references and one full-field synthesis through the production UI, then verified reload persistence.
+  - Edited synthesis title/status/next actions, updated Ref A to trigger stale, refreshed its snapshot, deleted Ref B and verified unavailable-source history.
+  - Archived and filtered the synthesis, deleted it, deleted Ref A, reloaded, and confirmed all batch titles were absent and seed examples returned.
+  - Clicked the saved-state synthesis Markdown export; the control channel did not capture the Blob download event, while automated content-contract coverage remained green.
+  - Verified 1280x900 and 390x844 document/body horizontal overflow at 0, visually checked both layouts, and confirmed production console error count 0.
+  - Re-ran `npm test` (21 files / 187 tests), typecheck, lint and build; all passed.
+- Production baseline:
+  - Sites version 13 from `d7db34a48b02ad679b96776b044983498f561a3c`.
+  - Version ID `appgprj_6a246b271d848191b88b60d1633030c7~appgver_bd1b020d6b9c8191bf4e1c615816d208`.
+  - Deployment ID `appgdep_6a554351cd608191b6b8348439729684`.
+- Result:
+  - Round 11 production write-path QA and cleanup passed.
+  - The uncaptured Blob download event remains a documented non-blocking browser-control evidence boundary.
+  - Round 12 may begin only after design and implementation-plan approval.

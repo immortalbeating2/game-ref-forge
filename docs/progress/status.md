@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-07-14
+Updated: 2026-07-20
 
 ## Current Stage
 
-`Round 11 deployed to Sites version 13; production write-path QA pending`
+`Round 11 complete; Round 12 design-ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -25,7 +25,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Agent guidance exists at `AGENTS.md`.
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
-- Round 11 is merged into `main`; final independent review is `Approved`, merged-main validation passed, GitHub and Sites source are synchronized to `d7db34a`, and Sites version 13 deployed successfully. Production write-path QA is still pending.
+- Round 11 is merged into `main`; final independent review is `Approved`, merged-main validation passed, GitHub and Sites runtime source are synchronized to `d7db34a`, Sites version 13 deployed successfully, and authenticated production UI CRUD plus cleanup passed on 2026-07-20.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -218,11 +218,12 @@ It helps collect source links from game asset and game design sites, normalize t
 - An earlier clean Browser Use `iab` initialization diagnostic failed to discover a backend; later in the same work period the existing bound in-app browser runtime became usable and completed real DOM/click/focus/390px regression. The tooling blocker is no longer current.
 - Sites version 13 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_bd1b020d6b9c8191bf4e1c615816d208`) deployed successfully from runtime source `d7db34a48b02ad679b96776b044983498f561a3c` as `appgdep_6a554351cd608191b6b8348439729684`, with migration 2 included in the archive. GitHub `main` subsequently gained deployment-evidence documentation only; no newer application, migration, dependency, or runtime build is waiting for Sites deployment.
 - Authenticated production read-only UI evidence passed after deployment: Chinese default, Round 11 workspace switch, disabled start-comparison state for seed examples, add-reference form opening, and full Round 11 fields were visible.
-- Production write-path QA is still pending. In-app Browser click could open the form, but fill/type actions repeatedly timed out and reset the control session; form values and QA title checks remained empty. Chrome extension control was unavailable after the required retry. A newly generated SIWC bypass token still returned edge-layer `403` for `/api/references` with the documented header, so no API CRUD was attempted after that probe.
-- No Round 11 QA title was visible and the add form remained empty after the failed write attempts. Markdown download and production 390px evidence remain unverified; no production CRUD pass is claimed.
-- A later browser-control diagnostic refined the blocker: single browser operations succeed when isolated. Production DOM read, non-empty search fill, reference/synthesis workspace click and `aria-pressed` readback all passed; application console error logs were empty. The control client waits on failing Statsig requests for about 10-20 seconds per operation, so combined calls exceed the total timeout. `fill("")` is also a confirmed no-op despite returning success; replacing with one character and pressing Backspace clears correctly. The page was restored to the reference workspace with empty search/source fields and no `R11 QA` title.
-- The primary deployment-evidence commit is on GitHub. One later documentation-only clarification commit remains local after three final push attempts hit connection reset or `github.com:443` unavailability; it contains no application, migration, dependency, or production-data change.
+- The 2026-07-14 production write-path failure is superseded by the authenticated 2026-07-20 batch `20260720-164438`. Running one browser action per call with an independent readback avoided duplicate writes despite Statsig telemetry delays.
+- Production UI QA passed for two reference creates, reload persistence, full-field synthesis create, reload persistence, title/status/next-action edit, reference-driven stale warning, explicit snapshot refresh, deleted-source historical snapshot, archive filter, synthesis delete, reference delete, and final zero QA-title residue.
+- Production layout evidence passed at 1280x900 and 390x844 with document/body horizontal overflow `0`; desktop and mobile screenshots showed no incoherent overlap, and application console error logs were empty.
+- Production saved-state Markdown export was clicked successfully, but the browser control channel again did not emit a capturable Blob `download` event. The 187-test suite covers source links, saved/unsaved markers, unavailable snapshots, no media leakage and safe filenames; this remains a non-blocking tool evidence boundary rather than a product blocker.
+- Sites version 13 remains the runtime baseline from `d7db34a48b02ad679b96776b044983498f561a3c`; later `main` changes are documentation-only and do not require a new Sites deployment.
 
 ## Next Suggested Step
 
-Restore a writable authenticated browser channel, or have the user execute the minimal production form steps in the already signed-in page, then complete CRUD/Markdown/390px QA and cleanup before declaring Round 11 complete or starting Round 12.
+Begin Round 12 with design clarification and an approved implementation plan. Keep Sites version 13 stable until a new product scope is approved; do not carry the resolved Round 11 production write-path blocker forward.
