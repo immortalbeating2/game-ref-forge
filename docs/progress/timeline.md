@@ -1483,3 +1483,4 @@
   - Round 11 production write-path QA and cleanup passed.
   - The uncaptured Blob download event remains a documented non-blocking browser-control evidence boundary.
   - Round 12 may begin only after design and implementation-plan approval.
+  - Production closure evidence commit `104a55b` was pushed to GitHub `main`; Sites remains intentionally on runtime source `d7db34a` because the difference is documentation-only.

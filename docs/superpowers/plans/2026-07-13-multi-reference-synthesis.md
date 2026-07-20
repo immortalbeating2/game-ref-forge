@@ -77,7 +77,7 @@
 - Consumes: `ReferenceRecord` from `lib/reference.ts`.
 - Produces: `SYNTHESIS_STATUSES`, `SynthesisStatus`, `SynthesisInput`, `CreateSynthesisInput`, `SynthesisRecord`, `SynthesisReferenceSnapshot`, `SynthesisReferenceLink`, `SynthesisDetail`, `SynthesisSummary`, `validateSynthesisInput()`, `validateCreateSynthesisInput()`, `createSynthesisRecord()`, `createReferenceSnapshot()`, `parseReferenceSnapshot()`, `deriveSnapshotState()`.
 
-- [ ] **Step 1: 写领域契约失败测试**
+- [x] **Step 1: 写领域契约失败测试**
 
 Create `tests/synthesis.test.ts` with tests that assert:
 
@@ -170,7 +170,7 @@ it("derives current, stale, and unavailable states without persisting them", () 
 });
 ```
 
-- [ ] **Step 2: 运行 focused test 验证 RED**
+- [x] **Step 2: 运行 focused test 验证 RED**
 
 ```powershell
 npm test -- tests/synthesis.test.ts
@@ -178,7 +178,7 @@ npm test -- tests/synthesis.test.ts
 
 Expected: FAIL because `lib/synthesis.ts` does not exist.
 
-- [ ] **Step 3: 实现最小领域模型**
+- [x] **Step 3: 实现最小领域模型**
 
 Create `lib/synthesis.ts` with the approved closed vocabulary and shapes:
 
@@ -259,7 +259,7 @@ Implement `validateSynthesisInput`, `validateCreateSynthesisInput`, `createSynth
 - parse snapshots only when `schema_version === 1` and required scalar/array groups have valid runtime shapes;
 - stale is `available && currentUpdatedAt > snapshot.reference_updated_at` using parsed timestamps; invalid timestamps safely return `stale: false`.
 
-- [ ] **Step 4: 验证 GREEN 并提交 Task 1**
+- [x] **Step 4: 验证 GREEN 并提交 Task 1**
 
 ```powershell
 npm test -- tests/synthesis.test.ts
@@ -283,7 +283,7 @@ Expected: focused tests and typecheck pass.
 - Consumes: existing `references` Drizzle table.
 - Produces: `syntheses` and `synthesisReferences` Drizzle tables with cascade and set-null semantics.
 
-- [ ] **Step 1: 写 migration 行为失败测试**
+- [x] **Step 1: 写 migration 行为失败测试**
 
 Create `tests/synthesis-migration.test.ts` using `node:sqlite` `DatabaseSync`. Read and apply migrations `0000`, `0001`, and `0002`, splitting on `--> statement-breakpoint`. The test must:
 
@@ -325,7 +325,7 @@ it("preserves snapshots after reference delete and cascades synthesis delete", (
 });
 ```
 
-- [ ] **Step 2: 运行测试验证 RED**
+- [x] **Step 2: 运行测试验证 RED**
 
 ```powershell
 npm test -- tests/synthesis-migration.test.ts
@@ -333,7 +333,7 @@ npm test -- tests/synthesis-migration.test.ts
 
 Expected: FAIL because `drizzle/0002_multi_reference_synthesis.sql` does not exist.
 
-- [ ] **Step 3: 扩展 Drizzle schema**
+- [x] **Step 3: 扩展 Drizzle schema**
 
 Modify `db/schema.ts` to import `index`, `uniqueIndex`, and define:
 
@@ -372,7 +372,7 @@ export const synthesisReferences = sqliteTable("synthesis_references", {
 ]);
 ```
 
-- [ ] **Step 4: 生成命名 migration 并检查 SQL**
+- [x] **Step 4: 生成命名 migration 并检查 SQL**
 
 ```powershell
 npx drizzle-kit generate --name=multi_reference_synthesis
@@ -381,7 +381,7 @@ rg -n "CREATE TABLE.*syntheses|CREATE TABLE.*synthesis_references|ON DELETE casc
 
 Expected: Drizzle creates the exact `0002_multi_reference_synthesis.sql` and `0002_snapshot.json`; SQL contains two tables, both foreign-key actions, two list indexes, and three relation indexes/uniques.
 
-- [ ] **Step 5: 验证 migration GREEN 并提交 Task 2**
+- [x] **Step 5: 验证 migration GREEN 并提交 Task 2**
 
 ```powershell
 npm test -- tests/synthesis-migration.test.ts
@@ -404,7 +404,7 @@ Expected: migration test proves `SET NULL` and cascade behavior.
 - Consumes: `getDb()`, `references`, `syntheses`, `synthesisReferences`, and Task 1 domain helpers.
 - Produces: `listSyntheses(status?)`, `getSynthesis(id)`, `createSynthesis(input)`, `updateSynthesis(id, input)`, `deleteSynthesis(id)`, `refreshSynthesisReference(synthesisId, relationId)`.
 
-- [ ] **Step 1: 扩展序列化与错误结果失败测试**
+- [x] **Step 1: 扩展序列化与错误结果失败测试**
 
 Add tests to `tests/synthesis.test.ts` for:
 
@@ -421,7 +421,7 @@ expect(createSynthesisRecord({ title: "  Study  ", status: "draft", target_asset
 
 Also assert malformed stored snapshots return a stable placeholder snapshot carrying `schema_version: 1`, `reference_id`, title `"Unavailable snapshot"`, empty arrays, and null scores rather than crashing a whole detail response.
 
-- [ ] **Step 2: 运行 focused test 验证 RED**
+- [x] **Step 2: 运行 focused test 验证 RED**
 
 ```powershell
 npm test -- tests/synthesis.test.ts
@@ -429,7 +429,7 @@ npm test -- tests/synthesis.test.ts
 
 Expected: FAIL until the timestamp injection and stored-snapshot fallback are implemented.
 
-- [ ] **Step 3: 实现数据访问函数**
+- [x] **Step 3: 实现数据访问函数**
 
 Create `lib/synthesis-db.ts` with these exact behaviors:
 
@@ -465,7 +465,7 @@ Implementation rules:
 - `deleteSynthesis` returns whether a row was deleted; the database performs cascade cleanup.
 - no function accepts client-provided `snapshot_json`, `position`, `reference_id` changes, or `created_at`.
 
-- [ ] **Step 4: 运行领域回归和 typecheck**
+- [x] **Step 4: 运行领域回归和 typecheck**
 
 ```powershell
 npm test -- tests/synthesis.test.ts tests/synthesis-migration.test.ts
@@ -474,7 +474,7 @@ npm run typecheck
 
 Expected: all focused tests pass and Drizzle query types compile.
 
-- [ ] **Step 5: 提交 Task 3**
+- [x] **Step 5: 提交 Task 3**
 
 ```powershell
 git add lib/synthesis.ts lib/reference-db.ts lib/synthesis-db.ts tests/synthesis.test.ts
@@ -493,7 +493,7 @@ git commit -m "feat: 增加综合稿数据访问 / add synthesis data access"
 - Consumes: all Task 3 data-access functions.
 - Produces: JSON routes defined by the approved spec.
 
-- [ ] **Step 1: 写 route 失败测试**
+- [x] **Step 1: 写 route 失败测试**
 
 Create `tests/synthesis-routes.test.ts`. Use `vi.mock("../lib/synthesis-db", ...)`, reset mocks before each test, and dynamically import route modules. Cover these exact cases:
 
@@ -516,7 +516,7 @@ Also assert:
 - refresh returns 200, 404 for missing relation/synthesis, and 409 for unavailable source;
 - thrown missing-table errors return 500 with a migration-oriented message without leaking credentials.
 
-- [ ] **Step 2: 运行 route test 验证 RED**
+- [x] **Step 2: 运行 route test 验证 RED**
 
 ```powershell
 npm test -- tests/synthesis-routes.test.ts
@@ -524,7 +524,7 @@ npm test -- tests/synthesis-routes.test.ts
 
 Expected: FAIL because the routes do not exist.
 
-- [ ] **Step 3: 实现 route handlers**
+- [x] **Step 3: 实现 route handlers**
 
 Implement these signatures:
 
@@ -552,7 +552,7 @@ Use response bodies:
 
 Do not add a separate authentication layer; Sites private access remains the outer boundary used by the existing references routes.
 
-- [ ] **Step 4: 验证 API GREEN 并提交 Task 4**
+- [x] **Step 4: 验证 API GREEN 并提交 Task 4**
 
 ```powershell
 npm test -- tests/synthesis-routes.test.ts tests/synthesis.test.ts tests/synthesis-migration.test.ts
@@ -578,7 +578,7 @@ Expected: route tests pass with all approved status codes.
 **Interfaces:**
 - Produces: `SynthesisDraft`, `createEmptySynthesisDraft()`, `detailToSynthesisDraft()`, `draftToSynthesisInput()`, `isSynthesisDraftDirty()`, `toggleSynthesisSelection()`, `canEnterSynthesisComparison()`, `formatSynthesisMarkdown()`, `safeSynthesisExportFilename()`.
 
-- [ ] **Step 1: 写四组失败测试**
+- [x] **Step 1: 写四组失败测试**
 
 Tests must assert:
 
@@ -608,7 +608,7 @@ expect(markdown).not.toContain("preview_url");
 
 Extend `tests/localization.test.ts` so every new key exists and is non-empty in `zh` and `en`, including view switch, compare mode, counts, status labels, field labels, stale/unavailable, refresh, save states, unsaved confirmation, delete confirmation, filters and export warning.
 
-- [ ] **Step 2: 运行 focused tests 验证 RED**
+- [x] **Step 2: 运行 focused tests 验证 RED**
 
 ```powershell
 npm test -- tests/synthesis-draft.test.ts tests/synthesis-selection.test.ts tests/synthesis-export.test.ts tests/localization.test.ts
@@ -616,7 +616,7 @@ npm test -- tests/synthesis-draft.test.ts tests/synthesis-selection.test.ts test
 
 Expected: FAIL because the three helpers and new copy do not exist.
 
-- [ ] **Step 3: 实现纯 helper 和文案**
+- [x] **Step 3: 实现纯 helper 和文案**
 
 Implement selection with a fixed maximum of 4 and preserved insertion order. Implement draft conversion for every synthesis field and dirty comparison against normalized input.
 
@@ -642,7 +642,7 @@ Empty sections render `-`; unavailable references retain snapshot title and URL 
 
 Add explicit `uiCopy` keys and `labelForSynthesisStatus(status, language)`; do not infer English strings by transforming Chinese keys.
 
-- [ ] **Step 4: 验证 GREEN 并提交 Task 5**
+- [x] **Step 4: 验证 GREEN 并提交 Task 5**
 
 ```powershell
 npm test -- tests/synthesis-draft.test.ts tests/synthesis-selection.test.ts tests/synthesis-export.test.ts tests/localization.test.ts
@@ -664,7 +664,7 @@ git commit -m "feat: 增加综合稿交互契约 / add synthesis interaction con
 - Consumes: synthesis API, helpers, `Language`, and optional initial reference IDs.
 - Produces: one self-contained `SynthesisWorkspace` mounted by `app/page.tsx`.
 
-- [ ] **Step 1: 创建组件契约并验证 typecheck RED**
+- [x] **Step 1: 创建组件契约并验证 typecheck RED**
 
 Create component shells with these exact props and exported component:
 
@@ -689,7 +689,7 @@ npm run typecheck
 
 Expected: FAIL until all props are implemented and imported types exist.
 
-- [ ] **Step 2: 实现工作区状态与 API 数据流**
+- [x] **Step 2: 实现工作区状态与 API 数据流**
 
 `SynthesisWorkspace` must own:
 
@@ -703,7 +703,7 @@ When `initialReferenceIds.length >= 2`, open a blank create draft, retain those 
 
 Internal back, status-filter switch, opening another synthesis, and returning to references must use an app-owned unsaved confirmation. Browser/tab close uses the native `beforeunload` contract because custom UI cannot intercept it.
 
-- [ ] **Step 3: 实现列表、编辑器和参考摘要**
+- [x] **Step 3: 实现列表、编辑器和参考摘要**
 
 List behavior:
 
@@ -729,7 +729,7 @@ Reference card behavior:
 
 Saving validates locally with `validateSynthesisInput`, retains the draft on any error, and displays saving/saved/failed. Markdown uses current draft merged into the loaded detail and marks unsaved output.
 
-- [ ] **Step 4: 添加 scoped CSS 与 390px 结构**
+- [x] **Step 4: 添加 scoped CSS 与 390px 结构**
 
 Add classes scoped under `.synthesis-workspace`:
 
@@ -743,7 +743,7 @@ Add classes scoped under `.synthesis-workspace`:
 
 At `max-width: 720px`, reference cards become an 82%-width horizontal scroll-snap strip, the form becomes one column, secondary commands enter a native `<details>` action menu, and all command targets are at least 44px high. Ensure `min-width: 0`, `overflow-wrap: anywhere`, and stable toolbar tracks prevent page overflow.
 
-- [ ] **Step 5: 运行 typecheck/lint/build 并提交 Task 6**
+- [x] **Step 5: 运行 typecheck/lint/build 并提交 Task 6**
 
 ```powershell
 npm run typecheck
@@ -767,7 +767,7 @@ Expected: all three gates pass; the component is not yet mounted.
 - Consumes: `SynthesisWorkspace`, selection helpers, current filtered/sorted references.
 - Produces: the complete user workflow from references to saved synthesis.
 
-- [ ] **Step 1: 接入顶层视图与临时选择状态**
+- [x] **Step 1: 接入顶层视图与临时选择状态**
 
 Add page state:
 
@@ -783,7 +783,7 @@ Add a segmented “参考 / 综合稿” switch below language selection. Render
 
 “开始对比” must be disabled when `isUsingSeedReferences` is true. Starting selection closes add/edit states safely, clears prior comparison IDs, and changes card semantics from selecting details to toggling comparison IDs. The pin button remains disabled in comparison mode to keep one click meaning.
 
-- [ ] **Step 2: 实现 2-4 条选择操作条**
+- [x] **Step 2: 实现 2-4 条选择操作条**
 
 Render a stable selection indicator on cards and a sticky bottom action bar with count `N / 4`, cancel, and enter. Enter is disabled unless `canEnterSynthesisComparison()` is true. On enter:
 
@@ -796,7 +796,7 @@ setWorkspaceView("syntheses");
 
 Filtering must not mutate `comparisonReferenceIds`. Cancel restores normal card detail behavior.
 
-- [ ] **Step 3: 应用 migration 到本地 Sites D1 状态**
+- [x] **Step 3: 应用 migration 到本地 Sites D1 状态**
 
 Start the dev server once so `.wrangler/state` creates the local D1 sqlite file. Locate the single active sqlite file under `.wrangler/state/v3/d1`, then apply only migration 2 with Node 22 `node:sqlite`:
 
@@ -808,7 +808,7 @@ node --input-type=module -e "import {readFileSync} from 'node:fs'; import {Datab
 
 Expected: command exits 0. Query `sqlite_master` with a second read-only `node:sqlite` command and confirm both new tables exist. Do not delete or recreate the existing local references data.
 
-- [ ] **Step 4: 运行本地 API CRUD smoke**
+- [x] **Step 4: 运行本地 API CRUD smoke**
 
 Create two temporary references through the existing API, capture IDs, then:
 
@@ -823,7 +823,7 @@ Create two temporary references through the existing API, capture IDs, then:
 
 Record exact HTTP statuses and IDs in the QA document; never record tokens.
 
-- [ ] **Step 5: 运行本地浏览器 CRUD 与响应式验证**
+- [x] **Step 5: 运行本地浏览器 CRUD 与响应式验证**
 
 Using the in-app browser on the local dev server:
 
@@ -838,7 +838,7 @@ Using the in-app browser on the local dev server:
 - measure desktop, 1024px and 390x844: `document.documentElement.scrollWidth - document.documentElement.clientWidth === 0` and no sticky-action overlap;
 - confirm browser console has no application errors.
 
-- [ ] **Step 6: 运行全量门禁并提交 Task 7**
+- [x] **Step 6: 运行全量门禁并提交 Task 7**
 
 ```powershell
 npm test
@@ -863,11 +863,11 @@ Expected: all gates pass and local QA data is absent.
 - Modify: `docs/progress/2026-07-13.md`
 - Modify: valid review-finding files only
 
-- [ ] **Step 1: 同步真实工程文档与三份留痕**
+- [x] **Step 1: 同步真实工程文档与三份留痕**
 
 Document the implemented schema, foreign-key semantics, snapshot version, API list and module boundaries. Set stage to “Round 11 implemented and locally verified; merge pending”. Record every task commit, migration result, exact test counts, browser viewports, cleanup result and a `Delegation Log` for each subagent.
 
-- [ ] **Step 2: 使用 `superpowers:requesting-code-review` 独立审查**
+- [x] **Step 2: 使用 `superpowers:requesting-code-review` 独立审查**
 
 Review base SHA and feature HEAD against the approved spec and this plan. Priorities:
 
@@ -882,11 +882,11 @@ Review base SHA and feature HEAD against the approved spec and this plan. Priori
 - bilingual gaps, keyboard failures, nested cards, 390px overflow or sticky overlap;
 - production cleanup paths.
 
-- [ ] **Step 3: 对有效 Critical/Important finding 执行 RED→GREEN**
+- [x] **Step 3: 对有效 Critical/Important finding 执行 RED→GREEN**
 
 For each valid behavior defect, add a focused failing unit/API/browser regression first, run it to observe RED, implement the smallest fix, rerun GREEN, and commit with a focused bilingual message. Record intentionally deferred Minor findings in the QA document.
 
-- [ ] **Step 4: 运行新鲜全量验证**
+- [x] **Step 4: 运行新鲜全量验证**
 
 ```powershell
 npm test
@@ -899,14 +899,14 @@ git status --short --branch
 
 Expected: zero failures, clean diff check, and only intended documentation changes before their commit.
 
-- [ ] **Step 5: 提交实现留痕**
+- [x] **Step 5: 提交实现留痕**
 
 ```powershell
 git add docs/engineering/data-model.md docs/engineering/architecture.md AGENTS.md docs/progress/status.md docs/progress/timeline.md docs/progress/2026-07-13.md docs/qa/2026-07-13-multi-reference-synthesis.md
 git commit -m "docs: 记录第十一轮综合实现 / record round 11 synthesis implementation"
 ```
 
-- [ ] **Step 6: 使用 `superpowers:finishing-a-development-branch`**
+- [x] **Step 6: 使用 `superpowers:finishing-a-development-branch`**
 
 选择合并到本地 `main`。该技能必须在合并前复验、从主工作树合并、在合并后的 `main` 再运行测试/typecheck/lint/build、确认无未提交文件，然后删除 owned worktree 和本地功能分支。任何验证失败都停止清理并进入 systematic debugging。
 
@@ -976,7 +976,7 @@ If browser automation times out after a write, first re-read UI/API state before
 
 Update stage to `Round 11 complete; Round 12 design-ready`. Record exact GitHub SHA, Sites source SHA, version/deployment IDs, migration result, production QA IDs/titles, Markdown result, 390px evidence and cleanup proof in the QA document and all three progress files.
 
-- [ ] **Step 6: 提交并推送最终部署证据**
+- [x] **Step 6: 提交并推送最终部署证据**
 
 ```powershell
 git diff --check
@@ -991,20 +991,20 @@ Expected: clean `main` aligned with `origin/main`. If Sites source intentionally
 
 ## Final Verification Checklist
 
-- [ ] `syntheses` and `synthesis_references` migration applies to existing data without rewriting references.
-- [ ] D1 verifies `ON DELETE SET NULL`, `ON DELETE CASCADE`, order uniqueness and relationship uniqueness.
-- [ ] Only 2-4 unique real D1 references can create a synthesis.
-- [ ] Server creates every snapshot; client cannot forge snapshots or change saved relationships.
-- [ ] List, create, read, edit, status change, archive, delete and reload persistence pass.
-- [ ] Reference update produces stale state; explicit refresh clears it without changing another snapshot.
-- [ ] Reference delete preserves the synthesis and readable historical snapshot.
-- [ ] Markdown exports current text and source links without media copies or all-library JSON changes.
-- [ ] Save/refresh/delete failures preserve prior data and provide visible bilingual feedback.
-- [ ] Unsaved internal navigation uses app confirmation; browser close uses `beforeunload`.
-- [ ] Seed examples cannot enter persisted comparison mode.
-- [ ] Chinese and English, keyboard use, desktop, 1024px and 390px checks pass.
-- [ ] No page-level horizontal overflow, incoherent overlap, nested cards or unstable action sizing remains.
-- [ ] All automated tests, typecheck, lint and production build pass on merged `main`.
-- [ ] Local and production temporary references/syntheses are deleted and absence is confirmed.
-- [ ] Engineering docs, QA evidence, three progress traces and Delegation Log match real results.
-- [ ] GitHub `main`, Sites source and the deployed version are reconciled and documented.
+- [x] `syntheses` and `synthesis_references` migration applies to existing data without rewriting references.
+- [x] D1 verifies `ON DELETE SET NULL`, `ON DELETE CASCADE`, order uniqueness and relationship uniqueness.
+- [x] Only 2-4 unique real D1 references can create a synthesis.
+- [x] Server creates every snapshot; client cannot forge snapshots or change saved relationships.
+- [x] List, create, read, edit, status change, archive, delete and reload persistence pass.
+- [x] Reference update produces stale state; explicit refresh clears it without changing another snapshot.
+- [x] Reference delete preserves the synthesis and readable historical snapshot.
+- [x] Markdown exports current text and source links without media copies or all-library JSON changes.
+- [x] Save/refresh/delete failures preserve prior data and provide visible bilingual feedback.
+- [x] Unsaved internal navigation uses app confirmation; browser close uses `beforeunload`.
+- [x] Seed examples cannot enter persisted comparison mode.
+- [x] Chinese and English, keyboard use, desktop, 1024px and 390px checks pass.
+- [x] No page-level horizontal overflow, incoherent overlap, nested cards or unstable action sizing remains.
+- [x] All automated tests, typecheck, lint and production build pass on merged `main`.
+- [x] Local and production temporary references/syntheses are deleted and absence is confirmed.
+- [x] Engineering docs, QA evidence, three progress traces and Delegation Log match real results.
+- [x] GitHub `main`, Sites source and the deployed version are reconciled and documented.
