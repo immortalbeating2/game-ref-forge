@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 11 complete; Round 12 design-ready`
+- 当前阶段：`Round 12 implemented and locally verified; merge pending`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,12 +142,12 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 11 complete; Round 12 design-ready`。Round 11 已合并、通过本地完整门禁、同步到 GitHub，并以包含 migration 2 的 Sites version 13 成功部署。2026-07-20 已在认证生产站完成 reference 与 synthesis 的真实 UI CRUD、刷新持久化、stale/refresh、来源删除后的历史快照、归档筛选、桌面与 390px 布局、控制台和最终清理验证。
+本项目当前为 `Round 12 implemented and locally verified; merge pending`。Round 12 已在隔离分支完成可调三栏工作台、折叠恢复、键盘控制、版本化本地偏好和响应式降级，并通过最终独立审查；尚未合并、部署或完成生产布局复测。Round 11 的 reference/synthesis 生产 CRUD 基线仍保持不变。
 
 当前默认目标：
 
-- Round 12 开始前先完成设计确认和实现计划，不直接扩张代码范围。
-- 将 Sites version 13 作为当前稳定生产基线；后续修改继续执行真实生产回归与临时数据清理。
+- 先将已验证的 Round 12 分支 fast-forward 合并到 `main`，再重跑 merged-main 门禁。
+- 将 Sites version 13 作为当前稳定生产基线，直到 Round 12 新版本部署并通过认证生产站只读布局复测。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。
@@ -170,6 +170,8 @@ Round 11 扩展边界：
 - 综合稿不写回 reference，不公开托管第三方媒体，不新增公开路由。
 
 Round 11 最终本地证据：21 个测试文件 / 187 项测试、typecheck、lint、build、migration 2、HTTP API CRUD、内置浏览器 CRUD、1024px 与 390px 布局检查、console error 0、清理残留 0。
+
+Round 12 当前本地证据：23 个测试文件 / 205 项测试、typecheck、lint、build、diff check 和最终独立审查通过；Chrome 完成左右 pointer drag、最小/最大边界、1400px 约束态和刷新持久化，内置浏览器完成键盘、折叠恢复、视图切换及 1600/1280/1024/390px 布局检查，干净 Chrome console error 0。生产证据尚未补跑。
 
 Round 11 最终外部状态：Sites version 13 的已部署运行时代码和归档来自 `d7db34a`；GitHub `main` 在其后仅增加部署与生产 QA 证据文档，不包含新的应用、migration 或依赖改动。生产批次 `20260720-164438` 已完成两条 reference 和一份全字段 synthesis 的创建、刷新持久化、编辑、stale/refresh、删除后快照、归档筛选、删除和零残留回读。1280x900 与 390x844 的 document/body 横向溢出均为 0，console error 为 0。生产 Markdown 导出按钮已触发；控制通道仍无法捕获程序化 Blob `download` 事件，文件内容、来源链接、unsaved 标记、无媒体泄漏和安全文件名由自动化测试覆盖，该工具证据边界不阻塞 Round 11 收口。
 

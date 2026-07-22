@@ -56,7 +56,7 @@
 - Produces: `parseWorkspaceLayoutPreferences`, `serializeWorkspaceLayoutPreferences`, `resolveWorkspaceLayout`, `resizeWorkspacePanel`, `getKeyboardWorkspaceWidth`。
 - Consumed by: Task 2 hook and Task 3 CSS-variable integration。
 
-- [ ] **Step 1: 写偏好与约束失败测试**
+- [x] **Step 1: 写偏好与约束失败测试**
 
 Create `tests/workspace-layout.test.ts` with focused cases equivalent to:
 
@@ -150,13 +150,13 @@ describe("workspace layout keyboard values", () => {
 });
 ```
 
-- [ ] **Step 2: 运行测试并确认 RED**
+- [x] **Step 2: 运行测试并确认 RED**
 
 Run: `npm test -- tests/workspace-layout.test.ts`
 
 Expected: FAIL because `lib/workspace-layout.ts` does not exist.
 
-- [ ] **Step 3: 实现最小纯函数**
+- [x] **Step 3: 实现最小纯函数**
 
 Create `lib/workspace-layout.ts` with these exact public values and signatures:
 
@@ -209,7 +209,7 @@ Implementation rules:
 - `resizeWorkspacePanel` uses the opposite effective panel width and current handle widths to compute the dragged side's dynamic maximum; it updates only the requested side.
 - Keyboard helper returns clamped values for arrows/Home/End/reset and `null` for unhandled keys.
 
-- [ ] **Step 4: 确认 GREEN 并提交 Task 1**
+- [x] **Step 4: 确认 GREEN 并提交 Task 1**
 
 Run:
 
@@ -237,7 +237,7 @@ Expected: focused tests and typecheck exit 0; commit contains only Task 1 files.
 - Produces: `WorkspaceSeparator` with expanded separator and collapsed recovery-button modes.
 - Consumed by: Task 3 `app/page.tsx`.
 
-- [ ] **Step 1: 写组件契约与本地化失败测试**
+- [x] **Step 1: 写组件契约与本地化失败测试**
 
 Create `tests/workspace-layout-components.test.ts` using `readFileSync` to require these source contracts before the files exist:
 
@@ -287,13 +287,13 @@ expect(uiCopy("en").expandDetailsPanel).toBe("Expand details panel");
 expect(uiCopy("en").resetPanelWidth).toBe("Double-click to reset width");
 ```
 
-- [ ] **Step 2: 运行测试并确认 RED**
+- [x] **Step 2: 运行测试并确认 RED**
 
 Run: `npm test -- tests/workspace-layout-components.test.ts tests/localization.test.ts`
 
 Expected: FAIL because workspace files and localization keys are absent.
 
-- [ ] **Step 3: 实现 hook 与分隔条**
+- [x] **Step 3: 实现 hook 与分隔条**
 
 `useWorkspaceLayout` must:
 
@@ -317,7 +317,7 @@ Expected: FAIL because workspace files and localization keys are absent.
 
 Add the seven exact localization keys to both language objects in `lib/localization.ts`.
 
-- [ ] **Step 4: 确认 GREEN 并提交 Task 2**
+- [x] **Step 4: 确认 GREEN 并提交 Task 2**
 
 Run:
 
@@ -342,7 +342,7 @@ Expected: focused tests and typecheck exit 0; no application page or CSS integra
 - Consumes: Task 2 hook and separator component.
 - Produces: reference five-track layout, synthesis three-track layout, collapse controls, internal desktop scroll and responsive fallback.
 
-- [ ] **Step 1: 增加页面/CSS 失败契约**
+- [x] **Step 1: 增加页面/CSS 失败契约**
 
 Extend `tests/workspace-layout-components.test.ts` to assert:
 
@@ -364,13 +364,13 @@ it("wires reference and synthesis grid modes without leaking splitters to respon
 });
 ```
 
-- [ ] **Step 2: 运行测试并确认 RED**
+- [x] **Step 2: 运行测试并确认 RED**
 
 Run: `npm test -- tests/workspace-layout-components.test.ts`
 
 Expected: FAIL because `app/page.tsx` and CSS do not yet wire the new modules.
 
-- [ ] **Step 3: 接入页面结构**
+- [x] **Step 3: 接入页面结构**
 
 Modify `app/page.tsx` with these boundaries:
 
@@ -383,7 +383,7 @@ Modify `app/page.tsx` with these boundaries:
 - pass localized labels and the correct `220-360` or `340-640` ARIA bounds;
 - do not move, duplicate or reset reference/synthesis business state.
 
-- [ ] **Step 4: 实现桌面轨道、滚动和响应式降级**
+- [x] **Step 4: 实现桌面轨道、滚动和响应式降级**
 
 Modify `app/globals.css`:
 
@@ -399,7 +399,7 @@ Modify `app/globals.css`:
 - in `@media (max-width: 820px)`, preserve the current one-column layout and 16px padding;
 - keep `prefers-reduced-motion` free of animated panel transitions.
 
-- [ ] **Step 5: 确认自动化 GREEN**
+- [x] **Step 5: 确认自动化 GREEN**
 
 Run:
 
@@ -414,7 +414,7 @@ git diff --check
 
 Expected: all tests pass; typecheck, lint, build and diff check exit 0.
 
-- [ ] **Step 6: 运行本地浏览器验收并记录 QA**
+- [x] **Step 6: 运行本地浏览器验收并记录 QA**
 
 Start the isolated worktree server with `npm run dev -- --port 3012`. If 3012 is already occupied by this repository, reuse that process only after confirming its working directory and commit; otherwise stop the unrelated process or use 3013 and record the actual URL. Record in `docs/qa/2026-07-22-resizable-workspace-layout.md`:
 
@@ -427,7 +427,7 @@ Start the isolated worktree server with `npm run dev -- --port 3012`. If 3012 is
 - 1280x900, 1024x768 and 390x844 have no splitters, overlap or page-level horizontal overflow;
 - Chinese and English labels/tooltips are present; console error count is 0.
 
-- [ ] **Step 7: 提交 Task 3**
+- [x] **Step 7: 提交 Task 3**
 
 Run:
 
@@ -452,14 +452,14 @@ Expected: commit contains the integrated UI, CSS, contract test and truthful loc
 - Consumes: Tasks 1-3 feature branch and QA evidence.
 - Produces: reviewed, merged, pushed, deployed and production-verified Round 12 with branch/worktree cleanup.
 
-- [ ] **Step 1: 完成逐任务和全分支审查**
+- [x] **Step 1: 完成逐任务和全分支审查**
 
 - For each Task 1-3 commit range, generate a review package and require both spec-compliance and code-quality approval.
 - Dispatch one broad final reviewer against `git merge-base main HEAD..HEAD`.
 - Fix every Critical or Important finding through one focused fix agent, rerun covering tests, and re-review.
 - Record all agents in the 2026-07-22 `Delegation Log` with purpose, scope, result and closure.
 
-- [ ] **Step 2: 运行最终功能分支门禁**
+- [x] **Step 2: 运行最终功能分支门禁**
 
 Run fresh:
 
@@ -520,11 +520,11 @@ Expected: fast-forward merge, merged-main gates exit 0, and GitHub `main` advanc
 
 ## Definition of Done
 
-- [ ] Pure layout helpers prove parsing, clamping, center-width safety, collapse and keyboard behavior.
-- [ ] Desktop reference view has two accessible separators; synthesis view has only the left separator.
+- [x] Pure layout helpers prove parsing, clamping, center-width safety, collapse and keyboard behavior.
+- [x] Desktop reference view has two accessible separators; synthesis view has only the left separator.
 - [ ] Pointer, keyboard, double-click, collapse/recovery and refresh persistence work locally and in production.
-- [ ] Desktop outer scrolling is removed without hiding pane scrolling.
-- [ ] 1280px, 1024px and 390px responsive layouts remain non-draggable and free of page-level overflow.
-- [ ] No API, D1, migration, dependency or production business-data change occurs.
+- [x] Desktop outer scrolling is removed without hiding pane scrolling.
+- [x] 1280px, 1024px and 390px responsive layouts remain non-draggable and free of page-level overflow.
+- [x] No API, D1, migration, dependency or production business-data change occurs.
 - [ ] Tests, typecheck, lint, build, task reviews, final review, merged-main verification and production smoke pass.
 - [ ] Three progress documents, QA evidence, AGENTS stage, plan checkboxes, GitHub main, Sites deployment and branch cleanup agree.

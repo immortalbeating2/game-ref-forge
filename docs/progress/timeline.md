@@ -1489,3 +1489,8 @@
 
 - Round 12 可调整工作台布局方向获准进入 Superpowers 流程；完成设计规格初稿，范围限定为桌面三栏拖拽、键盘调整、折叠恢复、偏好持久化和滚动连续性优化，不修改业务数据、API 或 D1。当前等待书面规格审阅后进入实现计划。
 - 用户批准 Round 12 书面规格；实现计划拆分为纯布局契约、可访问交互、页面/CSS 集成和交付验证四项，下一步从最新 `main` 创建隔离分支与 worktree。
+- 设计与计划基线 `ae5bbf2`、`d891ed6` 已推送到 GitHub `main`；从同步主线创建 `codex/round-12-resizable-workspace` 和隔离 worktree，基线 21 个测试文件 / 187 项测试通过。
+- 完成布局纯函数、React hook、可访问分隔条、页面/CSS 接线及 1024px 工具栏溢出修复；主要实现提交为 `978c67b`、`e549fa3`、`60579c6`、`9b80aa1`、`c0bebe3`、`042a639`、`b69ccc2`。
+- 本地浏览器 QA 覆盖左右拖拽最小/最大边界、键盘、双击复位、折叠恢复、刷新持久化、视图切换、1600/1280/1024/390px 和中英文标签；内置浏览器拖拽通道限制由 Chrome 真实 pointer drag 补齐，干净 Chrome console error 0。
+- 最终审查发现 1400px 约束态从持久化宽度而非可见宽度起算；提交 `58f1e6e` 以 resolved metrics 修复，并新增 4 项回归。1400px 真实浏览器复测通过 `360/464 -> 360/448` 首次键盘步长，以及左栏 `360 -> 220` 时右栏保持 `464`。
+- 最终复审 `Approved`，无 Critical/Important；本地最终门禁为 23 个测试文件 / 205 项测试、typecheck、lint、build、diff check 全部通过。阶段更新为 `Round 12 implemented and locally verified; merge pending`。
