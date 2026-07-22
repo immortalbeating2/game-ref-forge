@@ -73,8 +73,6 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
   const [draggingSide, setDraggingSide] = useState<WorkspacePanelSide | null>(null);
   const [hasLoadedPreferences, setHasLoadedPreferences] = useState(false);
 
-  preferencesRef.current = preferences;
-
   const endDrag = useCallback(() => {
     const activeDrag = activeDragRef.current;
     if (activeDrag?.element.hasPointerCapture(activeDrag.pointerId)) {
@@ -85,13 +83,29 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
   }, []);
 
   useEffect(() => {
-    try {
-      setPreferences(parseWorkspaceLayoutPreferences(window.localStorage.getItem(WORKSPACE_LAYOUT_STORAGE_KEY)));
-    } catch {
-      setPreferences(DEFAULT_WORKSPACE_LAYOUT);
-    } finally {
-      setHasLoadedPreferences(true);
-    }
+    preferencesRef.current = preferences;
+  }, [preferences]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (cancelled) {
+        return;
+      }
+
+      try {
+        setPreferences(parseWorkspaceLayoutPreferences(window.localStorage.getItem(WORKSPACE_LAYOUT_STORAGE_KEY)));
+      } catch {
+        setPreferences(DEFAULT_WORKSPACE_LAYOUT);
+      } finally {
+        setHasLoadedPreferences(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
