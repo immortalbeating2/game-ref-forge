@@ -474,7 +474,7 @@ git status --short
 
 Expected: all commands exit 0 and feature worktree is clean after documentation commit.
 
-- [ ] **Step 3: 更新实现状态文档**
+- [x] **Step 3: 更新实现状态文档**
 
 - Set the feature-branch stage to `Round 12 implemented and locally verified; merge pending`.
 - Record exact test file/test counts, browser viewport metrics, localStorage checks, console errors, commits, review verdicts and any minor residual risk.
