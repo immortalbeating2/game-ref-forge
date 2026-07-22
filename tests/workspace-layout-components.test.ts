@@ -20,4 +20,20 @@ describe("workspace layout interaction source", () => {
     expect(source).toContain("aria-valuenow");
     expect(source).toMatch(/collapsed[\s\S]*<button/);
   });
+
+  it("wires reference and synthesis grid modes without leaking splitters to responsive layouts", () => {
+    const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+
+    expect(page).toContain("useWorkspaceLayout");
+    expect(page).toContain("workspace--references");
+    expect(page).toContain("workspace--syntheses");
+    expect(page.match(/<WorkspaceSeparator/g)).toHaveLength(2);
+    expect(page).toContain("collapseFiltersPanel");
+    expect(page).toContain("collapseDetailsPanel");
+    expect(css).toContain("var(--workspace-left-width)");
+    expect(css).toContain("var(--workspace-right-width)");
+    expect(css).toMatch(/@media \(max-width: 1280px\)[\s\S]*\.workspace-separator[\s\S]*display:\s*none/);
+    expect(css).toMatch(/@media \(max-width: 820px\)[\s\S]*grid-template-columns:\s*1fr/);
+  });
 });

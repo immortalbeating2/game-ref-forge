@@ -147,6 +147,14 @@ label {
   gap: 10px;
 }
 
+.brand-eyebrow-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .brand-block h1,
 .detail-heading h2,
 .deck-heading h2 {
@@ -1286,6 +1294,168 @@ label {
   width: auto;
 }
 
+@media (min-width: 1281px) {
+  .workspace {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace--references {
+    grid-template-columns:
+      var(--workspace-left-width)
+      var(--workspace-left-handle-width)
+      minmax(560px, 1fr)
+      var(--workspace-right-handle-width)
+      var(--workspace-right-width);
+  }
+
+  .workspace--syntheses {
+    grid-template-columns:
+      var(--workspace-left-width)
+      var(--workspace-left-handle-width)
+      minmax(0, 1fr);
+  }
+
+  .sidebar,
+  .gallery-pane,
+  .detail-panel,
+  .synthesis-workspace {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar,
+  .detail-panel {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .sidebar {
+    grid-column: 1;
+  }
+
+  .workspace--references .gallery-pane {
+    grid-column: 3;
+  }
+
+  .workspace--references .detail-panel {
+    grid-column: 5;
+  }
+
+  .workspace--syntheses .synthesis-workspace {
+    grid-column: 3;
+  }
+
+  .workspace-separator {
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    touch-action: none;
+    cursor: col-resize;
+    user-select: none;
+  }
+
+  .workspace-separator::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--border);
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .workspace-separator:hover::before,
+  .workspace-separator:focus-visible::before,
+  .workspace--dragging-left .workspace-separator--left::before,
+  .workspace--dragging-right .workspace-separator--right::before {
+    width: 2px;
+    background: var(--accent);
+  }
+
+  .workspace--dragging-left,
+  .workspace--dragging-right {
+    user-select: none;
+  }
+
+  .workspace-separator--left {
+    grid-column: 2;
+  }
+
+  .workspace-separator--right {
+    grid-column: 4;
+  }
+
+  .workspace-separator--collapsed {
+    display: grid;
+    min-height: 100%;
+    place-items: start center;
+    color: var(--muted-strong);
+    cursor: pointer;
+    padding-top: 20px;
+  }
+
+  .workspace-separator--collapsed::before {
+    display: none;
+  }
+
+  .workspace-separator--collapsed span {
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+
+  .workspace-collapse-button {
+    display: grid;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    place-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--muted-strong);
+    padding: 0;
+  }
+
+  .workspace-collapse-button:hover,
+  .workspace-collapse-button:focus-visible {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .workspace-collapse-button span {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .workspace-collapse-button--details {
+    position: sticky;
+    z-index: 3;
+    top: 0;
+    align-self: end;
+    flex: 0 0 auto;
+  }
+
+  .workspace--left-collapsed .sidebar,
+  .workspace--right-collapsed .detail-panel {
+    visibility: hidden;
+    overflow: hidden;
+    padding-right: 0;
+    padding-left: 0;
+    pointer-events: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1302,6 +1472,22 @@ label {
 @media (max-width: 1280px) {
   .workspace {
     grid-template-columns: 230px minmax(0, 1fr);
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .workspace-separator,
+  .workspace-collapse-button {
+    display: none;
+  }
+
+  .workspace--left-collapsed .sidebar,
+  .workspace--right-collapsed .detail-panel {
+    visibility: visible;
+    overflow-y: auto;
+    padding: 20px;
+    pointer-events: auto;
   }
 
   .detail-panel {

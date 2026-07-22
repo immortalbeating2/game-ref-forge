@@ -81,6 +81,8 @@ import {
 import type { SynthesisDraft } from "../lib/synthesis-draft";
 import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
 import { SynthesisConfirmation } from "./synthesis/synthesis-confirmation";
+import { useWorkspaceLayout } from "./workspace/use-workspace-layout";
+import { WorkspaceSeparator } from "./workspace/workspace-separator";
 
 type WorkspaceView = "references" | "syntheses";
 
@@ -194,6 +196,16 @@ function ensureInspirationEntryIds(entries: InspirationEntry[]) {
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("references");
+  const {
+    workspaceRef,
+    preferences: workspacePreferences,
+    metrics: workspaceMetrics,
+    workspaceStyle,
+    draggingSide,
+    separatorHandlers,
+    togglePanel,
+    restorePanel,
+  } = useWorkspaceLayout(workspaceView);
   const [comparisonSelection, setComparisonSelection] = useState<ComparisonSelectionState>({
     isActive: false,
     referenceIds: [],
@@ -969,10 +981,33 @@ export default function Home() {
   );
 
   return (
-    <main className="workspace">
+    <main
+      ref={workspaceRef}
+      style={workspaceStyle}
+      className={[
+        "workspace",
+        workspaceView === "references" ? "workspace--references" : "workspace--syntheses",
+        workspacePreferences.leftCollapsed ? "workspace--left-collapsed" : "",
+        workspaceView === "references" && workspacePreferences.rightCollapsed
+          ? "workspace--right-collapsed"
+          : "",
+        draggingSide ? `workspace--dragging-${draggingSide}` : "",
+      ].filter(Boolean).join(" ")}
+    >
       <aside className="sidebar" aria-label={copy.filtersLabel}>
         <div className="brand-block">
-          <p className="eyebrow">REFFORGE</p>
+          <div className="brand-eyebrow-row">
+            <p className="eyebrow">REFFORGE</p>
+            <button
+              type="button"
+              className="workspace-collapse-button workspace-collapse-button--filters"
+              aria-label={copy.collapseFiltersPanel}
+              title={copy.collapseFiltersPanel}
+              onClick={() => togglePanel("left")}
+            >
+              <span aria-hidden="true">&#8249;</span>
+            </button>
+          </div>
           <h1>灵感锻造台</h1>
           <p className="workspace-mode">{copy.workspaceMode}</p>
           <p>{copy.productDescription}</p>
@@ -1124,6 +1159,19 @@ export default function Home() {
           </>
         ) : null}
       </aside>
+
+      <WorkspaceSeparator
+        side="left"
+        collapsed={workspacePreferences.leftCollapsed}
+        expandLabel={copy.expandFiltersPanel}
+        handlers={separatorHandlers.left}
+        label={copy.resizeFiltersPanel}
+        min={220}
+        max={360}
+        value={workspaceMetrics.leftWidth}
+        resetLabel={copy.resetPanelWidth}
+        onRestore={() => restorePanel("left")}
+      />
 
       {workspaceView === "references" ? (
         <>
@@ -1667,7 +1715,29 @@ export default function Home() {
         ) : null}
       </section>
 
+      <WorkspaceSeparator
+        side="right"
+        collapsed={workspacePreferences.rightCollapsed}
+        expandLabel={copy.expandDetailsPanel}
+        handlers={separatorHandlers.right}
+        label={copy.resizeDetailsPanel}
+        min={340}
+        max={640}
+        value={workspaceMetrics.rightWidth}
+        resetLabel={copy.resetPanelWidth}
+        onRestore={() => restorePanel("right")}
+      />
+
       <aside className="detail-panel" aria-label={copy.selectedReference}>
+        <button
+          type="button"
+          className="workspace-collapse-button workspace-collapse-button--details"
+          aria-label={copy.collapseDetailsPanel}
+          title={copy.collapseDetailsPanel}
+          onClick={() => togglePanel("right")}
+        >
+          <span aria-hidden="true">&#8250;</span>
+        </button>
         {selectedReference ? (
           <>
             <div className="detail-heading">
