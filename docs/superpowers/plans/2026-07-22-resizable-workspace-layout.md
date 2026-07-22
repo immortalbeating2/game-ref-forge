@@ -488,7 +488,7 @@ git add AGENTS.md docs/qa/2026-07-22-resizable-workspace-layout.md docs/progress
 git commit -m "docs: 记录第十二轮实现验证 / record round 12 implementation verification"
 ```
 
-- [ ] **Step 4: 使用 finishing-a-development-branch 合并并复验**
+- [x] **Step 4: 使用 finishing-a-development-branch 合并并复验**
 
 The user's standing choice is local merge and cleanup after verification. From the main worktree:
 
@@ -504,14 +504,14 @@ git push origin main
 
 Expected: fast-forward merge, merged-main gates exit 0, and GitHub `main` advances to the verified commit.
 
-- [ ] **Step 5: 部署 Sites 并验证生产布局**
+- [x] **Step 5: 部署 Sites 并验证生产布局**
 
 - Synchronize Sites source to the merged `main`, save and deploy one new version.
 - On the authenticated production page, repeat the read-only 1600px drag/keyboard/collapse/reload checks and 1280px/390px responsive checks.
 - Confirm console error 0, document/body horizontal overflow 0, layout preference persistence, and no reference/synthesis writes.
 - Record Sites source SHA, version ID, deployment ID/status and exact production metrics in QA and progress docs.
 
-- [ ] **Step 6: 收口文档与清理分支/worktree**
+- [x] **Step 6: 收口文档与清理分支/worktree**
 
 - Set stage to `Round 12 complete; Round 13 design-ready` only after production verification.
 - Commit and push final deployment/production evidence.
@@ -522,9 +522,9 @@ Expected: fast-forward merge, merged-main gates exit 0, and GitHub `main` advanc
 
 - [x] Pure layout helpers prove parsing, clamping, center-width safety, collapse and keyboard behavior.
 - [x] Desktop reference view has two accessible separators; synthesis view has only the left separator.
-- [ ] Pointer, keyboard, double-click, collapse/recovery and refresh persistence work locally and in production.
+- [x] Pointer, keyboard, double-click, collapse/recovery and refresh persistence work locally and in production.
 - [x] Desktop outer scrolling is removed without hiding pane scrolling.
 - [x] 1280px, 1024px and 390px responsive layouts remain non-draggable and free of page-level overflow.
 - [x] No API, D1, migration, dependency or production business-data change occurs.
-- [ ] Tests, typecheck, lint, build, task reviews, final review, merged-main verification and production smoke pass.
-- [ ] Three progress documents, QA evidence, AGENTS stage, plan checkboxes, GitHub main, Sites deployment and branch cleanup agree.
+- [x] Tests, typecheck, lint, build, task reviews, final review, merged-main verification and production smoke pass.
+- [x] Three progress documents, QA evidence, AGENTS stage, plan checkboxes, GitHub main, Sites deployment and branch cleanup agree.

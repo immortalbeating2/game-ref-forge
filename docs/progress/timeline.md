@@ -1494,3 +1494,7 @@
 - 本地浏览器 QA 覆盖左右拖拽最小/最大边界、键盘、双击复位、折叠恢复、刷新持久化、视图切换、1600/1280/1024/390px 和中英文标签；内置浏览器拖拽通道限制由 Chrome 真实 pointer drag 补齐，干净 Chrome console error 0。
 - 最终审查发现 1400px 约束态从持久化宽度而非可见宽度起算；提交 `58f1e6e` 以 resolved metrics 修复，并新增 4 项回归。1400px 真实浏览器复测通过 `360/464 -> 360/448` 首次键盘步长，以及左栏 `360 -> 220` 时右栏保持 `464`。
 - 最终复审 `Approved`，无 Critical/Important；本地最终门禁为 23 个测试文件 / 205 项测试、typecheck、lint、build、diff check 全部通过。阶段更新为 `Round 12 implemented and locally verified; merge pending`。
+- `codex/round-12-resizable-workspace` 以 fast-forward 合并到 `main` 的 `7db349a`；merged-main 23 个测试文件 / 205 项测试、typecheck、lint、build 通过，并推送到 GitHub。嵌套 worktree 的构建产物曾被主工作树 lint 扫描，移除已合并 worktree 后标准 lint 通过。
+- Sites source 推送到 `7db349a08d7dfe50e9fe06af7646bfb0ce3cc0fd`，保存 Sites version 14 并以 deployment `appgdep_6a60dcd2f09481919dc981b8bba830ac` 私有发布成功。
+- 认证生产只读 QA 通过：1600px 外层无溢出；Chrome 左右 pointer drag 到 `320/470` 并刷新持久化；详情折叠刷新后保持且选中项不丢失；键盘 `470 -> 454`；1280px 与 390px document/body 横向溢出为 0，控制隐藏；console error 0。最终偏好复位 `260/420`，reference 数量保持 2，无业务写入。
+- Round 12 worktree 与本地功能分支已删除，远程不存在对应功能分支；阶段更新为 `Round 12 complete; Round 13 design-ready`。生产基线为 Sites version 14，后续证据文档提交不改变 runtime source。

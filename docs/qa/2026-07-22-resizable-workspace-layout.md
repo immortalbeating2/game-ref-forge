@@ -51,8 +51,38 @@
 - 浏览器安全约束禁止直接读取或写入 localStorage；刷新持久化通过用户可见布局结果验证，损坏值回退由 `parseWorkspaceLayoutPreferences` 自动化测试验证。
 - 本地无生产 D1 binding，页面使用既有入门示例；本轮不执行 reference/synthesis 写入测试。
 
-## 待完成
+## 合并与部署
 
-- 合并到 `main` 后重跑完整门禁。
-- 部署新的 Sites version 后，在认证生产站重复桌面拖拽、键盘、折叠/刷新、1280px/390px 无溢出和 console error 0 检查。
-- 生产验证通过后补充 source SHA、Sites version、deployment ID，并清理功能分支和 worktree。
+- 功能分支以 fast-forward 合并到 `main`，运行时代码 source SHA 为 `7db349a08d7dfe50e9fe06af7646bfb0ce3cc0fd`。
+- 合并后重新执行完整门禁：23 个测试文件 / 205 项测试、typecheck、lint、build 均通过。
+- `main` 已推送到 GitHub；后续仅追加部署与生产 QA 文档，不改变 Sites v14 的运行时代码。
+- Sites version 14：`appgprj_6a246b271d848191b88b60d1633030c7~appgver_7ee067837bf481919dd71d8d70271c24`。
+- Deployment：`appgdep_6a60dcd2f09481919dc981b8bba830ac`，状态 `succeeded`，生产地址为 `https://game-ref-forge.yeep-6613.chatgpt.site`。
+- 本轮没有依赖、API、D1、migration 或业务数据变更。
+
+## 生产浏览器验收
+
+在认证生产站执行只读布局回归；未创建、编辑、归档或删除 reference/synthesis。
+
+| 项目 | 结果 | 证据 |
+| --- | --- | --- |
+| 1600px 桌面轨道 | 通过 | 内置浏览器初始五轨为 `260px 8px 904px 8px 420px`；document/body/workspace 的 client/scroll 尺寸一致，workspace 为 `overflow: hidden` |
+| 左右 pointer drag | 通过 | Chrome 实际指针拖拽将左侧 `260 -> 320`、右侧 `420 -> 470`，轨道更新为 `320px 8px 901.33px 8px 470px` |
+| 刷新持久化 | 通过 | 刷新并等待页面稳定后仍为 `320/470` |
+| 折叠、恢复与选中态 | 通过 | 右侧折叠后宽度为 0，刷新后保持折叠；`Kenney UI Pack` 选中态保持，恢复按钮可重新展开 |
+| 键盘调整 | 通过 | 右侧在 `470` 时按 ArrowLeft 后立即变为 `454` |
+| 1280x900 | 通过 | document/body `clientWidth == scrollWidth == 1265`；分隔条和折叠控件隐藏，详情面板下移 |
+| 390x844 | 通过 | document/body `clientWidth == scrollWidth == 375`；单栏约 `374.67px`，工具栏约 `313.33px`，分隔条和折叠控件隐藏 |
+| Console errors | 通过 | Chrome 页面 console error 为 0 |
+| 数据完整性 | 通过 | 回归前后 reference 数量均为 2；未进行任何生产业务写入 |
+| 最终状态 | 通过 | 左右面板均已展开并双击复位到 `260/420`，页面无横向溢出 |
+
+## 生产工具证据边界
+
+- 390px 生产截图捕获在控制通道超时，但同一页面的 DOM 尺寸、控件可见性和横向溢出指标已读取成功；本地 390px 截图也已通过。因此这是截图通道证据缺口，不是布局失败。
+- Statsig 遥测请求在浏览器控制通道中间歇超时；页面 console error 仍为 0，逐项操作与状态读取均成功，未影响产品行为判断。
+- 内置浏览器生产会话曾重置，最终状态、真实 pointer drag、持久化和多视口指标由 Chrome 控制通道复核。
+
+## 最终结论
+
+Round 12 的可调三栏工作台已完成本地与生产验收。两项控制工具边界均有独立的 DOM、自动化测试或 Chrome 实际交互证据补足，不阻塞本轮收口。

@@ -4,7 +4,7 @@ Updated: 2026-07-22
 
 ## Current Stage
 
-`Round 12 implemented and locally verified; merge pending`
+`Round 12 complete; Round 13 design-ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -26,10 +26,13 @@ It helps collect source links from game asset and game design sites, normalize t
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
 - Round 11 is merged into `main`; final independent review is `Approved`, merged-main validation passed, GitHub and Sites runtime source are synchronized to `d7db34a`, Sites version 13 deployed successfully, and authenticated production UI CRUD plus cleanup passed on 2026-07-20.
-- Round 12 is implemented on `codex/round-12-resizable-workspace`: two accessible splitters in the reference view, one in the synthesis view, collapsible side panels, versioned local preferences, reduced outer scrolling, and unchanged tablet/mobile fallbacks.
+- Round 12 is merged into `main`: two accessible splitters in the reference view, one in the synthesis view, collapsible side panels, versioned local preferences, reduced outer scrolling, and unchanged tablet/mobile fallbacks.
 - Round 12 local automation passes with 23 test files / 205 tests, typecheck, lint, build, and diff check. Final independent review is `Approved` after fixing constrained-width keyboard and opposite-panel stability at 1400px.
 - Local browser QA passes pointer drag, min/max clamping, double-click reset, keyboard steps, collapse/recovery, view switching, refresh persistence, 1600/1400/1280/1024/390px layouts, horizontal/outer overflow checks, bilingual labels, and clean Chrome console logs.
-- No dependency, API, D1, migration, reference/synthesis model, or production business-data change is included in Round 12. Merge, Sites deployment, authenticated production layout QA, and branch/worktree cleanup remain pending.
+- Merged-main verification passed with 23 test files / 205 tests, typecheck, lint, and build. GitHub and Sites runtime source are synchronized to `7db349a08d7dfe50e9fe06af7646bfb0ce3cc0fd`.
+- Sites version 14 deployed successfully. Authenticated production QA passed real left/right pointer drag, reload persistence, keyboard adjustment, detail collapse/reload/recovery, 1280px and 390px no-overflow metrics, and console error 0; final preferences were reset to `260/420`.
+- No dependency, API, D1, migration, reference/synthesis model, or production business-data change is included in Round 12. Production reference count remained 2 throughout read-only QA.
+- The Round 12 worktree and local feature branch are removed; no remote Round 12 feature branch exists.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -230,4 +233,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Fast-forward the verified Round 12 branch into `main`, rerun merged-main gates, push GitHub, deploy a new private Sites version, and complete authenticated production layout regression before cleaning the branch and worktree.
+Begin Round 13 with design clarification and an approved implementation plan. Keep Sites version 14 stable until a new product scope is approved.
