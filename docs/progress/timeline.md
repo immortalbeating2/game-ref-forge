@@ -1484,3 +1484,7 @@
   - The uncaptured Blob download event remains a documented non-blocking browser-control evidence boundary.
   - Round 12 may begin only after design and implementation-plan approval.
   - Production closure evidence commit `104a55b` was pushed to GitHub `main`; Sites remains intentionally on runtime source `d7db34a` because the difference is documentation-only.
+
+## 2026-07-22
+
+- Round 12 可调整工作台布局方向获准进入 Superpowers 流程；完成设计规格初稿，范围限定为桌面三栏拖拽、键盘调整、折叠恢复、偏好持久化和滚动连续性优化，不修改业务数据、API 或 D1。当前等待书面规格审阅后进入实现计划。
