@@ -46,11 +46,19 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function clampLeftWidth(width: number) {
-  return clamp(width, WORKSPACE_LEFT_MIN, WORKSPACE_LEFT_MAX);
+  return clamp(
+    Number.isFinite(width) ? width : WORKSPACE_LEFT_DEFAULT,
+    WORKSPACE_LEFT_MIN,
+    WORKSPACE_LEFT_MAX,
+  );
 }
 
 function clampRightWidth(width: number) {
-  return clamp(width, WORKSPACE_RIGHT_MIN, WORKSPACE_RIGHT_MAX);
+  return clamp(
+    Number.isFinite(width) ? width : WORKSPACE_RIGHT_DEFAULT,
+    WORKSPACE_RIGHT_MIN,
+    WORKSPACE_RIGHT_MAX,
+  );
 }
 
 function normalizeWorkspaceLayout(value: WorkspaceLayoutPreferences): WorkspaceLayoutPreferences {

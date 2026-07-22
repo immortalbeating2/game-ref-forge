@@ -34,6 +34,22 @@ describe("workspace layout preferences", () => {
     });
     expect(parseWorkspaceLayoutPreferences(serializeWorkspaceLayoutPreferences(parsed))).toEqual(parsed);
   });
+
+  it("normalizes non-finite widths before serialization and preserves booleans", () => {
+    const serialized = serializeWorkspaceLayoutPreferences({
+      ...DEFAULT_WORKSPACE_LAYOUT,
+      leftWidth: Number.NaN,
+      rightWidth: Number.POSITIVE_INFINITY,
+      leftCollapsed: true,
+      rightCollapsed: true,
+    });
+
+    expect(parseWorkspaceLayoutPreferences(serialized)).toEqual({
+      ...DEFAULT_WORKSPACE_LAYOUT,
+      leftCollapsed: true,
+      rightCollapsed: true,
+    });
+  });
 });
 
 describe("workspace layout constraints", () => {
