@@ -4,7 +4,7 @@ Updated: 2026-07-22
 
 ## Current Stage
 
-`Round 11 complete; Round 12 design written, review pending`
+`Round 11 complete; Round 12 design approved, implementation plan written`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -26,7 +26,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Required progress trace docs exist under `docs/progress/`.
 - Initial documentation baseline commit exists: `538d43d`.
 - Round 11 is merged into `main`; final independent review is `Approved`, merged-main validation passed, GitHub and Sites runtime source are synchronized to `d7db34a`, Sites version 13 deployed successfully, and authenticated production UI CRUD plus cleanup passed on 2026-07-20.
-- Round 12 design is written for a resizable desktop workspace: two accessible splitters in the reference view, one in the synthesis view, collapsible side panels, versioned local preferences, reduced outer scrolling, and unchanged tablet/mobile fallbacks. Written-spec review is pending before implementation planning.
+- Round 12 design is approved and its implementation plan is written for a resizable desktop workspace: two accessible splitters in the reference view, one in the synthesis view, collapsible side panels, versioned local preferences, reduced outer scrolling, and unchanged tablet/mobile fallbacks. Isolated implementation is next.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
