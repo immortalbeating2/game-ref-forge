@@ -59,4 +59,12 @@ describe("workspace layout interaction source", () => {
     expect(css).toMatch(/@media \(max-width: 1280px\)[\s\S]*\.workspace-separator[\s\S]*display:\s*none/);
     expect(css).toMatch(/@media \(max-width: 820px\)[\s\S]*grid-template-columns:\s*1fr/);
   });
+
+  it("stacks toolbar tracks before they can overflow medium viewports", () => {
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+
+    expect(css).toMatch(
+      /@media \(max-width: 1280px\) \{(?:(?!@media)[\s\S])*?\.toolbar\s*\{[\s\S]*?grid-template-columns:\s*1fr;/,
+    );
+  });
 });

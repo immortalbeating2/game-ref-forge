@@ -1477,6 +1477,10 @@ label {
     overflow: visible;
   }
 
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
   .workspace-separator,
   .workspace-collapse-button {
     display: none;
