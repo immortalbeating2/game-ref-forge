@@ -11,6 +11,29 @@ describe("workspace layout interaction source", () => {
     expect(source).toContain('window.addEventListener("blur"');
   });
 
+  it("does not mirror workspace preferences into an event ref", () => {
+    const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
+    expect(source).not.toContain("preferencesRef");
+  });
+
+  it("starts pointer resizing from the current resolved panel track", () => {
+    const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
+    expect(source).toMatch(
+      /const beginDrag[\s\S]*?startWidth\s*=\s*side === "left"\s*\?\s*metrics\.leftWidth\s*:\s*metrics\.rightWidth/,
+    );
+  });
+
+  it("derives keyboard resizing from the functional preference update", () => {
+    const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
+    expect(source).toMatch(/const handleKeyboard[\s\S]*?setPreferences\(\(current\) => \{/);
+    expect(source).toMatch(
+      /const handleKeyboard[\s\S]*?side === "left"\s*\?\s*current\.leftWidth\s*:\s*current\.rightWidth/,
+    );
+    expect(source).toMatch(
+      /const handleKeyboard[\s\S]*?return resizeWorkspacePanel\(current, side, targetWidth, containerWidth, view\)/,
+    );
+  });
+
   it("renders an accessible separator and a real recovery button", () => {
     const source = readFileSync(new URL("../app/workspace/workspace-separator.tsx", import.meta.url), "utf8");
     expect(source).toContain('role="separator"');

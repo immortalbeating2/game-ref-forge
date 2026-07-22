@@ -66,7 +66,6 @@ function contentWidth(element: HTMLElement) {
 
 export function useWorkspaceLayout(view: WorkspaceViewMode) {
   const workspaceRef = useRef<HTMLElement | null>(null);
-  const preferencesRef = useRef<WorkspaceLayoutPreferences>(DEFAULT_WORKSPACE_LAYOUT);
   const activeDragRef = useRef<ActiveDrag | null>(null);
   const [preferences, setPreferences] = useState<WorkspaceLayoutPreferences>(DEFAULT_WORKSPACE_LAYOUT);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -81,10 +80,6 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
     activeDragRef.current = null;
     setDraggingSide(null);
   }, []);
-
-  useEffect(() => {
-    preferencesRef.current = preferences;
-  }, [preferences]);
 
   useEffect(() => {
     let cancelled = false;
@@ -155,12 +150,17 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
     return () => window.removeEventListener("blur", endDrag);
   }, [endDrag]);
 
+  const metrics = useMemo(
+    () => resolveWorkspaceLayout(preferences, containerWidth, view),
+    [containerWidth, preferences, view],
+  );
+
   const resizePanel = useCallback((side: WorkspacePanelSide, width: number) => {
     setPreferences((current) => resizeWorkspacePanel(current, side, width, containerWidth, view));
   }, [containerWidth, view]);
 
   const beginDrag = useCallback((side: WorkspacePanelSide, event: PointerEvent<HTMLElement>) => {
-    const startWidth = side === "left" ? preferencesRef.current.leftWidth : preferencesRef.current.rightWidth;
+    const startWidth = side === "left" ? metrics.leftWidth : metrics.rightWidth;
     event.currentTarget.setPointerCapture(event.pointerId);
     activeDragRef.current = {
       element: event.currentTarget,
@@ -170,7 +170,7 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
       startX: event.clientX,
     };
     setDraggingSide(side);
-  }, []);
+  }, [metrics.leftWidth, metrics.rightWidth]);
 
   const moveDrag = useCallback((event: PointerEvent<HTMLElement>) => {
     const activeDrag = activeDragRef.current;
@@ -188,23 +188,34 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
   }, [resizePanel]);
 
   const handleKeyboard = useCallback((side: WorkspacePanelSide, event: KeyboardEvent<HTMLElement>) => {
-    const bounds = panelBounds[side];
-    const currentWidth = side === "left" ? preferencesRef.current.leftWidth : preferencesRef.current.rightWidth;
-    const targetWidth = getKeyboardWorkspaceWidth(
-      currentWidth,
-      event.key,
-      event.shiftKey,
-      bounds.min,
-      bounds.max,
-      bounds.defaultWidth,
-    );
-    if (targetWidth === null) {
+    if (
+      event.key !== "ArrowLeft" &&
+      event.key !== "ArrowRight" &&
+      event.key !== "Home" &&
+      event.key !== "End"
+    ) {
       return;
     }
 
+    const bounds = panelBounds[side];
     event.preventDefault();
-    resizePanel(side, targetWidth);
-  }, [resizePanel]);
+    setPreferences((current) => {
+      const currentWidth = side === "left" ? current.leftWidth : current.rightWidth;
+      const targetWidth = getKeyboardWorkspaceWidth(
+        currentWidth,
+        event.key,
+        event.shiftKey,
+        bounds.min,
+        bounds.max,
+        bounds.defaultWidth,
+      );
+      if (targetWidth === null) {
+        return current;
+      }
+
+      return resizeWorkspacePanel(current, side, targetWidth, containerWidth, view);
+    });
+  }, [containerWidth, view]);
 
   const separatorHandlers = useMemo<Record<WorkspacePanelSide, WorkspaceSeparatorHandlers>>(() => ({
     left: {
@@ -239,10 +250,6 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
       : { ...current, rightCollapsed: false });
   }, []);
 
-  const metrics = useMemo(
-    () => resolveWorkspaceLayout(preferences, containerWidth, view),
-    [containerWidth, preferences, view],
-  );
   const workspaceStyle = useMemo<WorkspaceStyle>(() => ({
     "--workspace-left-handle-width": `${metrics.leftHandleWidth}px`,
     "--workspace-left-width": `${metrics.leftWidth}px`,
