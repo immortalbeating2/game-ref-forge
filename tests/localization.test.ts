@@ -143,6 +143,13 @@ describe("uiCopy", () => {
     expect(uiCopy().completeQualityIssue).toBe("补全");
     expect(uiCopy().qualityTargetMissing).toBe("未找到对应编辑字段；草稿已保留。");
     expect(uiCopy().qualityComplete).toBe("资料完整");
+    expect(uiCopy().resizeFiltersPanel).toBe("调整筛选面板宽度");
+    expect(uiCopy().resizeDetailsPanel).toBe("调整详情面板宽度");
+    expect(uiCopy().collapseFiltersPanel).toBe("收起筛选面板");
+    expect(uiCopy().expandFiltersPanel).toBe("展开筛选面板");
+    expect(uiCopy().collapseDetailsPanel).toBe("收起详情面板");
+    expect(uiCopy().expandDetailsPanel).toBe("展开详情面板");
+    expect(uiCopy().resetPanelWidth).toBe("双击恢复默认宽度");
   });
 
   it("returns English interface copy when requested", () => {
@@ -175,5 +182,12 @@ describe("uiCopy", () => {
       "The matching edit field was not found; your draft is preserved.",
     );
     expect(uiCopy("en").qualityComplete).toBe("Complete");
+    expect(uiCopy("en").resizeFiltersPanel).toBe("Resize filters panel");
+    expect(uiCopy("en").resizeDetailsPanel).toBe("Resize details panel");
+    expect(uiCopy("en").collapseFiltersPanel).toBe("Collapse filters panel");
+    expect(uiCopy("en").expandFiltersPanel).toBe("Expand filters panel");
+    expect(uiCopy("en").collapseDetailsPanel).toBe("Collapse details panel");
+    expect(uiCopy("en").expandDetailsPanel).toBe("Expand details panel");
+    expect(uiCopy("en").resetPanelWidth).toBe("Double-click to reset width");
   });
 });
