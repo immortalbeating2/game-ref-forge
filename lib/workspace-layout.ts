@@ -176,6 +176,13 @@ export function resizeWorkspacePanel(
   }
 
   const layout = resolveWorkspaceLayout(normalized, containerWidth, view);
+  const currentLayout = view === "references"
+    ? {
+        ...normalized,
+        ...(!normalized.leftCollapsed ? { leftWidth: layout.leftWidth } : {}),
+        ...(!normalized.rightCollapsed ? { rightWidth: layout.rightWidth } : {}),
+      }
+    : normalized;
   const oppositeWidth = side === "left" ? layout.rightWidth : layout.leftWidth;
   const handleWidth = layout.leftHandleWidth + layout.rightHandleWidth;
   const dynamicMax = Math.max(
@@ -191,10 +198,10 @@ export function resizeWorkspacePanel(
   );
   const width = Number.isFinite(requestedWidth)
     ? clamp(requestedWidth, side === "left" ? WORKSPACE_LEFT_MIN : WORKSPACE_RIGHT_MIN, maxWidth)
-    : side === "left" ? normalized.leftWidth : normalized.rightWidth;
+    : side === "left" ? layout.leftWidth : layout.rightWidth;
 
   return {
-    ...normalized,
+    ...currentLayout,
     ...(side === "left" ? { leftWidth: width } : { rightWidth: width }),
   };
 }

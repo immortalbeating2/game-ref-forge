@@ -200,7 +200,8 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
     const bounds = panelBounds[side];
     event.preventDefault();
     setPreferences((current) => {
-      const currentWidth = side === "left" ? current.leftWidth : current.rightWidth;
+      const currentMetrics = resolveWorkspaceLayout(current, containerWidth, view);
+      const currentWidth = side === "left" ? currentMetrics.leftWidth : currentMetrics.rightWidth;
       const targetWidth = getKeyboardWorkspaceWidth(
         currentWidth,
         event.key,

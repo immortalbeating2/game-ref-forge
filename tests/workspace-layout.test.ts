@@ -89,6 +89,76 @@ describe("workspace layout constraints", () => {
     expect(resizeWorkspacePanel(DEFAULT_WORKSPACE_LAYOUT, "left", 900, 1440, "references").leftWidth).toBe(360);
     expect(resizeWorkspacePanel(DEFAULT_WORKSPACE_LAYOUT, "right", 900, 1281, "references").rightWidth).toBe(445);
   });
+
+  it("moves the constrained right track on the first keyboard step", () => {
+    const preferences = {
+      ...DEFAULT_WORKSPACE_LAYOUT,
+      leftWidth: 360,
+      rightWidth: 640,
+    };
+    const current = resolveWorkspaceLayout(preferences, 1400, "references");
+    const target = getKeyboardWorkspaceWidth(current.rightWidth, "ArrowLeft", false, 340, 640, 420);
+
+    expect(current.rightWidth).toBe(464);
+    expect(target).toBe(448);
+    expect(resolveWorkspaceLayout(
+      resizeWorkspacePanel(preferences, "right", target ?? current.rightWidth, 1400, "references"),
+      1400,
+      "references",
+    )).toMatchObject({
+      leftWidth: 360,
+      rightWidth: 448,
+      centerWidth: 576,
+    });
+  });
+
+  it("persists the opposite visible track while resizing one reference panel", () => {
+    const preferences = {
+      ...DEFAULT_WORKSPACE_LAYOUT,
+      leftWidth: 360,
+      rightWidth: 640,
+    };
+    const resized = resizeWorkspacePanel(preferences, "left", 220, 1400, "references");
+
+    expect(resized).toMatchObject({
+      leftWidth: 220,
+      rightWidth: 464,
+    });
+    expect(resolveWorkspaceLayout(resized, 1400, "references")).toMatchObject({
+      leftWidth: 220,
+      rightWidth: 464,
+    });
+  });
+
+  it("uses the opposite visible track to cap the requested reference panel", () => {
+    const preferences = {
+      ...DEFAULT_WORKSPACE_LAYOUT,
+      leftWidth: 220,
+      rightWidth: 640,
+    };
+    const resized = resizeWorkspacePanel(preferences, "left", 900, 1400, "references");
+
+    expect(resolveWorkspaceLayout(preferences, 1400, "references")).toMatchObject({
+      leftWidth: 220,
+      rightWidth: 604,
+    });
+    expect(resized).toMatchObject({
+      leftWidth: 220,
+      rightWidth: 604,
+    });
+  });
+
+  it("preserves the stored right preference while resizing syntheses", () => {
+    const preferences = {
+      ...DEFAULT_WORKSPACE_LAYOUT,
+      rightWidth: 640,
+    };
+
+    expect(resizeWorkspacePanel(preferences, "left", 300, 1400, "syntheses")).toMatchObject({
+      leftWidth: 300,
+      rightWidth: 640,
+    });
+  });
 });
 
 describe("workspace layout keyboard values", () => {

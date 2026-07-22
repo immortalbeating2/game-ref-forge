@@ -27,7 +27,7 @@ describe("workspace layout interaction source", () => {
     const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
     expect(source).toMatch(/const handleKeyboard[\s\S]*?setPreferences\(\(current\) => \{/);
     expect(source).toMatch(
-      /const handleKeyboard[\s\S]*?side === "left"\s*\?\s*current\.leftWidth\s*:\s*current\.rightWidth/,
+      /setPreferences\(\(current\) => \{[\s\S]*?resolveWorkspaceLayout\(current, containerWidth, view\)[\s\S]*?side === "left"\s*\?\s*currentMetrics\.leftWidth\s*:\s*currentMetrics\.rightWidth/,
     );
     expect(source).toMatch(
       /const handleKeyboard[\s\S]*?return resizeWorkspacePanel\(current, side, targetWidth, containerWidth, view\)/,
