@@ -31,7 +31,7 @@ export type SynthesisRefreshResult =
 
 type SynthesisRow = typeof syntheses.$inferSelect;
 
-function synthesisRowToRecord(row: SynthesisRow): SynthesisRecord {
+export function synthesisRowToRecord(row: SynthesisRow): SynthesisRecord {
   return {
     id: row.id,
     title: row.title,
@@ -50,7 +50,7 @@ function synthesisRowToRecord(row: SynthesisRow): SynthesisRecord {
   };
 }
 
-function recordToSynthesisRow(record: SynthesisRecord): typeof syntheses.$inferInsert {
+export function synthesisRecordToRow(record: SynthesisRecord): typeof syntheses.$inferInsert {
   return {
     id: record.id,
     title: record.title,
@@ -70,7 +70,7 @@ function recordToSynthesisRow(record: SynthesisRecord): typeof syntheses.$inferI
 }
 
 function recordToSynthesisUpdate(record: SynthesisRecord) {
-  const row = recordToSynthesisRow(record);
+  const row = synthesisRecordToRow(record);
   return {
     title: row.title,
     targetAsset: row.targetAsset,
@@ -192,7 +192,7 @@ export async function createSynthesis(input: CreateSynthesisInput): Promise<Synt
   const db = getDb();
   try {
     await db.batch([
-      db.insert(syntheses).values(recordToSynthesisRow(record)),
+      db.insert(syntheses).values(synthesisRecordToRow(record)),
       db.insert(synthesisReferences).values(relationRows),
     ]);
   } catch (error) {

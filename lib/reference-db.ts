@@ -51,7 +51,7 @@ export function referenceRowToRecord(row: ReferenceRow): ReferenceRecord {
   };
 }
 
-function recordToRow(record: ReferenceRecord): typeof references.$inferInsert {
+export function referenceRecordToRow(record: ReferenceRecord): typeof references.$inferInsert {
   return {
     id: record.id,
     title: record.title,
@@ -105,7 +105,7 @@ export async function createReference(input: ReferenceInput) {
   const record = createReferenceRecord(input);
   const [row] = await getDb()
     .insert(references)
-    .values(recordToRow(record))
+    .values(referenceRecordToRow(record))
     .returning();
 
   return { ok: true as const, reference: referenceRowToRecord(row) };
@@ -136,7 +136,7 @@ export async function updateReference(id: string, input: ReferenceInput) {
 
   const [row] = await getDb()
     .update(references)
-    .set(recordToRow(next))
+    .set(referenceRecordToRow(next))
     .where(eq(references.id, id))
     .returning();
 
