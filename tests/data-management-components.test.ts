@@ -45,6 +45,6 @@ describe("data management dialog source contracts", () => {
     expect(source).toContain("handleDiscardDialogKeyDown");
     expect(source).toContain("discardDialogRef");
     expect(source).toContain("event.stopPropagation()");
-    expect(source).toContain("discardTrigger?.focus({ preventScroll: true })");
+    expect(source).toContain("triggerIsFocusable");
   });
 });

@@ -114,13 +114,28 @@ describe("data management state", () => {
   it("keeps the preview and file after a failed restore so it can be retried", () => {
     const state = dataManagementReducer(
       dataManagementReducer(previewReadyState(), { type: "restore_started" }),
-      { type: "restore_failed", errorCode: "preview_stale" },
+      { type: "restore_failed", errorCode: "restore_failed" },
     );
 
     expect(state.status).toBe("error");
     expect(state.selectedFile).toEqual({ name: "library.json", size: 1200 });
     expect(state.preview).toEqual(preview);
     expect(canSubmitRestore(state)).toBe(true);
+  });
+
+  it("invalidates stale preview digests but keeps the parsed backup available for a fresh preview", () => {
+    const state = dataManagementReducer(
+      {
+        ...previewReadyState(),
+        overwriteConfirmed: true,
+      },
+      { type: "restore_failed", errorCode: "preview_stale" },
+    );
+
+    expect(state.parsedBackup).not.toBeNull();
+    expect(state.preview).toBeNull();
+    expect(state.overwriteConfirmed).toBe(false);
+    expect(canSubmitRestore(state)).toBe(false);
   });
 
   it("keeps a bounded preview issue list separate from its safe error code", () => {

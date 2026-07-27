@@ -3,12 +3,13 @@ import type { BackupPreview } from "../../lib/backup-db";
 
 export type DataManagementStatus =
   | "idle"
-  | "loading_backup"
   | "previewing"
   | "ready"
   | "restoring"
   | "success"
   | "error";
+
+export type DataManagementExportStatus = "idle" | "exporting";
 
 export type DataManagementIssue = {
   path: string;
@@ -29,6 +30,8 @@ export type DataManagementState = {
   overwriteConfirmed: boolean;
   status: DataManagementStatus;
   errorCode: string | null;
+  exportStatus: DataManagementExportStatus;
+  exportErrorCode: string | null;
   issues: DataManagementIssue[];
   preferenceResult: "not_requested" | "applied" | "failed";
 };
@@ -45,9 +48,9 @@ export type DataManagementAction =
   | { type: "preview_failed"; errorCode: string; issues?: DataManagementIssue[] }
   | { type: "overwrite_confirmation_changed"; value: boolean }
   | { type: "restore_preferences_changed"; value: boolean }
-  | { type: "backup_started" }
-  | { type: "backup_finished" }
-  | { type: "backup_failed"; errorCode: string }
+  | { type: "export_started" }
+  | { type: "export_finished" }
+  | { type: "export_failed"; errorCode: string }
   | { type: "restore_started" }
   | { type: "restore_succeeded"; preferenceResult: DataManagementState["preferenceResult"] }
   | { type: "restore_failed"; errorCode: string };
@@ -63,6 +66,8 @@ export function createDataManagementState(): DataManagementState {
     overwriteConfirmed: false,
     status: "idle",
     errorCode: null,
+    exportStatus: "idle",
+    exportErrorCode: null,
     issues: [],
     preferenceResult: "not_requested",
   };
@@ -137,17 +142,27 @@ export function dataManagementReducer(
       return { ...state, overwriteConfirmed: action.value };
     case "restore_preferences_changed":
       return { ...state, restorePreferences: action.value };
-    case "backup_started":
-      return { ...state, status: "loading_backup", errorCode: null };
-    case "backup_finished":
-      return { ...state, status: "idle", errorCode: null };
-    case "backup_failed":
-      return { ...state, status: "error", errorCode: action.errorCode };
+    case "export_started":
+      return { ...state, exportStatus: "exporting", exportErrorCode: null };
+    case "export_finished":
+      return { ...state, exportStatus: "idle", exportErrorCode: null };
+    case "export_failed":
+      return { ...state, exportStatus: "idle", exportErrorCode: action.errorCode };
     case "restore_started":
       return canSubmitRestore(state) ? { ...state, status: "restoring", errorCode: null } : state;
     case "restore_succeeded":
       return { ...state, status: "success", errorCode: null, preferenceResult: action.preferenceResult };
     case "restore_failed":
+      if (action.errorCode === "preview_stale") {
+        return {
+          ...state,
+          preview: null,
+          overwriteConfirmed: false,
+          status: "error",
+          errorCode: action.errorCode,
+          issues: [],
+        };
+      }
       return { ...state, status: "error", errorCode: action.errorCode };
   }
 }

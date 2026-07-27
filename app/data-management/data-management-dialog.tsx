@@ -4,6 +4,7 @@ import { DatabaseBackup, Download, Upload, X } from "lucide-react";
 import {
   type ChangeEvent,
   type KeyboardEvent,
+  useCallback,
   useEffect,
   useId,
   useReducer,
@@ -48,12 +49,38 @@ export type DataManagementDialogProps = {
 
 type BackupApiError = { code?: unknown };
 
+const BACKUP_ERROR_CODES = new Set([
+  "invalid_json",
+  "unsupported_format",
+  "unsupported_version",
+  "backup_too_large",
+  "validation_failed",
+  "backup_changed",
+  "preview_stale",
+  "overwrite_confirmation_required",
+  "restore_failed",
+  "database_unavailable",
+  "backup_operation_failed",
+]);
+
 function readErrorCode(value: unknown, fallback: string) {
   if (value && typeof value === "object" && "code" in value) {
     const code = (value as BackupApiError).code;
     if (typeof code === "string") return code;
   }
   return fallback;
+}
+
+function errorCodeFromUnknown(error: unknown, fallback: string) {
+  return error instanceof Error && BACKUP_ERROR_CODES.has(error.message) ? error.message : fallback;
+}
+
+async function readResponseJson(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
 function readIssues(value: unknown): DataManagementIssue[] {
@@ -95,7 +122,6 @@ function statusCopy(
 ) {
   const copy = uiCopy(language);
   if (errorCode) return backupErrorMessage(errorCode, language);
-  if (status === "loading_backup") return copy.exportingBackup;
   if (status === "previewing") return copy.previewingBackup;
   if (status === "restoring") return copy.restoringBackup;
   if (status === "success") {
@@ -122,9 +148,18 @@ export function DataManagementDialog({
   const [confirmDiscardDraft, setConfirmDiscardDraft] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const statusRef = useRef<HTMLParagraphElement>(null);
   const discardDialogRef = useRef<HTMLDivElement>(null);
   const discardRestoreRef = useRef<HTMLButtonElement>(null);
+  const backupTabRef = useRef<HTMLButtonElement>(null);
+  const restoreTabRef = useRef<HTMLButtonElement>(null);
   const restoreGuard = useRef(false);
+  const exportGuard = useRef(false);
+  const fileReadToken = useRef(0);
+  const previewToken = useRef(0);
+  const exportToken = useRef(0);
+  const restoreToken = useRef(0);
+  const previewAbort = useRef<AbortController | null>(null);
   const titleId = useId();
   const statusId = useId();
   const backupTabId = useId();
@@ -134,9 +169,25 @@ export function DataManagementDialog({
   const isRestoring = state.status === "restoring";
   const isBusy = isRestoring || businessMutationBusy;
   const activeDialogLayer = getDataManagementDialogLayer(confirmDiscardDraft);
-  const message = statusCopy(state.status, state.errorCode, state.preferenceResult, language);
+  const message = state.exportErrorCode
+    ? backupErrorMessage(state.exportErrorCode, language)
+    : state.exportStatus === "exporting"
+      ? copy.exportingBackup
+      : statusCopy(state.status, state.errorCode, state.preferenceResult, language);
+
+  const invalidateAsyncWork = useCallback(() => {
+    fileReadToken.current += 1;
+    previewToken.current += 1;
+    exportToken.current += 1;
+    restoreToken.current += 1;
+    previewAbort.current?.abort();
+    previewAbort.current = null;
+    restoreGuard.current = false;
+    exportGuard.current = false;
+  }, []);
 
   useEffect(() => {
+    invalidateAsyncWork();
     if (!open) {
       dispatch({ type: "close" });
       return;
@@ -144,31 +195,65 @@ export function DataManagementDialog({
 
     dispatch({ type: "open" });
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const frame = window.requestAnimationFrame(() => titleRef.current?.focus());
+    titleRef.current?.focus({ preventScroll: true });
     return () => {
-      window.cancelAnimationFrame(frame);
       trigger?.focus({ preventScroll: true });
     };
-  }, [open]);
+  }, [open, invalidateAsyncWork]);
+
+  useEffect(() => () => invalidateAsyncWork(), [invalidateAsyncWork]);
+
+  useEffect(() => {
+    if (state.status !== "success") return;
+    statusRef.current?.focus({ preventScroll: true });
+  }, [state.status]);
 
   useEffect(() => {
     if (!confirmDiscardDraft) return;
     const discardTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const fallbackTitle = titleRef.current;
-    const frame = window.requestAnimationFrame(() => discardRestoreRef.current?.focus());
+    const fallbackStatus = statusRef.current;
+    discardRestoreRef.current?.focus({ preventScroll: true });
     return () => {
-      window.cancelAnimationFrame(frame);
       window.requestAnimationFrame(() => {
-        if (discardTrigger?.isConnected) discardTrigger?.focus({ preventScroll: true });
-        else fallbackTitle?.focus({ preventScroll: true });
+        const triggerIsFocusable = discardTrigger?.isConnected
+          && (!(discardTrigger instanceof HTMLButtonElement) || !discardTrigger.disabled);
+        if (triggerIsFocusable) {
+          discardTrigger.focus({ preventScroll: true });
+        } else if (fallbackStatus) {
+          fallbackStatus.focus({ preventScroll: true });
+        } else {
+          fallbackTitle?.focus({ preventScroll: true });
+        }
       });
     };
   }, [confirmDiscardDraft]);
 
   function handleClose() {
-    if (isRestoring) return;
+    if (isBusy) return;
+    invalidateAsyncWork();
     setConfirmDiscardDraft(false);
     onClose();
+  }
+
+  function selectTab(tab: "backup" | "restore") {
+    dispatch({ type: "tab_changed", tab });
+    (tab === "backup" ? backupTabRef.current : restoreTabRef.current)?.focus();
+  }
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    let nextTab: "backup" | "restore" | null = null;
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      nextTab = state.tab === "backup" ? "restore" : "backup";
+    } else if (event.key === "Home") {
+      nextTab = "backup";
+    } else if (event.key === "End") {
+      nextTab = "restore";
+    }
+    if (nextTab) {
+      event.preventDefault();
+      selectTab(nextTab);
+    }
   }
 
   function handleDialogKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -179,7 +264,7 @@ export function DataManagementDialog({
     const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
     const action = getDialogKeyboardAction(event.key, event.shiftKey, activeIndex, focusable.length);
     if (action?.kind === "cancel") {
-      if (!isRestoring) {
+      if (!isBusy) {
         event.preventDefault();
         handleClose();
       }
@@ -199,7 +284,7 @@ export function DataManagementDialog({
     const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
     const action = getDialogKeyboardAction(event.key, event.shiftKey, activeIndex, focusable.length);
     if (action?.kind === "cancel") {
-      if (!isRestoring) {
+      if (!isBusy) {
         event.preventDefault();
         setConfirmDiscardDraft(false);
       }
@@ -211,14 +296,16 @@ export function DataManagementDialog({
   }
 
   async function handleBackup() {
-    if (isBusy) return;
-    dispatch({ type: "backup_started" });
+    if (businessMutationBusy || isRestoring || exportGuard.current) return;
+    const token = ++exportToken.current;
+    exportGuard.current = true;
+    dispatch({ type: "export_started" });
     try {
       const response = await fetch("/api/backup");
-      const payload: unknown = await response.json();
-      if (!response.ok) throw new Error(readErrorCode(payload, "database_unavailable"));
+      const payload = await readResponseJson(response);
+      if (!response.ok) throw new Error(readErrorCode(payload, "backup_operation_failed"));
       const parsed = parseRefForgeBackup(payload);
-      if (!parsed.ok) throw new Error(parsed.issues[0]?.code ?? "validation_failed");
+      if (!parsed.ok) throw new Error("backup_operation_failed");
       const backup = withBackupPreferences(
         parsed.backup,
         state.includePreferences ? devicePreferences : null,
@@ -234,36 +321,49 @@ export function DataManagementDialog({
       } finally {
         URL.revokeObjectURL(objectUrl);
       }
-      dispatch({ type: "backup_finished" });
+      if (exportToken.current === token) dispatch({ type: "export_finished" });
     } catch (error) {
-      dispatch({ type: "backup_failed", errorCode: error instanceof Error ? error.message : "database_unavailable" });
+      if (exportToken.current === token) {
+        dispatch({ type: "export_failed", errorCode: errorCodeFromUnknown(error, "backup_operation_failed") });
+      }
+    } finally {
+      if (exportToken.current === token) exportGuard.current = false;
     }
   }
 
-  async function previewBackupFile(file: File, backup: RefForgeBackupV1) {
-    dispatch({ type: "file_selected", file: { name: file.name, size: file.size }, backup });
+  async function previewBackupFile(file: NonNullable<typeof state.selectedFile>, backup: RefForgeBackupV1) {
+    const token = ++previewToken.current;
+    previewAbort.current?.abort();
+    const controller = new AbortController();
+    previewAbort.current = controller;
+    dispatch({ type: "file_selected", file, backup });
     dispatch({ type: "preview_started" });
     try {
       const response = await fetch("/api/backup/preview", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ backup }),
+        signal: controller.signal,
       });
-      const payload: unknown = await response.json();
+      const payload = await readResponseJson(response);
+      if (previewToken.current !== token) return;
       if (!response.ok) {
         dispatch({
           type: "preview_failed",
-          errorCode: readErrorCode(payload, "validation_failed"),
+          errorCode: readErrorCode(payload, "backup_operation_failed"),
           issues: readIssues(payload),
         });
         return;
       }
       if (!payload || typeof payload !== "object" || !("preview" in payload) || !isBackupPreview(payload.preview)) {
-        throw new Error("validation_failed");
+        throw new Error("backup_operation_failed");
       }
       dispatch({ type: "preview_succeeded", preview: payload.preview });
     } catch (error) {
-      dispatch({ type: "preview_failed", errorCode: error instanceof Error ? error.message : "validation_failed" });
+      if (previewToken.current !== token || controller.signal.aborted) return;
+      dispatch({ type: "preview_failed", errorCode: errorCodeFromUnknown(error, "backup_operation_failed") });
+    } finally {
+      if (previewToken.current === token) previewAbort.current = null;
     }
   }
 
@@ -271,13 +371,18 @@ export function DataManagementDialog({
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file || isRestoring) return;
+    const token = ++fileReadToken.current;
+    previewToken.current += 1;
+    previewAbort.current?.abort();
+    previewAbort.current = null;
     dispatch({ type: "file_selection_started" });
     if (file.size > MAX_BACKUP_BYTES) {
-      dispatch({ type: "preview_failed", errorCode: "backup_too_large" });
+      if (fileReadToken.current === token) dispatch({ type: "preview_failed", errorCode: "backup_too_large" });
       return;
     }
     try {
       const parsed = parseRefForgeBackup(JSON.parse(await file.text()));
+      if (fileReadToken.current !== token) return;
       if (!parsed.ok) {
         dispatch({
           type: "preview_failed",
@@ -286,46 +391,61 @@ export function DataManagementDialog({
         });
         return;
       }
-      await previewBackupFile(file, parsed.backup);
-    } catch {
-      dispatch({ type: "preview_failed", errorCode: "invalid_json" });
+      await previewBackupFile({ name: file.name, size: file.size }, parsed.backup);
+    } catch (error) {
+      if (fileReadToken.current === token) {
+        dispatch({ type: "preview_failed", errorCode: errorCodeFromUnknown(error, "invalid_json") });
+      }
     }
   }
 
   async function submitRestore() {
-    if (!state.parsedBackup || !state.preview || !tryAcquireOperationGuard(restoreGuard)) return;
+    if (businessMutationBusy || isBusy || !canSubmitRestore(state) || !state.parsedBackup || !state.preview || !tryAcquireOperationGuard(restoreGuard)) return;
+    const token = ++restoreToken.current;
+    const backup = state.parsedBackup;
+    const preview = state.preview;
+    const file = state.selectedFile;
     dispatch({ type: "restore_started" });
     try {
       const response = await fetch("/api/backup/restore", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          backup: state.parsedBackup,
-          backup_digest: state.preview.backup_digest,
-          state_digest: state.preview.state_digest,
+          backup,
+          backup_digest: preview.backup_digest,
+          state_digest: preview.state_digest,
           confirm_overwrite: state.overwriteConfirmed,
         }),
       });
-      const payload: unknown = await response.json();
-      if (!response.ok) throw new Error(readErrorCode(payload, "restore_failed"));
-      const preferences = state.restorePreferences ? state.parsedBackup.preferences : null;
+      const payload = await readResponseJson(response);
+      if (restoreToken.current !== token) return;
+      if (!response.ok) {
+        const errorCode = readErrorCode(payload, "backup_operation_failed");
+        dispatch({ type: "restore_failed", errorCode });
+        if (errorCode === "preview_stale" && file) void previewBackupFile(file, backup);
+        return;
+      }
+      const preferences = state.restorePreferences ? backup.preferences : null;
       let preferenceResult: "applied" | "failed" | "not_requested" = "not_requested";
       try {
         preferenceResult = await onRestoreCommitted(preferences);
       } catch {
         preferenceResult = "failed";
       }
+      if (restoreToken.current !== token) return;
       dispatch({ type: "restore_succeeded", preferenceResult });
       setConfirmDiscardDraft(false);
     } catch (error) {
-      dispatch({ type: "restore_failed", errorCode: error instanceof Error ? error.message : "restore_failed" });
+      if (restoreToken.current === token) {
+        dispatch({ type: "restore_failed", errorCode: errorCodeFromUnknown(error, "backup_operation_failed") });
+      }
     } finally {
-      restoreGuard.current = false;
+      if (restoreToken.current === token) restoreGuard.current = false;
     }
   }
 
   function handleRestoreRequest() {
-    if (!canSubmitRestore(state) || isBusy) return;
+    if (businessMutationBusy || isBusy || !canSubmitRestore(state)) return;
     if (hasUnsavedDraft) {
       setConfirmDiscardDraft(true);
       return;
@@ -361,15 +481,15 @@ export function DataManagementDialog({
         </header>
 
         <div className="data-management-tabs" role="tablist" aria-label={copy.dataManagement}>
-          <button id={backupTabId} type="button" role="tab" aria-selected={state.tab === "backup"} aria-controls={backupPanelId} onClick={() => dispatch({ type: "tab_changed", tab: "backup" })} disabled={isRestoring}>
+          <button ref={backupTabRef} id={backupTabId} type="button" role="tab" aria-selected={state.tab === "backup"} aria-controls={backupPanelId} tabIndex={state.tab === "backup" ? 0 : -1} onClick={() => selectTab("backup")} onKeyDown={handleTabKeyDown} disabled={isRestoring}>
             <Download aria-hidden="true" size={16} /> {copy.backupTab}
           </button>
-          <button id={restoreTabId} type="button" role="tab" aria-selected={state.tab === "restore"} aria-controls={restorePanelId} onClick={() => dispatch({ type: "tab_changed", tab: "restore" })} disabled={isRestoring}>
+          <button ref={restoreTabRef} id={restoreTabId} type="button" role="tab" aria-selected={state.tab === "restore"} aria-controls={restorePanelId} tabIndex={state.tab === "restore" ? 0 : -1} onClick={() => selectTab("restore")} onKeyDown={handleTabKeyDown} disabled={isRestoring}>
             <Upload aria-hidden="true" size={16} /> {copy.restoreTab}
           </button>
         </div>
 
-        <p id={statusId} className={`data-management-status${state.status === "error" ? " data-management-status--error" : ""}`} aria-live="polite">
+        <p ref={statusRef} id={statusId} tabIndex={-1} className={`data-management-status${state.status === "error" || state.exportErrorCode ? " data-management-status--error" : ""}`} aria-live="polite">
           {message}
         </p>
 
@@ -388,8 +508,8 @@ export function DataManagementDialog({
             </label>
             <p className="data-management-note">{copy.transparentJsonWarning}</p>
             <div className="data-management-actions">
-              <button type="button" onClick={() => void handleBackup()} disabled={isBusy}>
-                <Download aria-hidden="true" size={16} /> {state.status === "loading_backup" ? copy.exportingBackup : copy.fullBackup}
+              <button type="button" onClick={() => void handleBackup()} disabled={businessMutationBusy || isRestoring || state.exportStatus === "exporting"}>
+                <Download aria-hidden="true" size={16} /> {state.exportStatus === "exporting" ? copy.exportingBackup : copy.fullBackup}
               </button>
             </div>
           </section>
@@ -443,8 +563,8 @@ export function DataManagementDialog({
             <h3 id={`${titleId}-discard`}>{copy.unsavedDraftRestoreTitle}</h3>
             <p>{copy.unsavedDraftRestoreBody}</p>
             <div>
-              <button type="button" className="ghost-button" onClick={() => setConfirmDiscardDraft(false)}>{copy.cancel}</button>
-              <button ref={discardRestoreRef} type="button" className="danger-button" onClick={() => void submitRestore()}>{copy.discardDraftAndRestore}</button>
+              <button type="button" className="ghost-button" onClick={() => setConfirmDiscardDraft(false)} disabled={isBusy}>{copy.cancel}</button>
+              <button ref={discardRestoreRef} type="button" className="danger-button" onClick={() => void submitRestore()} disabled={isBusy}>{copy.discardDraftAndRestore}</button>
             </div>
           </div>
         ) : null}
