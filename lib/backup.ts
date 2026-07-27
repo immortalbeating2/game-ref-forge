@@ -86,7 +86,6 @@ const INSPIRATION_ENTRY_KEYS = [
 ] as const;
 const MAX_ID_LENGTH = 200;
 const MAX_BACKUP_JSON_DEPTH = 64;
-const MAX_BACKUP_JSON_NODES = 1_000_000;
 const SCORE_FIELDS = [
   "rating",
   "reference_value_score",
@@ -112,11 +111,10 @@ function hasExactKeys(value: PlainObject, keys: readonly string[]) {
 
 function isPlainJsonValue(value: unknown): boolean {
   const values: Array<{ value: unknown; depth: number }> = [{ value, depth: 0 }];
-  let nodes = 0;
 
   while (values.length > 0) {
     const current = values.pop();
-    if (current === undefined || current.depth > MAX_BACKUP_JSON_DEPTH || ++nodes > MAX_BACKUP_JSON_NODES) {
+    if (current === undefined || current.depth > MAX_BACKUP_JSON_DEPTH) {
       return false;
     }
     if (current.value === null || typeof current.value === "string" || typeof current.value === "boolean") continue;
@@ -125,7 +123,6 @@ function isPlainJsonValue(value: unknown): boolean {
       continue;
     }
     if (Array.isArray(current.value)) {
-      if (current.value.length > MAX_BACKUP_JSON_NODES - nodes) return false;
       for (let index = current.value.length - 1; index >= 0; index -= 1) {
         values.push({ value: current.value[index], depth: current.depth + 1 });
       }
@@ -133,7 +130,6 @@ function isPlainJsonValue(value: unknown): boolean {
     }
     if (!isPlainObject(current.value)) return false;
     const entries = Object.values(current.value);
-    if (entries.length > MAX_BACKUP_JSON_NODES - nodes) return false;
     for (let index = entries.length - 1; index >= 0; index -= 1) {
       values.push({ value: entries[index], depth: current.depth + 1 });
     }

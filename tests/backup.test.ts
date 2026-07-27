@@ -207,7 +207,7 @@ describe("Backup v1 domain contract", () => {
 
   it("returns a structured validation failure for deeply nested malformed JSON", () => {
     let deeplyNested: unknown = "leaf";
-    for (let depth = 0; depth < 10_000; depth += 1) deeplyNested = { next: deeplyNested };
+    for (let depth = 0; depth < 20_000; depth += 1) deeplyNested = { next: deeplyNested };
     const backup = makeBackupFixture();
     const malformed = {
       ...backup,
@@ -218,6 +218,14 @@ describe("Backup v1 domain contract", () => {
     const result = parseRefForgeBackup(malformed);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues[0].code).toBe("validation_failed");
+  });
+
+  it("accepts a sub-5MB backup with a wide legal field array", () => {
+    const backup = makeBackupFixture();
+    backup.data.references[0].style_tags = Array.from({ length: 1_000_001 }, () => "x");
+
+    expect(new TextEncoder().encode(canonicalBackupJson(backup)).byteLength).toBeLessThan(MAX_BACKUP_BYTES);
+    expect(parseRefForgeBackup(backup).ok).toBe(true);
   });
 
   it.each([
