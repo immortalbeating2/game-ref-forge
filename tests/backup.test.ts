@@ -12,6 +12,17 @@ import {
 } from "../lib/backup";
 import { makeBackupFixture, makeReference, makeSynthesis } from "./fixtures/backup";
 
+const INVALID_REQUIRED_ENUM_VALUES = [false, 0, "", null] as const;
+const REQUIRED_REFERENCE_ENUM_CASES = [
+  "media_type",
+  "asset_category",
+  "license_status",
+  "public_status",
+  "quality_status",
+].flatMap((field) =>
+  INVALID_REQUIRED_ENUM_VALUES.map((value) => ({ field, value })),
+);
+
 function expectInvalid(value: unknown, path: string) {
   const result = parseRefForgeBackup(value);
   expect(result.ok).toBe(false);
@@ -250,6 +261,26 @@ describe("Backup v1 domain contract", () => {
   ])("rejects invalid %s domain values", (_label, mutate, path) => {
     expectInvalid(mutate(makeBackupFixture()), path);
   });
+
+  it.each(REQUIRED_REFERENCE_ENUM_CASES)(
+    "requires reference $field to be a legal enum string when set to $value",
+    ({ field, value }) => {
+      const backup = makeBackupFixture();
+      Object.assign(backup.data.references[0], { [field]: value });
+
+      const result = parseRefForgeBackup(backup);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues).toEqual(expect.arrayContaining([
+          expect.objectContaining({
+            code: "validation_failed",
+            path: "data.references[0]",
+          }),
+        ]));
+      }
+    },
+  );
 
   it.each([
     "rating",

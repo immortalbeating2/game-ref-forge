@@ -1,5 +1,12 @@
-import type { ReferenceRecord } from "./reference";
-import { validateReferenceInput } from "./reference";
+import {
+  ASSET_CATEGORIES,
+  LICENSE_STATUSES,
+  MEDIA_TYPES,
+  PUBLIC_STATUSES,
+  QUALITY_STATUSES,
+  type ReferenceRecord,
+  validateReferenceInput,
+} from "./reference";
 import {
   parseReferenceSnapshot,
   SYNTHESIS_STATUSES,
@@ -178,6 +185,10 @@ function isIntegerScore(value: unknown): value is number | null {
   );
 }
 
+function isEnumValue<T extends string>(value: unknown, allowed: readonly T[]): value is T {
+  return typeof value === "string" && allowed.includes(value as T);
+}
+
 function isInspirationEntries(value: unknown) {
   return Array.isArray(value) && value.every((entry) =>
     isPlainObject(entry) &&
@@ -214,6 +225,11 @@ function validateReference(value: unknown, path: string, issues: BackupValidatio
   const arrayFields = ["style_tags", "use_tags", "mechanic_tags", "mood_tags", "visual_language_tags", "inspiration_points"];
   const hasValidTypes = isNonEmptyId(record.id) &&
     ["title", "source_url"].every((field) => typeof record[field] === "string") &&
+    isEnumValue(record.media_type, MEDIA_TYPES) &&
+    isEnumValue(record.asset_category, ASSET_CATEGORIES) &&
+    isEnumValue(record.license_status, LICENSE_STATUSES) &&
+    isEnumValue(record.public_status, PUBLIC_STATUSES) &&
+    isEnumValue(record.quality_status, QUALITY_STATUSES) &&
     nullableFields.every((field) => isNullableString(record[field])) &&
     arrayFields.every((field) => isStringArray(record[field])) &&
     isInspirationEntries(record.inspiration_entries) &&

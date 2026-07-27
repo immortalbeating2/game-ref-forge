@@ -29,6 +29,17 @@ import {
   restoreBackup,
 } from "../lib/backup-db";
 
+const INVALID_REQUIRED_ENUM_VALUES = [false, 0, "", null] as const;
+const REQUIRED_REFERENCE_ENUM_CASES = [
+  "media_type",
+  "asset_category",
+  "license_status",
+  "public_status",
+  "quality_status",
+].flatMap((field) =>
+  INVALID_REQUIRED_ENUM_VALUES.map((value) => ({ field, value })),
+);
+
 type ReadRows = {
   references: Array<typeof references.$inferSelect>;
   syntheses: Array<typeof syntheses.$inferSelect>;
@@ -644,6 +655,23 @@ describe("backup restore operation generation", () => {
 });
 
 describe("guarded backup restore", () => {
+  it.each(REQUIRED_REFERENCE_ENUM_CASES)(
+    "rejects invalid required reference enum $field=$value before D1 access",
+    async ({ field, value }) => {
+      const backup = makeBackupFixture();
+      Object.assign(backup.data.references[0], { [field]: value });
+
+      await expect(restoreBackup({
+        backup,
+        backup_digest: await createBackupDigest(backup),
+        state_digest: "0".repeat(64),
+        confirm_overwrite: true,
+      })).resolves.toEqual({ ok: false, code: "validation_failed" });
+      expect(getDb).not.toHaveBeenCalled();
+      expect(getD1Binding).not.toHaveBeenCalled();
+    },
+  );
+
   it.each([
     ["empty library", null, false],
     ["preferences-only", {

@@ -54,6 +54,7 @@ export type BackupRestoreResult =
   | {
       ok: false;
       code:
+        | "validation_failed"
         | "backup_changed"
         | "preview_stale"
         | "overwrite_confirmation_required"
@@ -570,7 +571,7 @@ export async function restoreBackup(
   request: BackupRestoreRequest,
 ): Promise<BackupRestoreResult> {
   const parsed = parseRefForgeBackup(request.backup);
-  if (!parsed.ok) return { ok: false, code: "restore_failed" };
+  if (!parsed.ok) return { ok: false, code: "validation_failed" };
 
   const backupDigest = await createBackupDigest(parsed.backup);
   if (backupDigest !== request.backup_digest) {
