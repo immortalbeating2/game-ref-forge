@@ -240,7 +240,6 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
   if (value.schema_version !== BACKUP_SCHEMA_VERSION) {
     return { ok: false, issues: [issue("schema_version", "must be 1", "unsupported_version")] };
   }
-
   const issues: BackupValidationIssue[] = [];
   if (!isPlainJsonValue(value) || !hasExactKeys(value, TOP_LEVEL_KEYS)) {
     issues.push(issue("", "backup must be a closed JSON object"));
@@ -270,6 +269,12 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
   if (!Array.isArray(references) || !Array.isArray(syntheses) || !Array.isArray(relations)) {
     return { ok: false, issues };
   }
+  if (references.length > MAX_BACKUP_REFERENCES || syntheses.length > MAX_BACKUP_SYNTHESES || relations.length > MAX_BACKUP_RELATIONS) {
+    return { ok: false, issues };
+  }
+  if (isPlainJsonValue(value) && new TextEncoder().encode(canonicalBackupJson(value)).byteLength > MAX_BACKUP_BYTES) {
+    return { ok: false, issues: [issue("", "canonical backup JSON exceeds the 5 MB limit", "backup_too_large")] };
+  }
 
   const referenceIds = new Set<string>();
   references.forEach((reference, index) => {
@@ -290,7 +295,7 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
   });
 
   const relationIds = new Set<string>();
-  const relationsBySynthesis = new Map<string, BackupSynthesisRelation[]>();
+  const relationsBySynthesis = new Map<string, Array<{ relation: BackupSynthesisRelation; index: number }>>();
   const availableRelationKeys = new Set<string>();
   relations.forEach((relation, index) => {
     const path = `data.synthesis_references[${index}]`;
@@ -314,6 +319,14 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
       issues.push(issue(`${path}.snapshot`, "must be a valid reference snapshot"));
       return;
     }
+    if (!isNonEmptyId(snapshot.reference_id)) {
+      issues.push(issue(`${path}.snapshot.reference_id`, "must be a non-empty backup id"));
+      return;
+    }
+    if (!isIsoTimestamp(snapshot.reference_updated_at)) {
+      issues.push(issue(`${path}.snapshot.reference_updated_at`, "must be a valid ISO-8601 timestamp"));
+      return;
+    }
     if (relationIds.has(relation.id)) issues.push(issue(`${path}.id`, "must be unique"));
     relationIds.add(relation.id);
     if (!synthesisIds.has(relation.synthesis_id)) issues.push(issue(`${path}.synthesis_id`, "must reference a backup synthesis"));
@@ -332,7 +345,10 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
       snapshot,
       snapshot_updated_at: relation.snapshot_updated_at,
     };
-    relationsBySynthesis.set(relation.synthesis_id, [...(relationsBySynthesis.get(relation.synthesis_id) ?? []), parsedRelation]);
+    relationsBySynthesis.set(relation.synthesis_id, [
+      ...(relationsBySynthesis.get(relation.synthesis_id) ?? []),
+      { relation: parsedRelation, index },
+    ]);
   });
 
   for (const synthesis of syntheses) {
@@ -342,10 +358,11 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
       issues.push(issue("data.synthesis_references", "each synthesis must have two to four relations"));
       continue;
     }
-    const positions = synthesisRelations.map((relation) => relation.position).sort((left, right) => left - right);
-    if (positions.some((position, index) => position !== index)) {
-      const firstInvalidIndex = synthesisRelations.findIndex((relation) => relation.position !== synthesisRelations.indexOf(relation));
-      issues.push(issue(`data.synthesis_references[${Math.max(firstInvalidIndex, 0)}].position`, "must be contiguous from zero"));
+    const invalidRelation = [...synthesisRelations]
+      .sort((left, right) => left.relation.position - right.relation.position || left.index - right.index)
+      .find(({ relation }, position) => relation.position !== position);
+    if (invalidRelation !== undefined) {
+      issues.push(issue(`data.synthesis_references[${invalidRelation.index}].position`, "must be contiguous from zero"));
     }
   }
 

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  MAX_BACKUP_BYTES,
   MAX_BACKUP_REFERENCES,
   MAX_BACKUP_RELATIONS,
   MAX_BACKUP_SYNTHESES,
+  canonicalBackupJson,
   createBackupDigest,
   createBackupFilename,
   parseRefForgeBackup,
@@ -61,6 +63,28 @@ describe("Backup v1 domain contract", () => {
     backup.data.synthesis_references[1].position = 2;
 
     expectInvalid(backup, "data.synthesis_references[1].position");
+  });
+
+  it("reports a non-contiguous position at its original global relation index", () => {
+    const backup = makeBackupFixture();
+    const secondSynthesis = makeSynthesis({ id: "syn-2", title: "Second direction" });
+    backup.data.syntheses.push(secondSynthesis);
+    backup.data.synthesis_references.push(
+      {
+        ...backup.data.synthesis_references[0],
+        id: "link-3",
+        synthesis_id: secondSynthesis.id,
+        position: 0,
+      },
+      {
+        ...backup.data.synthesis_references[1],
+        id: "link-4",
+        synthesis_id: secondSynthesis.id,
+        position: 2,
+      },
+    );
+
+    expectInvalid(backup, "data.synthesis_references[3].position");
   });
 
   it.each([1, 5])("requires two to four relations per synthesis", (count) => {
@@ -124,6 +148,17 @@ describe("Backup v1 domain contract", () => {
   });
 
   it.each([
+    ["timestamp", "reference_updated_at", "invalid", "data.synthesis_references[1].snapshot.reference_updated_at"],
+    ["blank id", "reference_id", "", "data.synthesis_references[1].snapshot.reference_id"],
+    ["oversized id", "reference_id", "x".repeat(201), "data.synthesis_references[1].snapshot.reference_id"],
+  ])("rejects a historical snapshot with an invalid %s", (_label, field, value, path) => {
+    const backup = makeBackupFixture();
+    Object.assign(backup.data.synthesis_references[1].snapshot, { [field]: value });
+
+    expectInvalid(backup, path);
+  });
+
+  it.each([
     ["export", (backup: ReturnType<typeof makeBackupFixture>) => ({ ...backup, exported_at: "invalid" }), "exported_at"],
     ["reference", (backup: ReturnType<typeof makeBackupFixture>) => ({
       ...backup,
@@ -168,6 +203,21 @@ describe("Backup v1 domain contract", () => {
     expectInvalid({ ...backup, data: { ...backup.data, references: Array(MAX_BACKUP_REFERENCES + 1).fill(makeReference()) } }, "data.references");
     expectInvalid({ ...backup, data: { ...backup.data, syntheses: Array(MAX_BACKUP_SYNTHESES + 1).fill(makeSynthesis()) } }, "data.syntheses");
     expectInvalid({ ...backup, data: { ...backup.data, synthesis_references: Array(MAX_BACKUP_RELATIONS + 1).fill(backup.data.synthesis_references[0]) } }, "data.synthesis_references");
+  });
+
+  it("accepts canonical JSON at 5 MB and rejects one byte above it", () => {
+    const atLimit = makeBackupFixture();
+    const originalTitle = atLimit.data.references[0].title;
+    const currentBytes = new TextEncoder().encode(canonicalBackupJson(atLimit)).byteLength;
+    atLimit.data.references[0].title = "x".repeat(MAX_BACKUP_BYTES - currentBytes + originalTitle.length);
+
+    expect(new TextEncoder().encode(canonicalBackupJson(atLimit)).byteLength).toBe(MAX_BACKUP_BYTES);
+    expect(parseRefForgeBackup(atLimit).ok).toBe(true);
+
+    atLimit.data.references[0].title += "x";
+    const result = parseRefForgeBackup(atLimit);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.issues[0].code).toBe("backup_too_large");
   });
 
   it("creates stable digests for key order but retains array order", async () => {
