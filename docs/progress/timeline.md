@@ -1512,3 +1512,10 @@
 - 实现期间逐任务修复深度遍历、全库 state digest、批量读取、零操作 batch、枚举校验、请求边界、异步门禁和导出取消等审查问题；subagent 额度耗尽后由主代理完成 Task 6 与全分支复核，并在当日日志明确记录工具边界。
 - 本地浏览器恢复发现并修复 1-2 位小数 ISO 时间戳无法回导、自动重新预览后 stale 原因消失、390px 全宽按钮图标错位三项问题；临时数据最终回读 references 0、syntheses 0。
 - Round 13 本地最终门禁通过：31 个测试文件 / 390 项测试、typecheck、lint、build、diff check；真实验收备份生成 4 条 D1 batch 语句，最大 JSON1 块 2,386 字节；阶段更新为 `Round 13 implemented and locally verified; merge pending`。
+- `codex/round-13-backup-restore` fast-forward 合并到 `main`；merged-main 31 个测试文件 / 390 项测试、typecheck、lint、build 和 diff check 通过。运行时代码提交 `25e0b7fcba57ec9fbf0025cfd62047668003f9f8` 通过 HTTP/1.1 推送到 GitHub，认证与仓库 `ADMIN` 权限复核正常。
+- Sites source 精确同步到 `25e0b7f`，保存 Sites version 15 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_236fd0b268648191b5c344014caa57cf`，deployment `appgdep_6a677241fa788191b411bcef3338fc90` 发布成功；未新增或应用 migration。
+- 认证生产批次 `QA-R13-20260727-2326` 通过真实 UI 创建两条 reference 和一份按 B、A 排序的 synthesis；含偏好 Backup v1 导出为 4,699 字节、SHA-256 `39ede3682b791d09344ab6ae45d93f5d3fa5fa57d093541a323739b4f2601351`，包含 2/1/2 条业务记录、B 的 pinned ID 和 `276/420` 布局。
+- 生产站随后通过 UI 修改两条 reference notes、synthesis notes/status、pin 和左栏宽度，证明备份后的当前状态确实发生变化。Chrome 控制桥三次向 file input 注入备份均返回 `Not allowed`，而认证网关对外部 API 返回 403，因此生产 UI 文件选择后的恢复未直接执行；本地真实 SQLite、D1 API 和浏览器恢复链路保持完整通过。
+- 生产清理通过 UI 依次删除 synthesis 和两条 references；清理后 Backup v1 导出为 200 字节，references/syntheses/relations 均为 0，SHA-256 `CF2B0DB183ACA9F8DF28C7B6068B3A32865E4A77A54D275506466147345A9935`。页面 QA 前缀为 0，seed 示例恢复显示。
+- 生产 1280x900 与 390x844 的 document/body 横向溢出均为 0；390px 数据管理 dialog 为 317.33px 宽且左右溢出为 0；console error 0。浏览器视口已复位并保留生产交付页。
+- Round 13 worktree 和本地功能分支已删除，远程不存在对应功能分支；阶段更新为 `Round 13 complete; Round 14 design-ready`。Sites version 15 保持运行时代码基线，后续仅文档证据提交不要求重新部署。

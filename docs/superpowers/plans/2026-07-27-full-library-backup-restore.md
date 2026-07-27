@@ -1,6 +1,6 @@
 # Round 13 Full-Library Backup And Controlled Restore Implementation Plan
 
-Status: Tasks 1-6 implemented and locally verified on 2026-07-27; Task 7 merge, Sites deployment and production closure in progress.
+Status: Round 13 complete on 2026-07-27; merged, synchronized and deployed as Sites version 15. Production file-input restore remains a documented non-blocking automation evidence boundary.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -90,7 +90,7 @@ Status: Tasks 1-6 implemented and locally verified on 2026-07-27; Task 7 merge, 
   - `createBackupFilename(exportedAt?: string): string`
   - `withBackupPreferences(backup, preferences): RefForgeBackupV1`
 
-- [ ] **Step 1: Add a complete reusable Backup v1 fixture**
+- [x] **Step 1: Add a complete reusable Backup v1 fixture**
 
 Create `tests/fixtures/backup.ts` with two complete references, one synthesis and two ordered relations. One relation must be available and one must use `reference_id: null` with a valid historical snapshot:
 
@@ -134,7 +134,7 @@ export function makeBackupFixture(): RefForgeBackupV1 {
 
 The fixture's `makeReference` must fill every `ReferenceRecord` field and `makeSynthesis` must fill every `SynthesisRecord` field so later tasks never use unsafe partial records.
 
-- [ ] **Step 2: Write failing strict-format tests**
+- [x] **Step 2: Write failing strict-format tests**
 
 Add focused cases in `tests/backup.test.ts`:
 
@@ -160,7 +160,7 @@ it.each([
 
 Add explicit tests for duplicate reference/synthesis/relation IDs, non-contiguous positions, fewer than 2 or more than 4 relations, duplicate non-null reference relations, multiple null relations, dangling synthesis IDs, dangling non-null reference IDs, snapshot/reference mismatch, invalid timestamps, invalid enums, invalid scores, damaged snapshots and all count limits.
 
-- [ ] **Step 3: Run the new tests and capture RED**
+- [x] **Step 3: Run the new tests and capture RED**
 
 Run:
 
@@ -170,7 +170,7 @@ npx vitest run --config vitest.config.ts tests/backup.test.ts
 
 Expected: FAIL because `lib/backup.ts` and its exported contract do not exist.
 
-- [ ] **Step 4: Implement the closed Backup v1 types and parser**
+- [x] **Step 4: Implement the closed Backup v1 types and parser**
 
 Create these exact public shapes in `lib/backup.ts`:
 
@@ -226,7 +226,7 @@ export type BackupParseResult =
 
 Use plain-object checks with exact allowed-key arrays at every level. Reuse `validateReferenceInput`, `validateSynthesisInput`, and `parseReferenceSnapshot(JSON.stringify(value))`, then add record ID/timestamp and relationship validation. Do not coerce unknown values into valid records.
 
-- [ ] **Step 5: Add canonical serialization, digest, preferences and filename**
+- [x] **Step 5: Add canonical serialization, digest, preferences and filename**
 
 Implement key-sorted object serialization with array order preserved:
 
@@ -254,7 +254,7 @@ export async function createBackupDigest(backup: RefForgeBackupV1) {
 
 `withBackupPreferences` must normalize pinned IDs with the existing pinned parser/serializer and normalize layout through the existing workspace parser/serializer. `createBackupFilename` must return `ref-forge-backup-v1-YYYY-MM-DD.json`.
 
-- [ ] **Step 6: Prove digest and optional preference behavior**
+- [x] **Step 6: Prove digest and optional preference behavior**
 
 Add tests showing:
 
@@ -274,7 +274,7 @@ npx vitest run --config vitest.config.ts tests/backup.test.ts tests/workspace-la
 
 Expected: PASS.
 
-- [ ] **Step 7: Remove the obsolete reference-only JSON creator**
+- [x] **Step 7: Remove the obsolete reference-only JSON creator**
 
 Delete `createReferenceJsonExport` from `lib/reference-export.ts` and remove only its old test from `tests/reference-export.test.ts`. Keep `formatReferenceMarkdown` and `safeExportFilename` unchanged.
 
@@ -286,7 +286,7 @@ npx vitest run --config vitest.config.ts tests/reference-export.test.ts tests/ba
 
 Expected: PASS and no source reference to `createReferenceJsonExport`.
 
-- [ ] **Step 8: Commit Task 1**
+- [x] **Step 8: Commit Task 1**
 
 ```powershell
 git add lib/backup.ts lib/reference-export.ts tests/fixtures/backup.ts tests/backup.test.ts tests/reference-export.test.ts
@@ -312,7 +312,7 @@ git commit -m "feat: 定义全库备份合同 / define full-library backup contr
   - `previewBackup(backup: RefForgeBackupV1): Promise<BackupPreview>`
   - exported CRUD converters plus storage-exact `referenceRecordToStorageRow` and `synthesisRecordToStorageRow`
 
-- [ ] **Step 1: Export CRUD converters and add storage-exact converters**
+- [x] **Step 1: Export CRUD converters and add storage-exact converters**
 
 Keep CRUD behavior unchanged, and add explicit storage-exact converters for backup restore:
 
@@ -348,7 +348,7 @@ npx vitest run --config vitest.config.ts tests/reference.test.ts tests/synthesis
 
 Expected: PASS.
 
-- [ ] **Step 2: Write failing complete-export tests**
+- [x] **Step 2: Write failing complete-export tests**
 
 In `tests/backup-db.test.ts`, mock `getDb()` with one deterministic three-query `batch()` and assert:
 
@@ -370,7 +370,7 @@ it("exports all tables in stable id order with structured snapshots", async () =
 
 Add a stored invalid-snapshot case that rejects export rather than substituting `Unavailable snapshot`.
 
-- [ ] **Step 3: Run export tests and capture RED**
+- [x] **Step 3: Run export tests and capture RED**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/backup-db.test.ts
@@ -378,7 +378,7 @@ npx vitest run --config vitest.config.ts tests/backup-db.test.ts
 
 Expected: FAIL because `lib/backup-db.ts` does not exist.
 
-- [ ] **Step 4: Implement stable inventory reads and full export**
+- [x] **Step 4: Implement stable inventory reads and full export**
 
 Use three ordered selects:
 
@@ -403,7 +403,7 @@ async function readBackupInventory(): Promise<BackupInventory> {
 
 Build Backup v1 with `preferences: null`, parse it through `parseRefForgeBackup`, and throw a typed stored-data error if the generated domain object is invalid.
 
-- [ ] **Step 5: Write failing diff and state-digest tests**
+- [x] **Step 5: Write failing diff and state-digest tests**
 
 Add tests for:
 
@@ -433,7 +433,7 @@ it("reports creates, overwrites, preserves and relations without writing", async
 
 Also prove deterministic state digest regardless of database row return order and digest change when any record, timestamp, relation or snapshot changes.
 
-- [ ] **Step 6: Implement preview and state digest**
+- [x] **Step 6: Implement preview and state digest**
 
 Define:
 
@@ -458,7 +458,7 @@ npx vitest run --config vitest.config.ts tests/backup-db.test.ts tests/synthesis
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit Task 2**
+- [x] **Step 7: Commit Task 2**
 
 ```powershell
 git add lib/backup-db.ts lib/reference-db.ts lib/synthesis-db.ts tests/backup-db.test.ts
@@ -485,7 +485,7 @@ git commit -m "feat: 增加备份导出预览 / add backup export preview"
   - `restoreBackup(request): Promise<BackupRestoreResult>`
   - `getD1Binding()`
 
-- [ ] **Step 1: Write failing chunk and SQL-operation tests**
+- [x] **Step 1: Write failing chunk and SQL-operation tests**
 
 Add tests for:
 
@@ -511,7 +511,7 @@ Add separate assertions that:
 - Relation operations use plain `INSERT` after delete.
 - More than 40 operations rejects before D1 access.
 
-- [ ] **Step 2: Run operation tests and capture RED**
+- [x] **Step 2: Run operation tests and capture RED**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/backup-db.test.ts
@@ -519,7 +519,7 @@ npx vitest run --config vitest.config.ts tests/backup-db.test.ts
 
 Expected: FAIL because restore operation exports do not exist.
 
-- [ ] **Step 3: Expose the native server-only D1 binding**
+- [x] **Step 3: Expose the native server-only D1 binding**
 
 Modify `db/index.ts`:
 
@@ -534,7 +534,7 @@ export function getD1Binding() {
 
 Keep `getDb()` unchanged for all existing Drizzle CRUD.
 
-- [ ] **Step 4: Implement static storage mappings and JSON chunking**
+- [x] **Step 4: Implement static storage mappings and JSON chunking**
 
 Use static identifier maps, never user-provided SQL identifiers:
 
@@ -577,7 +577,7 @@ const REFERENCE_RESTORE_COLUMNS = [
 
 Add complete equivalent maps for all synthesis and relation columns. Convert domain records through the storage-exact `referenceRecordToStorageRow` and `synthesisRecordToStorageRow`; do not use CRUD normalizers that trim or filter parser-valid backup values. Serialize relation snapshots exactly once. Chunk exact row arrays by UTF-8 byte length below 1,000,000 bytes.
 
-- [ ] **Step 5: Generate deterministic JSON1 SQL**
+- [x] **Step 5: Generate deterministic JSON1 SQL**
 
 Build SQL from only the static maps:
 
@@ -610,7 +610,7 @@ WHERE "synthesis_id" IN (SELECT value FROM json_each(?))
 
 Return `{ sql, params: [jsonChunk] }` operations and reject if count exceeds 40.
 
-- [ ] **Step 6: Write failing restore guard and orchestration tests**
+- [x] **Step 6: Write failing restore guard and orchestration tests**
 
 Cover:
 
@@ -643,7 +643,7 @@ export type BackupRestoreResult =
     };
 ```
 
-- [ ] **Step 7: Implement guarded native D1 batch restore**
+- [x] **Step 7: Implement guarded native D1 batch restore**
 
 `restoreBackup` must:
 
@@ -656,7 +656,7 @@ export type BackupRestoreResult =
 7. Call `getD1Binding().batch(statements)` exactly once.
 8. Return the pre-write preview counts only after batch success.
 
-- [ ] **Step 8: Execute the production SQL contract against real SQLite**
+- [x] **Step 8: Execute the production SQL contract against real SQLite**
 
 Create `tests/backup-restore-sqlite.test.ts`. Apply migrations 0000, 0001 and 0002 to `DatabaseSync(":memory:")`. Execute the exact `BackupRestoreOperation` SQL and params inside a transaction:
 
@@ -692,7 +692,7 @@ npx vitest run --config vitest.config.ts tests/backup-db.test.ts tests/backup-re
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit Task 3**
+- [x] **Step 9: Commit Task 3**
 
 ```powershell
 git add db/index.ts lib/backup-db.ts tests/backup-db.test.ts tests/backup-restore-sqlite.test.ts
@@ -718,7 +718,7 @@ git commit -m "feat: 增加原子备份恢复 / add atomic backup restore"
   - `POST /api/backup/restore`
   - structured `{ code, path, message }` errors.
 
-- [ ] **Step 1: Write failing route contract tests**
+- [x] **Step 1: Write failing route contract tests**
 
 Mock `lib/backup-db.ts` and cover:
 
@@ -740,7 +740,7 @@ it("previews without calling restore", async () => {
 
 Add malformed JSON, body above the bounded request limit, missing `backup`, unknown version, validation issues, backup changed, preview stale, overwrite confirmation, restore failed and missing-table cases.
 
-- [ ] **Step 2: Run route tests and capture RED**
+- [x] **Step 2: Run route tests and capture RED**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/backup-routes.test.ts
@@ -748,7 +748,7 @@ npx vitest run --config vitest.config.ts tests/backup-routes.test.ts
 
 Expected: FAIL because backup routes do not exist.
 
-- [ ] **Step 3: Implement a streaming bounded JSON reader**
+- [x] **Step 3: Implement a streaming bounded JSON reader**
 
 In `app/api/backup/request.ts`, read `request.body` with a reader and stop after `MAX_BACKUP_BYTES + 131_072` bytes:
 
@@ -773,7 +773,7 @@ export async function readBoundedJson(request: Request) {
 
 Do not rely only on `Content-Length`.
 
-- [ ] **Step 4: Implement GET export**
+- [x] **Step 4: Implement GET export**
 
 `GET /api/backup` calls `createFullBackup()` and returns the Backup v1 object with:
 
@@ -788,7 +788,7 @@ return Response.json(backup, {
 
 Map unavailable tables/bindings to a stable `database_unavailable` response without leaking raw database messages.
 
-- [ ] **Step 5: Implement preview route**
+- [x] **Step 5: Implement preview route**
 
 Accept only `{ backup }`. Parse through `parseRefForgeBackup`; on validation failure return:
 
@@ -807,7 +807,7 @@ Accept only `{ backup }`. Parse through `parseRefForgeBackup`; on validation fai
 
 Return status 400 for invalid JSON/format/version/validation and 413 for size limits.
 
-- [ ] **Step 6: Implement restore route**
+- [x] **Step 6: Implement restore route**
 
 Accept only:
 
@@ -822,7 +822,7 @@ type RestoreBody = {
 
 Map `backup_changed`, `preview_stale` and `overwrite_confirmation_required` to 409. Map rollback-safe `restore_failed` to 500 with no raw SQL details. Return `{ restored: true, preview }` only after `restoreBackup` succeeds.
 
-- [ ] **Step 7: Run route and full data tests**
+- [x] **Step 7: Run route and full data tests**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/backup-routes.test.ts tests/backup.test.ts tests/backup-db.test.ts tests/backup-restore-sqlite.test.ts
@@ -830,7 +830,7 @@ npx vitest run --config vitest.config.ts tests/backup-routes.test.ts tests/backu
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit Task 4**
+- [x] **Step 8: Commit Task 4**
 
 ```powershell
 git add app/api/backup lib/backup.ts lib/backup-db.ts tests/backup-routes.test.ts
@@ -860,7 +860,7 @@ git commit -m "feat: 提供备份恢复接口 / expose backup restore API"
   - `canSubmitRestore`
   - complete Chinese/English copy.
 
-- [ ] **Step 1: Install the approved icon dependency**
+- [x] **Step 1: Install the approved icon dependency**
 
 Run:
 
@@ -870,7 +870,7 @@ npm install lucide-react
 
 Expected: `package.json` and `package-lock.json` add one production dependency. Use `DatabaseBackup`, `Download`, `Upload` and `X`; do not draw custom SVG icons.
 
-- [ ] **Step 2: Write failing pure dialog-state tests**
+- [x] **Step 2: Write failing pure dialog-state tests**
 
 Create exact tests for:
 
@@ -894,7 +894,7 @@ expect(canSubmitRestore({
 })).toBe(false);
 ```
 
-- [ ] **Step 3: Run state tests and capture RED**
+- [x] **Step 3: Run state tests and capture RED**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/data-management-state.test.ts
@@ -902,7 +902,7 @@ npx vitest run --config vitest.config.ts tests/data-management-state.test.ts
 
 Expected: FAIL because the state module does not exist.
 
-- [ ] **Step 4: Implement the pure reducer and submit guards**
+- [x] **Step 4: Implement the pure reducer and submit guards**
 
 Define:
 
@@ -923,7 +923,7 @@ export type DataManagementState = {
 
 Actions must explicitly cover open/reset, tab, export preference, file selected, preview started/succeeded/failed, overwrite confirmation, restore preference, restore started/succeeded/failed and close.
 
-- [ ] **Step 5: Add localization before component markup**
+- [x] **Step 5: Add localization before component markup**
 
 Add keys for:
 
@@ -940,7 +940,7 @@ Add keys for:
 
 Extend `tests/localization.test.ts` to enumerate the new keys in both `zh` and `en`, and map each error code to non-empty safe copy.
 
-- [ ] **Step 6: Write failing component source contracts**
+- [x] **Step 6: Write failing component source contracts**
 
 In `tests/data-management-components.test.ts`, assert that the new component:
 
@@ -952,7 +952,7 @@ In `tests/data-management-components.test.ts`, assert that the new component:
 - Disables close while restoring.
 - Revokes every object URL used for download.
 
-- [ ] **Step 7: Implement `DataManagementDialog`**
+- [x] **Step 7: Implement `DataManagementDialog`**
 
 Use this public prop contract:
 
@@ -982,7 +982,7 @@ Required behavior:
 - Call `onRestoreCommitted` only after server success.
 - Show preference failure as partial success, not data failure.
 
-- [ ] **Step 8: Run Task 5 tests**
+- [x] **Step 8: Run Task 5 tests**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/data-management-state.test.ts tests/data-management-components.test.ts tests/localization.test.ts
@@ -990,7 +990,7 @@ npx vitest run --config vitest.config.ts tests/data-management-state.test.ts tes
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit Task 5**
+- [x] **Step 9: Commit Task 5**
 
 ```powershell
 git add app/data-management lib/localization.ts tests/data-management-state.test.ts tests/data-management-components.test.ts tests/localization.test.ts package.json package-lock.json
@@ -1016,7 +1016,7 @@ git commit -m "feat: 增加数据管理对话框 / add data management dialog"
 - Consumes: Task 5 dialog and Task 4 API.
 - Produces: one root-owned data-management flow, reference/synthesis reload coordination and validated preference application.
 
-- [ ] **Step 1: Write failing workspace integration contracts**
+- [x] **Step 1: Write failing workspace integration contracts**
 
 Add assertions that:
 
@@ -1029,7 +1029,7 @@ Add assertions that:
 - Page filters restored pinned IDs against the reloaded persisted reference IDs.
 - Page has no import of `createReferenceJsonExport`.
 
-- [ ] **Step 2: Run integration contracts and capture RED**
+- [x] **Step 2: Run integration contracts and capture RED**
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/data-management-components.test.ts tests/workspace-layout-components.test.ts tests/synthesis-workspace.test.ts
@@ -1037,7 +1037,7 @@ npx vitest run --config vitest.config.ts tests/data-management-components.test.t
 
 Expected: FAIL on missing wiring and legacy export code.
 
-- [ ] **Step 3: Expose safe external workspace preference application**
+- [x] **Step 3: Expose safe external workspace preference application**
 
 In `use-workspace-layout.ts`, add:
 
@@ -1061,7 +1061,7 @@ const applyPreferences = useCallback((next: WorkspaceLayoutPreferences) => {
 
 Return it from the hook and test success/fallback source contracts.
 
-- [ ] **Step 4: Report synthesis dirty/busy state and handle restore reload**
+- [x] **Step 4: Report synthesis dirty/busy state and handle restore reload**
 
 Extend `SynthesisWorkspaceProps`:
 
@@ -1073,7 +1073,7 @@ restoreEpoch: number;
 
 Report changes through an effect. On a new `restoreEpoch`, abort list/detail controllers, clear pending confirmations and mutations, reset the draft, then reload the active filter. Add a data-management icon/text button to the synthesis header.
 
-- [ ] **Step 5: Replace legacy page export with one root dialog**
+- [x] **Step 5: Replace legacy page export with one root dialog**
 
 In `app/page.tsx`:
 
@@ -1088,7 +1088,7 @@ In `app/page.tsx`:
 - Apply workspace preferences through the hook method.
 - Write both localStorage values before updating React state; return `"failed"` if either write throws.
 
-- [ ] **Step 6: Add dialog and responsive CSS**
+- [x] **Step 6: Add dialog and responsive CSS**
 
 Add stable classes for overlay, dialog, title bar, tabs, backup summary, file metadata, diff grid, warnings, error list, confirmation row and sticky action footer.
 
@@ -1102,7 +1102,7 @@ Required CSS checks:
 - `prefers-reduced-motion: reduce` removes dialog transitions.
 - Busy state does not change button dimensions.
 
-- [ ] **Step 7: Run all automated gates before browser work**
+- [x] **Step 7: Run all automated gates before browser work**
 
 ```powershell
 npm test
@@ -1113,7 +1113,7 @@ npm run build
 
 Expected: all exit 0. Record exact test file/test counts in the QA document.
 
-- [ ] **Step 8: Start the isolated local app**
+- [x] **Step 8: Start the isolated local app**
 
 Run:
 
@@ -1123,7 +1123,7 @@ npm run dev -- --port 3013
 
 Expected: vinext listens on `http://127.0.0.1:3013/` and returns HTTP 200.
 
-- [ ] **Step 9: Complete local browser backup/restore acceptance**
+- [x] **Step 9: Complete local browser backup/restore acceptance**
 
 Using the in-app browser or Chrome bound to the local app and a local D1 test path:
 
@@ -1142,7 +1142,7 @@ Using the in-app browser or Chrome bound to the local app and a local D1 test pa
 
 Record exact identifiers, counts, viewport metrics and cleanup result in `docs/qa/2026-07-27-full-library-backup-restore.md`.
 
-- [ ] **Step 10: Commit Task 6**
+- [x] **Step 10: Commit Task 6**
 
 ```powershell
 git add app/page.tsx app/globals.css app/workspace/use-workspace-layout.ts app/synthesis/synthesis-workspace.tsx tests/workspace-layout-components.test.ts tests/synthesis-workspace.test.ts tests/data-management-components.test.ts tests/localization.test.ts docs/qa/2026-07-27-full-library-backup-restore.md
@@ -1165,7 +1165,7 @@ git commit -m "feat: 接入全库备份恢复 / integrate full-library backup re
 - Consumes: Tasks 1-6 reviewed feature branch.
 - Produces: merged, pushed, deployed, production-verified Round 13 with zero QA residue and branch/worktree cleanup.
 
-- [ ] **Step 1: Run task-level spec and quality reviews**
+- [x] **Step 1: Run task-level spec and quality reviews**
 
 For each Task 1-6 commit range:
 
@@ -1176,7 +1176,7 @@ For each Task 1-6 commit range:
 - Re-run the covering focused tests and re-review.
 - Record every important agent in the daily `Delegation Log`.
 
-- [ ] **Step 2: Run a broad final review**
+- [x] **Step 2: Run a broad final review**
 
 Review `git merge-base main HEAD..HEAD` for:
 
@@ -1192,7 +1192,7 @@ Review `git merge-base main HEAD..HEAD` for:
 
 Do not merge with unresolved Critical or Important findings.
 
-- [ ] **Step 3: Run final feature-branch gates**
+- [x] **Step 3: Run final feature-branch gates**
 
 ```powershell
 npm test
@@ -1205,7 +1205,7 @@ git status --short
 
 Expected: all commands exit 0 and feature worktree is clean after evidence commit.
 
-- [ ] **Step 4: Update local implementation evidence**
+- [x] **Step 4: Update local implementation evidence**
 
 Set stage to `Round 13 implemented and locally verified; merge pending`. Record exact:
 
@@ -1225,7 +1225,7 @@ git add AGENTS.md docs/qa/2026-07-27-full-library-backup-restore.md docs/progres
 git commit -m "docs: 记录第十三轮实现验证 / record round 13 implementation verification"
 ```
 
-- [ ] **Step 5: Finish the development branch**
+- [x] **Step 5: Finish the development branch**
 
 From the main worktree:
 
@@ -1241,7 +1241,7 @@ git push origin main
 
 If GitHub HTTPS resets, verify DNS, 443 and auth separately, then use the already authenticated SSH remote URL for the same `main:main` push without changing `origin`.
 
-- [ ] **Step 6: Build and deploy the exact merged source through Sites**
+- [x] **Step 6: Build and deploy the exact merged source through Sites**
 
 - Read `.openai/hosting.json` and reuse its exact project ID.
 - Push the exact merged source state to the Sites repository.
@@ -1273,6 +1273,8 @@ Use a batch prefix such as `QA-R13-YYYYMMDD-HHMMSS` and perform through the real
 
 One browser action must be followed by an independent state read before the next write. A timeout is not success evidence.
 
+Result: production real-UI create, preference-bearing export, post-export mutation, delete cleanup, zero-residue export, 1280/390px layout and console checks passed for `QA-R13-20260727-2326`. Chrome rejected automated file injection with `fileChooser.setFiles: Not allowed`, and the authenticated gateway rejected out-of-browser API fallback with 403. Production restore execution is therefore not claimed; complete local browser/API/SQLite evidence covers the restore path.
+
 - [ ] **Step 8: Close documentation and cleanup**
 
 - Set stage to `Round 13 complete; Round 14 design-ready`.
@@ -1294,18 +1296,18 @@ Expected: one clean synchronized `main`, no Round 13 branch/worktree and Sites p
 
 ## Definition Of Done
 
-- [ ] New exports use only RefForge Backup v1.
-- [ ] Backup includes complete references, syntheses, ordered relations and historical snapshots.
-- [ ] Old reference-only JSON is rejected.
-- [ ] Preview reports create/overwrite/preserve with zero writes.
-- [ ] Restore preserves backup IDs/timestamps/snapshots and current backup-absent data.
-- [ ] Backup/state digest changes block restore.
-- [ ] JSON1 chunks remain under 1 MB and batch remains at or below 40 statements.
-- [ ] Real SQLite proves exact SQL behavior and rollback.
-- [ ] Optional pinned/layout preferences default off and round-trip when selected.
-- [ ] Unsaved reference/synthesis drafts are protected.
-- [ ] Chinese, English, keyboard, 1600px, 1280px and 390px pass.
-- [ ] Tests, typecheck, lint, build, task reviews, final review and merged-main gates pass.
-- [ ] Sites deploy succeeds with no migration.
-- [ ] Production QA restores temporary data, preserves non-QA data and leaves zero residue.
+- [x] New exports use only RefForge Backup v1.
+- [x] Backup includes complete references, syntheses, ordered relations and historical snapshots.
+- [x] Old reference-only JSON is rejected.
+- [x] Preview reports create/overwrite/preserve with zero writes.
+- [x] Restore preserves backup IDs/timestamps/snapshots and current backup-absent data.
+- [x] Backup/state digest changes block restore.
+- [x] JSON1 chunks remain under 1 MB and batch remains at or below 40 statements.
+- [x] Real SQLite proves exact SQL behavior and rollback.
+- [x] Optional pinned/layout preferences default off and round-trip when selected.
+- [x] Unsaved reference/synthesis drafts are protected.
+- [x] Chinese, English, keyboard, 1600px, 1280px and 390px pass.
+- [x] Tests, typecheck, lint, build, task reviews, final review and merged-main gates pass.
+- [x] Sites deploy succeeds with no migration.
+- [ ] Production QA restores temporary data, preserves non-QA data and leaves zero residue. Restore execution was not directly observable because Chrome rejected file injection; production create/export/mutate/cleanup and local exact restore passed.
 - [ ] Three progress documents, QA, AGENTS, plan, GitHub main, Sites source and branch cleanup agree.

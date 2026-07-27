@@ -4,7 +4,7 @@ Updated: 2026-07-27
 
 ## Current Stage
 
-`Round 13 implemented and locally verified; merge pending`
+`Round 13 complete; Round 14 design-ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -33,11 +33,14 @@ It helps collect source links from game asset and game design sites, normalize t
 - Sites version 14 deployed successfully. Authenticated production QA passed real left/right pointer drag, reload persistence, keyboard adjustment, detail collapse/reload/recovery, 1280px and 390px no-overflow metrics, and console error 0; final preferences were reset to `260/420`.
 - No dependency, API, D1, migration, reference/synthesis model, or production business-data change is included in Round 12. Production reference count remained 2 throughout read-only QA.
 - The Round 12 worktree and local feature branch are removed; no remote Round 12 feature branch exists.
-- Round 13 implementation is complete on `codex/round-13-backup-restore`: Backup v1 exports complete references, syntheses, ordered relations and snapshots; preview is zero-write; restore uses guarded native D1 batch upserts while preserving backup-absent data; optional pinned/layout preferences are device-local.
+- Round 13 Backup v1 exports complete references, syntheses, ordered relations and snapshots; preview is zero-write; restore uses guarded native D1 batch upserts while preserving backup-absent data; optional pinned/layout preferences are device-local.
 - Round 13 local automation passes with 31 test files / 390 tests, typecheck, lint, build and diff check. Real SQLite proves transaction rollback, and the accepted QA fixture uses 4 statements with a maximum JSON1 chunk of 2,386 bytes.
 - Local browser QA passes exact reference/synthesis/relation/snapshot restore, stale-preview 409 recovery, unsaved reference/synthesis gates, Chinese/English, keyboard focus/Escape, 1600/1280/390px zero-overflow layouts, console error 0 and zero QA residue.
 - The approved specification is `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`; implementation and QA evidence are in `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md` and `docs/qa/2026-07-27-full-library-backup-restore.md`.
-- Round 13 adds `lucide-react` and three backup API routes. It does not add or apply a D1 migration. Merge, Sites deployment and authenticated production recovery remain pending.
+- Round 13 adds `lucide-react` and three backup API routes. It does not add or apply a D1 migration.
+- Round 13 runtime source `25e0b7fcba57ec9fbf0025cfd62047668003f9f8` is merged to `main`, synchronized with GitHub and deployed as Sites version 15 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_236fd0b268648191b5c344014caa57cf`) through deployment `appgdep_6a677241fa788191b411bcef3338fc90`.
+- Authenticated production batch `QA-R13-20260727-2326` passed real UI creation of 2 references and 1 synthesis, ordered relations, preference-bearing Backup v1 export, post-backup mutation, UI deletion, zero-residue export, 1280/390px no-overflow checks and console error 0. The baseline production D1 was empty, so non-QA record preservation was proved by unchanged zero non-QA records.
+- Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -238,4 +241,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Push the approved design/plan baseline, create `codex/round-13-backup-restore` with an isolated worktree, and execute the TDD tasks with task-level review. Keep Sites version 14 stable until the reviewed implementation is deployed.
+Start Round 14 only after brainstorming, written specification and implementation-plan approval. Keep Sites version 15 as the stable production baseline until a reviewed Round 14 runtime change is ready.

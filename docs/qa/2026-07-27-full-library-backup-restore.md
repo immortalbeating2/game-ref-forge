@@ -4,8 +4,8 @@
 
 ## 验收目标
 
-- 工作树：`D:\Desktop\Project\Game\game-ref-forge\.worktrees\round-13-backup-restore`
-- 分支：`codex/round-13-backup-restore`
+- 最终工作树：`D:\Desktop\Project\Game\game-ref-forge`
+- 最终分支：`main`
 - 本地地址：`http://127.0.0.1:3013/`
 - 范围：Backup v1 全库导出、零写入预览、保留式原子恢复、可选设备偏好、工作台接线和中英文响应式交互。
 - 数据边界：不新增 migration；恢复只覆盖备份中同 ID 数据，保留备份未包含的当前数据。
@@ -79,8 +79,32 @@
 - 浏览器恢复中文、默认 1280x720 视口，数据管理弹窗关闭。
 - 本地设备布局和 pinned 偏好已回到验收前状态。
 
-## 待完成
+## 合并与部署
 
-- 功能分支最终独立审查与 merged-main 门禁。
-- GitHub `main` 同步、Sites 新版本部署。
-- 认证生产站临时 QA 批次、非 QA 数据不变证明和零残留清理。
+- `codex/round-13-backup-restore` fast-forward 合并到 `main`，运行时代码提交为 `25e0b7fcba57ec9fbf0025cfd62047668003f9f8`。
+- Merged-main 门禁：31 个测试文件 / 390 项测试、typecheck、lint、build 和 diff check 全部通过。
+- GitHub `main` 与运行时代码提交同步；首次 DNS 失败后分别验证解析、443、GitHub CLI 登录和仓库 `ADMIN` 权限，HTTP/1.1 推送成功。
+- Sites version 15：`appgprj_6a246b271d848191b88b60d1633030c7~appgver_236fd0b268648191b5c344014caa57cf`。
+- Deployment：`appgdep_6a677241fa788191b411bcef3338fc90`，状态 `succeeded`。
+- Production URL：`https://game-ref-forge.yeep-6613.chatgpt.site/`。
+- 没有新增或应用 D1 migration。
+
+## 认证生产 QA
+
+- 批次前 D1 业务数据为空；UI 显示两条 seed fallback 示例。无偏好 Backup v1 导出为 200 字节，业务记录计数为 0/0/0。
+- 批次 `QA-R13-20260727-2326` 通过真实 UI 创建两条 references 和一份 synthesis，relation 顺序为 Reference B 后 Reference A。
+- Reference IDs：B `08a2a556-59eb-42e6-9d87-fbe6b5ff3a37`，A `6ae25603-aa9d-48f3-b4bd-f6b8b2daa4c7`。
+- Synthesis ID：`e8ebc50f-ce81-4091-b04e-e53a0828209a`；relation IDs 为 `65cdfec2-1dca-4408-a233-7731284bc369`、`3b973d58-f949-4ab1-939b-63afbe4aca4c`。
+- 置顶 B 并把布局设为 `276/420` 后，通过真实 UI 导出含偏好 Backup v1：4,699 字节，2 references / 1 synthesis / 2 relations，SHA-256 `39ede3682b791d09344ab6ae45d93f5d3fa5fa57d093541a323739b4f2601351`。
+- 导出后通过真实 UI 修改两条 reference notes、synthesis notes/status、pin 和左栏宽度，独立读回确认当前状态已偏离备份。
+- Chrome 控制桥对 Downloads、工作区和运行时临时目录的 `fileChooser.setFiles` 均返回 `Not allowed`。生产认证网关对外部 `/api/references` 返回 403，因此没有用外部请求替代认证生产恢复。
+- 生产 UI 文件选择后的 restore 未直接观测；相同路径已由本地文件选择、preview、digest、D1 batch、关系顺序、snapshot、偏好应用、刷新持久化和真实 SQLite 回滚证据覆盖。此项记为非阻塞自动化证据边界。
+
+## 生产清理与布局
+
+- 通过真实 UI 先删除 synthesis，再删除 Reference A 和 Reference B。
+- 清理后重新导出的 Backup v1 为 200 字节，references/syntheses/relations 均为 0，preferences 为 null，SHA-256 `CF2B0DB183ACA9F8DF28C7B6068B3A32865E4A77A54D275506466147345A9935`。
+- 最终页面不含 QA 前缀，并重新显示 seed fallback 示例。
+- 1280x900：document/body 横向溢出均为 0。
+- 390x844：document/body 横向溢出均为 0；数据管理 dialog 左 28.67px、右 346.00px、宽 317.33px，左右溢出均为 0。
+- Production console error：0。Statsig 超时仅来自浏览器控制桥遥测，不在页面 console 中。
