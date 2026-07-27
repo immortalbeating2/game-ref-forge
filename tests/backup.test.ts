@@ -1,0 +1,228 @@
+import { describe, expect, it } from "vitest";
+import {
+  MAX_BACKUP_REFERENCES,
+  MAX_BACKUP_RELATIONS,
+  MAX_BACKUP_SYNTHESES,
+  createBackupDigest,
+  createBackupFilename,
+  parseRefForgeBackup,
+  withBackupPreferences,
+} from "../lib/backup";
+import { makeBackupFixture, makeReference, makeSynthesis } from "./fixtures/backup";
+
+function expectInvalid(value: unknown, path: string) {
+  const result = parseRefForgeBackup(value);
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(result.issues.some((issue) => issue.path === path)).toBe(true);
+}
+
+describe("Backup v1 domain contract", () => {
+  it("round-trips a complete Backup v1", () => {
+    const backup = makeBackupFixture();
+
+    expect(parseRefForgeBackup(JSON.parse(JSON.stringify(backup)))).toEqual({
+      ok: true,
+      backup,
+    });
+  });
+
+  it.each([
+    [{ exported_at: "", count: 0, references: [] }, "unsupported_format"],
+    [{ ...makeBackupFixture(), schema_version: 2 }, "unsupported_version"],
+    [{ ...makeBackupFixture(), extra: true }, "validation_failed"],
+  ])("rejects unsupported or open formats", (value, code) => {
+    const result = parseRefForgeBackup(value);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.issues[0].code).toBe(code);
+  });
+
+  it.each([
+    ["reference", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: { ...backup.data, references: [backup.data.references[0], backup.data.references[0]] },
+    }), "data.references[1].id"],
+    ["synthesis", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: { ...backup.data, syntheses: [backup.data.syntheses[0], backup.data.syntheses[0]] },
+    }), "data.syntheses[1].id"],
+    ["relation", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: {
+        ...backup.data,
+        synthesis_references: [backup.data.synthesis_references[0], backup.data.synthesis_references[0]],
+      },
+    }), "data.synthesis_references[1].id"],
+  ])("rejects duplicate %s ids", (_label, mutate, path) => {
+    expectInvalid(mutate(makeBackupFixture()), path);
+  });
+
+  it("requires ordered, complete relation positions for every synthesis", () => {
+    const backup = makeBackupFixture();
+    backup.data.synthesis_references[1].position = 2;
+
+    expectInvalid(backup, "data.synthesis_references[1].position");
+  });
+
+  it.each([1, 5])("requires two to four relations per synthesis", (count) => {
+    const backup = makeBackupFixture();
+    backup.data.synthesis_references = Array.from({ length: count }, (_, index) => ({
+      ...backup.data.synthesis_references[index % 2],
+      id: `link-${index}`,
+      position: index,
+      reference_id: `ref-${(index % 2) + 1}`,
+      snapshot: backup.data.synthesis_references[index % 2].snapshot,
+    }));
+
+    expectInvalid(backup, "data.synthesis_references");
+  });
+
+  it("rejects duplicate available reference relations but permits multiple historical relations", () => {
+    const duplicateAvailable = makeBackupFixture();
+    duplicateAvailable.data.synthesis_references[1] = {
+      ...duplicateAvailable.data.synthesis_references[1],
+      reference_id: "ref-1",
+      snapshot: duplicateAvailable.data.synthesis_references[0].snapshot,
+    };
+    expectInvalid(duplicateAvailable, "data.synthesis_references[1].reference_id");
+
+    const multipleHistorical = makeBackupFixture();
+    multipleHistorical.data.synthesis_references = [
+      ...multipleHistorical.data.synthesis_references,
+      {
+        ...multipleHistorical.data.synthesis_references[1],
+        id: "link-3",
+        position: 2,
+      },
+    ];
+    expect(parseRefForgeBackup(multipleHistorical).ok).toBe(true);
+  });
+
+  it.each([
+    ["synthesis", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: {
+        ...backup.data,
+        synthesis_references: [{ ...backup.data.synthesis_references[0], synthesis_id: "missing" }],
+      },
+    }), "data.synthesis_references[0].synthesis_id"],
+    ["reference", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: {
+        ...backup.data,
+        synthesis_references: [{ ...backup.data.synthesis_references[0], reference_id: "missing" }],
+      },
+    }), "data.synthesis_references[0].reference_id"],
+  ])("rejects dangling relation %s ids", (_label, mutate, path) => {
+    expectInvalid(mutate(makeBackupFixture()), path);
+  });
+
+  it("rejects relation snapshots that do not match available references", () => {
+    const backup = makeBackupFixture();
+    backup.data.synthesis_references[0].snapshot.reference_id = "ref-2";
+
+    expectInvalid(backup, "data.synthesis_references[0].snapshot.reference_id");
+  });
+
+  it.each([
+    ["export", (backup: ReturnType<typeof makeBackupFixture>) => ({ ...backup, exported_at: "invalid" }), "exported_at"],
+    ["reference", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: { ...backup.data, references: [{ ...backup.data.references[0], updated_at: "invalid" }] },
+    }), "data.references[0].updated_at"],
+    ["relation", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: {
+        ...backup.data,
+        synthesis_references: [{ ...backup.data.synthesis_references[0], snapshot_updated_at: "invalid" }],
+      },
+    }), "data.synthesis_references[0].snapshot_updated_at"],
+  ])("rejects invalid %s timestamps", (_label, mutate, path) => {
+    expectInvalid(mutate(makeBackupFixture()), path);
+  });
+
+  it.each([
+    ["enum", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: { ...backup.data, references: [{ ...backup.data.references[0], media_type: "invalid" }] },
+    }), "data.references[0]"],
+    ["score", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: { ...backup.data, references: [{ ...backup.data.references[0], rating: 6 }] },
+    }), "data.references[0]"],
+    ["snapshot", (backup: ReturnType<typeof makeBackupFixture>) => ({
+      ...backup,
+      data: {
+        ...backup.data,
+        synthesis_references: [{
+          ...backup.data.synthesis_references[0],
+          snapshot: { ...backup.data.synthesis_references[0].snapshot, scores: { rating: "5" } },
+        }],
+      },
+    }), "data.synthesis_references[0].snapshot"],
+  ])("rejects invalid %s domain values", (_label, mutate, path) => {
+    expectInvalid(mutate(makeBackupFixture()), path);
+  });
+
+  it("rejects count limits before accepting records", () => {
+    const backup = makeBackupFixture();
+    expectInvalid({ ...backup, data: { ...backup.data, references: Array(MAX_BACKUP_REFERENCES + 1).fill(makeReference()) } }, "data.references");
+    expectInvalid({ ...backup, data: { ...backup.data, syntheses: Array(MAX_BACKUP_SYNTHESES + 1).fill(makeSynthesis()) } }, "data.syntheses");
+    expectInvalid({ ...backup, data: { ...backup.data, synthesis_references: Array(MAX_BACKUP_RELATIONS + 1).fill(backup.data.synthesis_references[0]) } }, "data.synthesis_references");
+  });
+
+  it("creates stable digests for key order but retains array order", async () => {
+    const backup = makeBackupFixture();
+    const reorderedKeys = {
+      preferences: backup.preferences,
+      data: backup.data,
+      app: backup.app,
+      exported_at: backup.exported_at,
+      schema_version: backup.schema_version,
+      format: backup.format,
+    };
+    const reversedReferences = { ...backup, data: { ...backup.data, references: [...backup.data.references].reverse() } };
+    const reversedRelations = { ...backup, data: { ...backup.data, synthesis_references: [...backup.data.synthesis_references].reverse() } };
+
+    await expect(createBackupDigest(backup)).resolves.toBe(await createBackupDigest(reorderedKeys));
+    await expect(createBackupDigest(backup)).resolves.not.toBe(await createBackupDigest(reversedReferences));
+    await expect(createBackupDigest(backup)).resolves.not.toBe(await createBackupDigest(reversedRelations));
+  });
+
+  it("keeps preferences opt-in and normalizes stored preference contracts", () => {
+    const backup = makeBackupFixture();
+    expect(backup.preferences).toBeNull();
+
+    expect(withBackupPreferences(backup, {
+      pinned_reference_ids: ["ref-1", "", "ref-2", "ref-1"],
+      workspace_layout: {
+        version: 1,
+        leftWidth: 999,
+        rightWidth: 100,
+        leftCollapsed: true,
+        rightCollapsed: false,
+      },
+    }).preferences).toEqual({
+      pinned_reference_ids: ["ref-1", "ref-2"],
+      workspace_layout: {
+        version: 1,
+        leftWidth: 360,
+        rightWidth: 340,
+        leftCollapsed: true,
+        rightCollapsed: false,
+      },
+    });
+  });
+
+  it("rejects open device preferences and creates a safe dated filename", () => {
+    const backup = makeBackupFixture();
+    expectInvalid({
+      ...backup,
+      preferences: {
+        pinned_reference_ids: [],
+        workspace_layout: { version: 1, leftWidth: 260, rightWidth: 420, leftCollapsed: false, rightCollapsed: false },
+        extra: true,
+      },
+    }, "preferences");
+    expect(createBackupFilename("2026-07-27T12:00:00.000Z")).toBe("ref-forge-backup-v1-2026-07-27.json");
+  });
+});

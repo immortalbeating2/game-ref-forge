@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ReferenceRecord } from "../lib/reference";
 import {
-  createReferenceJsonExport,
   formatReferenceMarkdown,
   safeExportFilename,
 } from "../lib/reference-export";
@@ -60,14 +59,6 @@ describe("reference export helpers", () => {
     expect(markdown).toContain("reference_value_score: 4");
     expect(markdown).toContain("interaction feedback");
     expect(markdown).toContain("Buttons have clear state contrast.");
-  });
-
-  it("creates a full-library JSON export payload", () => {
-    const payload = createReferenceJsonExport([reference]);
-
-    expect(payload.exported_at).toEqual(expect.any(String));
-    expect(payload.count).toBe(1);
-    expect(payload.references[0].id).toBe("ref-1");
   });
 
   it("creates safe filenames", () => {

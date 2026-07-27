@@ -24,7 +24,6 @@ import {
   ReferenceDraft,
 } from "../lib/reference-draft";
 import {
-  createReferenceJsonExport,
   formatReferenceMarkdown,
   safeExportFilename,
 } from "../lib/reference-export";
@@ -967,14 +966,6 @@ export default function Home() {
     );
   }
 
-  function exportLibraryJson() {
-    downloadText(
-      JSON.stringify(createReferenceJsonExport(references), null, 2),
-      safeExportFilename("ref-forge-library", "json"),
-      "application/json;charset=utf-8",
-    );
-  }
-
   const comparisonAvailability = getComparisonAvailability(
     referenceDataSource,
     comparisonReferenceIds,
@@ -1208,9 +1199,6 @@ export default function Home() {
               </select>
             </label>
             <div className="export-actions">
-              <button className="ghost-button" type="button" onClick={exportLibraryJson}>
-                {copy.exportJson}
-              </button>
               <button
                 className="ghost-button"
                 type="button"

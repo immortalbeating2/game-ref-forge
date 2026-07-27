@@ -3,7 +3,6 @@ import { ReferenceRecord } from "./reference";
 function list(values: string[]) {
   return values.length > 0 ? values.join(", ") : "-";
 }
-
 function value(value: string | number | null | undefined) {
   return value === null || value === undefined || value === "" ? "-" : String(value);
 }
@@ -80,12 +79,4 @@ ${entries || "-"}
 - transformation_ideas: ${value(reference.transformation_ideas)}
 - related_original_asset: ${value(reference.related_original_asset)}
 `;
-}
-
-export function createReferenceJsonExport(references: ReferenceRecord[]) {
-  return {
-    exported_at: new Date().toISOString(),
-    count: references.length,
-    references,
-  };
 }

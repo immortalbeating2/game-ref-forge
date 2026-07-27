@@ -1,0 +1,403 @@
+import type { ReferenceRecord } from "./reference";
+import { validateReferenceInput } from "./reference";
+import {
+  parseReferenceSnapshot,
+  SYNTHESIS_STATUSES,
+  type SynthesisRecord,
+  type SynthesisReferenceSnapshot,
+  validateSynthesisInput,
+} from "./synthesis";
+import { parsePinnedReferenceIds, serializePinnedReferenceIds } from "./pinned-references";
+import {
+  parseWorkspaceLayoutPreferences,
+  serializeWorkspaceLayoutPreferences,
+  type WorkspaceLayoutPreferences,
+} from "./workspace-layout";
+
+export const BACKUP_FORMAT = "ref-forge-backup" as const;
+export const BACKUP_SCHEMA_VERSION = 1 as const;
+export const MAX_BACKUP_BYTES = 5_000_000;
+export const MAX_BACKUP_REFERENCES = 2_000;
+export const MAX_BACKUP_SYNTHESES = 1_000;
+export const MAX_BACKUP_RELATIONS = 4_000;
+
+export type BackupDevicePreferences = {
+  pinned_reference_ids: string[];
+  workspace_layout: WorkspaceLayoutPreferences;
+};
+
+export type BackupSynthesisRelation = {
+  id: string;
+  synthesis_id: string;
+  reference_id: string | null;
+  position: number;
+  snapshot: SynthesisReferenceSnapshot;
+  snapshot_updated_at: string;
+};
+
+export type RefForgeBackupV1 = {
+  format: typeof BACKUP_FORMAT;
+  schema_version: typeof BACKUP_SCHEMA_VERSION;
+  exported_at: string;
+  app: { name: "RefForge" };
+  data: {
+    references: ReferenceRecord[];
+    syntheses: SynthesisRecord[];
+    synthesis_references: BackupSynthesisRelation[];
+  };
+  preferences: BackupDevicePreferences | null;
+};
+
+export type BackupValidationIssue = {
+  code:
+    | "unsupported_format"
+    | "unsupported_version"
+    | "backup_too_large"
+    | "validation_failed";
+  path: string;
+  message: string;
+};
+
+export type BackupParseResult =
+  | { ok: true; backup: RefForgeBackupV1 }
+  | { ok: false; issues: BackupValidationIssue[] };
+
+const TOP_LEVEL_KEYS = ["format", "schema_version", "exported_at", "app", "data", "preferences"] as const;
+const APP_KEYS = ["name"] as const;
+const DATA_KEYS = ["references", "syntheses", "synthesis_references"] as const;
+const PREFERENCE_KEYS = ["pinned_reference_ids", "workspace_layout"] as const;
+const WORKSPACE_LAYOUT_KEYS = ["version", "leftWidth", "rightWidth", "leftCollapsed", "rightCollapsed"] as const;
+const RELATION_KEYS = ["id", "synthesis_id", "reference_id", "position", "snapshot", "snapshot_updated_at"] as const;
+const REFERENCE_KEYS = [
+  "id", "title", "source_url", "canonical_url", "site_name", "author", "preview_url", "media_type",
+  "asset_category", "source_category", "style_tags", "use_tags", "mechanic_tags", "mood_tags",
+  "visual_language_tags", "license_status", "attribution_text", "public_status", "quality_status", "rating",
+  "reference_value_score", "transformability_score", "copyright_risk_score", "production_readiness_score",
+  "inspiration_points", "inspiration_entries", "deconstruction_notes", "transformation_ideas",
+  "avoid_copying_notes", "related_original_asset", "created_at", "updated_at",
+] as const;
+const SYNTHESIS_KEYS = [
+  "id", "title", "target_asset", "shared_principles", "key_differences", "original_direction",
+  "avoid_copying_notes", "design_constraints", "experiment_plan", "next_actions", "additional_notes",
+  "status", "created_at", "updated_at",
+] as const;
+const INSPIRATION_ENTRY_KEYS = [
+  "id", "observation", "principle", "transferable_idea", "original_application", "avoid_copying",
+] as const;
+const MAX_ID_LENGTH = 200;
+
+type PlainObject = Record<string, unknown>;
+
+function isPlainObject(value: unknown): value is PlainObject {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function hasExactKeys(value: PlainObject, keys: readonly string[]) {
+  const actualKeys = Object.keys(value);
+  return actualKeys.length === keys.length &&
+    actualKeys.every((key) => keys.includes(key)) &&
+    keys.every((key) => Object.prototype.hasOwnProperty.call(value, key));
+}
+
+function isPlainJsonValue(value: unknown): boolean {
+  if (value === null || typeof value === "string" || typeof value === "boolean") return true;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every(isPlainJsonValue);
+  return isPlainObject(value) && Object.values(value).every(isPlainJsonValue);
+}
+
+function isNonEmptyId(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0 && value.length <= MAX_ID_LENGTH;
+}
+
+function isIsoTimestamp(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) {
+    return false;
+  }
+  return Number.isFinite(Date.parse(value));
+}
+
+function isNullableString(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isInspirationEntries(value: unknown) {
+  return Array.isArray(value) && value.every((entry) =>
+    isPlainObject(entry) &&
+    hasExactKeys(entry, INSPIRATION_ENTRY_KEYS) &&
+    isNonEmptyId(entry.id) &&
+    INSPIRATION_ENTRY_KEYS.slice(1).every((key) => typeof entry[key] === "string"),
+  );
+}
+
+function issue(path: string, message: string, code: BackupValidationIssue["code"] = "validation_failed"): BackupValidationIssue {
+  return { code, path, message };
+}
+
+function validateRecordShape(
+  value: unknown,
+  keys: readonly string[],
+  path: string,
+  issues: BackupValidationIssue[],
+): value is PlainObject {
+  if (!isPlainObject(value) || !hasExactKeys(value, keys)) {
+    issues.push(issue(path, "must be a closed record object"));
+    return false;
+  }
+  return true;
+}
+
+function validateReference(value: unknown, path: string, issues: BackupValidationIssue[]): value is ReferenceRecord {
+  if (!validateRecordShape(value, REFERENCE_KEYS, path, issues)) return false;
+  const record: PlainObject = value;
+  const nullableFields = [
+    "canonical_url", "site_name", "author", "preview_url", "source_category", "attribution_text", "deconstruction_notes",
+    "transformation_ideas", "avoid_copying_notes", "related_original_asset",
+  ];
+  const arrayFields = ["style_tags", "use_tags", "mechanic_tags", "mood_tags", "visual_language_tags", "inspiration_points"];
+  const scoreFields = ["rating", "reference_value_score", "transformability_score", "copyright_risk_score", "production_readiness_score"];
+  const hasValidTypes = isNonEmptyId(record.id) &&
+    ["title", "source_url"].every((field) => typeof record[field] === "string") &&
+    nullableFields.every((field) => isNullableString(record[field])) &&
+    arrayFields.every((field) => isStringArray(record[field])) &&
+    isInspirationEntries(record.inspiration_entries) &&
+    scoreFields.every((field) => record[field] === null || (typeof record[field] === "number" && Number.isFinite(record[field])));
+  if (!hasValidTypes) {
+    issues.push(issue(path, "contains invalid record fields"));
+    return false;
+  }
+  if (!isIsoTimestamp(record.created_at)) issues.push(issue(`${path}.created_at`, "must be a valid ISO-8601 timestamp"));
+  if (!isIsoTimestamp(record.updated_at)) issues.push(issue(`${path}.updated_at`, "must be a valid ISO-8601 timestamp"));
+  const validation = validateReferenceInput(record as ReferenceRecord);
+  if (!validation.ok) {
+    issues.push(issue(path, validation.errors.join("; ")));
+    return false;
+  }
+  return true;
+}
+
+function validateSynthesis(value: unknown, path: string, issues: BackupValidationIssue[]): value is SynthesisRecord {
+  if (!validateRecordShape(value, SYNTHESIS_KEYS, path, issues)) return false;
+  const record: PlainObject = value;
+  const textFields = [
+    "title", "target_asset", "shared_principles", "key_differences", "original_direction", "avoid_copying_notes",
+    "design_constraints", "experiment_plan", "next_actions", "additional_notes",
+  ];
+  const hasValidTypes = isNonEmptyId(record.id) &&
+    typeof record.title === "string" &&
+    textFields.slice(1).every((field) => isNullableString(record[field])) &&
+    typeof record.status === "string" && SYNTHESIS_STATUSES.includes(record.status as SynthesisRecord["status"]);
+  if (!hasValidTypes) {
+    issues.push(issue(path, "contains invalid record fields"));
+    return false;
+  }
+  if (!isIsoTimestamp(record.created_at)) issues.push(issue(`${path}.created_at`, "must be a valid ISO-8601 timestamp"));
+  if (!isIsoTimestamp(record.updated_at)) issues.push(issue(`${path}.updated_at`, "must be a valid ISO-8601 timestamp"));
+  const validation = validateSynthesisInput(record as SynthesisRecord);
+  if (!validation.ok) {
+    issues.push(issue(path, validation.errors.join("; ")));
+    return false;
+  }
+  return true;
+}
+
+function parsePreferences(value: unknown, issues: BackupValidationIssue[]): BackupDevicePreferences | null | undefined {
+  if (value === null) return null;
+  if (!isPlainObject(value) || !hasExactKeys(value, PREFERENCE_KEYS)) {
+    issues.push(issue("preferences", "must be null or a closed preferences object"));
+    return undefined;
+  }
+  if (!isStringArray(value.pinned_reference_ids) || !isPlainObject(value.workspace_layout) || !hasExactKeys(value.workspace_layout, WORKSPACE_LAYOUT_KEYS)) {
+    issues.push(issue("preferences", "contains invalid preference fields"));
+    return undefined;
+  }
+  const layout = value.workspace_layout;
+  if (
+    layout.version !== 1 ||
+    typeof layout.leftWidth !== "number" || !Number.isFinite(layout.leftWidth) ||
+    typeof layout.rightWidth !== "number" || !Number.isFinite(layout.rightWidth) ||
+    typeof layout.leftCollapsed !== "boolean" || typeof layout.rightCollapsed !== "boolean"
+  ) {
+    issues.push(issue("preferences.workspace_layout", "contains invalid workspace layout fields"));
+    return undefined;
+  }
+  return {
+    pinned_reference_ids: parsePinnedReferenceIds(serializePinnedReferenceIds(value.pinned_reference_ids)),
+    workspace_layout: parseWorkspaceLayoutPreferences(JSON.stringify(layout)),
+  };
+}
+
+export function parseRefForgeBackup(value: unknown): BackupParseResult {
+  if (!isPlainObject(value) || value.format !== BACKUP_FORMAT) {
+    return { ok: false, issues: [issue("format", "must be ref-forge-backup", "unsupported_format")] };
+  }
+  if (value.schema_version !== BACKUP_SCHEMA_VERSION) {
+    return { ok: false, issues: [issue("schema_version", "must be 1", "unsupported_version")] };
+  }
+
+  const issues: BackupValidationIssue[] = [];
+  if (!isPlainJsonValue(value) || !hasExactKeys(value, TOP_LEVEL_KEYS)) {
+    issues.push(issue("", "backup must be a closed JSON object"));
+  }
+  if (!isIsoTimestamp(value.exported_at)) issues.push(issue("exported_at", "must be a valid ISO-8601 timestamp"));
+  if (!isPlainObject(value.app) || !hasExactKeys(value.app, APP_KEYS) || value.app.name !== "RefForge") {
+    issues.push(issue("app", "must identify RefForge"));
+  }
+  if (!isPlainObject(value.data) || !hasExactKeys(value.data, DATA_KEYS)) {
+    issues.push(issue("data", "must be a closed data object"));
+  }
+
+  const data = isPlainObject(value.data) ? value.data : undefined;
+  const references = data?.references;
+  const syntheses = data?.syntheses;
+  const relations = data?.synthesis_references;
+  if (!Array.isArray(references) || references.length > MAX_BACKUP_REFERENCES) {
+    issues.push(issue("data.references", "exceeds the reference limit or is not an array", "backup_too_large"));
+  }
+  if (!Array.isArray(syntheses) || syntheses.length > MAX_BACKUP_SYNTHESES) {
+    issues.push(issue("data.syntheses", "exceeds the synthesis limit or is not an array", "backup_too_large"));
+  }
+  if (!Array.isArray(relations) || relations.length > MAX_BACKUP_RELATIONS) {
+    issues.push(issue("data.synthesis_references", "exceeds the relation limit or is not an array", "backup_too_large"));
+  }
+
+  if (!Array.isArray(references) || !Array.isArray(syntheses) || !Array.isArray(relations)) {
+    return { ok: false, issues };
+  }
+
+  const referenceIds = new Set<string>();
+  references.forEach((reference, index) => {
+    const path = `data.references[${index}]`;
+    if (validateReference(reference, path, issues)) {
+      if (referenceIds.has(reference.id)) issues.push(issue(`${path}.id`, "must be unique"));
+      referenceIds.add(reference.id);
+    }
+  });
+
+  const synthesisIds = new Set<string>();
+  syntheses.forEach((synthesis, index) => {
+    const path = `data.syntheses[${index}]`;
+    if (validateSynthesis(synthesis, path, issues)) {
+      if (synthesisIds.has(synthesis.id)) issues.push(issue(`${path}.id`, "must be unique"));
+      synthesisIds.add(synthesis.id);
+    }
+  });
+
+  const relationIds = new Set<string>();
+  const relationsBySynthesis = new Map<string, BackupSynthesisRelation[]>();
+  const availableRelationKeys = new Set<string>();
+  relations.forEach((relation, index) => {
+    const path = `data.synthesis_references[${index}]`;
+    if (!validateRecordShape(relation, RELATION_KEYS, path, issues)) return;
+    if (
+      !isNonEmptyId(relation.id) ||
+      !isNonEmptyId(relation.synthesis_id) ||
+      (relation.reference_id !== null && !isNonEmptyId(relation.reference_id)) ||
+      typeof relation.position !== "number" || !Number.isInteger(relation.position) || relation.position < 0 ||
+      !isPlainObject(relation.snapshot)
+    ) {
+      issues.push(issue(path, "contains invalid relation fields"));
+      return;
+    }
+    if (!isIsoTimestamp(relation.snapshot_updated_at)) {
+      issues.push(issue(`${path}.snapshot_updated_at`, "must be a valid ISO-8601 timestamp"));
+      return;
+    }
+    const snapshot = parseReferenceSnapshot(JSON.stringify(relation.snapshot));
+    if (snapshot === null) {
+      issues.push(issue(`${path}.snapshot`, "must be a valid reference snapshot"));
+      return;
+    }
+    if (relationIds.has(relation.id)) issues.push(issue(`${path}.id`, "must be unique"));
+    relationIds.add(relation.id);
+    if (!synthesisIds.has(relation.synthesis_id)) issues.push(issue(`${path}.synthesis_id`, "must reference a backup synthesis"));
+    if (relation.reference_id !== null) {
+      if (!referenceIds.has(relation.reference_id)) issues.push(issue(`${path}.reference_id`, "must reference a backup reference"));
+      if (snapshot.reference_id !== relation.reference_id) issues.push(issue(`${path}.snapshot.reference_id`, "must match reference_id"));
+      const relationKey = `${relation.synthesis_id}\u0000${relation.reference_id}`;
+      if (availableRelationKeys.has(relationKey)) issues.push(issue(`${path}.reference_id`, "must be unique within a synthesis"));
+      availableRelationKeys.add(relationKey);
+    }
+    const parsedRelation: BackupSynthesisRelation = {
+      id: relation.id,
+      synthesis_id: relation.synthesis_id,
+      reference_id: relation.reference_id,
+      position: relation.position,
+      snapshot,
+      snapshot_updated_at: relation.snapshot_updated_at,
+    };
+    relationsBySynthesis.set(relation.synthesis_id, [...(relationsBySynthesis.get(relation.synthesis_id) ?? []), parsedRelation]);
+  });
+
+  for (const synthesis of syntheses) {
+    if (!isPlainObject(synthesis) || !isNonEmptyId(synthesis.id)) continue;
+    const synthesisRelations = relationsBySynthesis.get(synthesis.id) ?? [];
+    if (synthesisRelations.length < 2 || synthesisRelations.length > 4) {
+      issues.push(issue("data.synthesis_references", "each synthesis must have two to four relations"));
+      continue;
+    }
+    const positions = synthesisRelations.map((relation) => relation.position).sort((left, right) => left - right);
+    if (positions.some((position, index) => position !== index)) {
+      const firstInvalidIndex = synthesisRelations.findIndex((relation) => relation.position !== synthesisRelations.indexOf(relation));
+      issues.push(issue(`data.synthesis_references[${Math.max(firstInvalidIndex, 0)}].position`, "must be contiguous from zero"));
+    }
+  }
+
+  const preferences = parsePreferences(value.preferences, issues);
+  if (issues.length > 0 || preferences === undefined) return { ok: false, issues };
+
+  return {
+    ok: true,
+    backup: {
+      format: BACKUP_FORMAT,
+      schema_version: BACKUP_SCHEMA_VERSION,
+      exported_at: String(value.exported_at),
+      app: { name: "RefForge" },
+      data: {
+        references: references as ReferenceRecord[],
+        syntheses: syntheses as SynthesisRecord[],
+        synthesis_references: relations as BackupSynthesisRelation[],
+      },
+      preferences,
+    },
+  };
+}
+
+export function canonicalBackupJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalBackupJson).join(",")}]`;
+  if (isPlainObject(value)) {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalBackupJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
+}
+
+export async function createBackupDigest(backup: RefForgeBackupV1) {
+  const bytes = new TextEncoder().encode(canonicalBackupJson(backup));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export function createBackupFilename(exportedAt = new Date().toISOString()) {
+  const date = Number.isFinite(Date.parse(exportedAt)) ? new Date(exportedAt) : new Date();
+  return `ref-forge-backup-v1-${date.toISOString().slice(0, 10)}.json`;
+}
+
+export function withBackupPreferences(
+  backup: RefForgeBackupV1,
+  preferences: BackupDevicePreferences | null,
+): RefForgeBackupV1 {
+  if (preferences === null) return { ...backup, preferences: null };
+  return {
+    ...backup,
+    preferences: {
+      pinned_reference_ids: parsePinnedReferenceIds(serializePinnedReferenceIds(preferences.pinned_reference_ids)),
+      workspace_layout: parseWorkspaceLayoutPreferences(serializeWorkspaceLayoutPreferences(preferences.workspace_layout)),
+    },
+  };
+}
