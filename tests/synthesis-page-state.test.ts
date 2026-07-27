@@ -168,10 +168,15 @@ describe("synthesis page comparison selection state", () => {
     const recoveryStart = pageSource.indexOf("async function reselectSynthesisReferences");
     const recoveryEnd = pageSource.indexOf("async function previewMetadata", recoveryStart);
     const recoverySource = pageSource.slice(recoveryStart, recoveryEnd);
+    const reloadStart = pageSource.indexOf("const reloadReferenceLibrary");
+    const reloadEnd = pageSource.indexOf("useEffect(() =>", reloadStart);
+    const reloadSource = pageSource.slice(reloadStart, reloadEnd);
 
     expect(recoveryStart).toBeGreaterThan(-1);
-    expect(recoverySource).toContain('await fetch("/api/references")');
-    expect(recoverySource).toContain("setReferences(rows.length > 0 ? rows : seedReferences)");
+    expect(reloadStart).toBeGreaterThan(-1);
+    expect(reloadSource).toContain('fetch("/api/references")');
+    expect(reloadSource).toContain("setReferences(visibleRows)");
+    expect(recoverySource).toContain("await reloadReferenceLibrary(null)");
     expect(recoverySource).toContain('nextSource === "persisted"');
   });
 });

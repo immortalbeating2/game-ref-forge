@@ -349,7 +349,11 @@ export function DataManagementDialog({
     }
   }
 
-  async function previewBackupFile(file: NonNullable<typeof state.selectedFile>, backup: RefForgeBackupV1) {
+  async function previewBackupFile(
+    file: NonNullable<typeof state.selectedFile>,
+    backup: RefForgeBackupV1,
+    noticeCode?: string,
+  ) {
     const token = ++previewToken.current;
     previewAbort.current?.abort();
     const controller = new AbortController();
@@ -376,7 +380,7 @@ export function DataManagementDialog({
       if (!payload || typeof payload !== "object" || !("preview" in payload) || !isBackupPreview(payload.preview)) {
         throw new Error("backup_operation_failed");
       }
-      dispatch({ type: "preview_succeeded", preview: payload.preview });
+      dispatch({ type: "preview_succeeded", preview: payload.preview, noticeCode });
     } catch (error) {
       if (previewToken.current !== token || controller.signal.aborted) return;
       dispatch({ type: "preview_failed", errorCode: errorCodeFromUnknown(error, "backup_operation_failed") });
@@ -440,7 +444,9 @@ export function DataManagementDialog({
       if (!response.ok) {
         const errorCode = readErrorCode(payload, "backup_operation_failed");
         dispatch({ type: "restore_failed", errorCode });
-        if (errorCode === "preview_stale" && file) void previewBackupFile(file, backup);
+        if (errorCode === "preview_stale" && file) {
+          void previewBackupFile(file, backup, "preview_stale");
+        }
         return;
       }
       const preferences = state.restorePreferences ? backup.preferences : null;

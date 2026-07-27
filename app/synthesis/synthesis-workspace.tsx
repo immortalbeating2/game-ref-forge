@@ -1,5 +1,6 @@
 "use client";
 
+import { DatabaseBackup } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 
@@ -34,6 +35,9 @@ export type SynthesisWorkspaceProps = {
   onInitialDraftConsumed: () => void;
   onReselectReferences: (draft: SynthesisDraft) => void;
   onBackToReferences: () => void;
+  onOpenDataManagement: () => void;
+  onWorkspaceStatusChange: (status: { dirty: boolean; busy: boolean }) => void;
+  restoreEpoch: number;
 };
 
 type PendingNavigation =
@@ -75,6 +79,9 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     onInitialDraftConsumed,
     onReselectReferences,
     onBackToReferences,
+    onOpenDataManagement,
+    onWorkspaceStatusChange,
+    restoreEpoch,
   } = props;
   const copy = uiCopy(language);
   const [summaries, setSummaries] = useState<SynthesisSummary[]>([]);
@@ -103,6 +110,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
   const createReferenceIds = useRef<string[]>([]);
   const consumedInitialIds = useRef<string | null>(null);
   const handledExternalBackRequestToken = useRef(externalBackRequestToken);
+  const handledRestoreEpoch = useRef(restoreEpoch);
   const deleteGuard = useRef(false);
   const mutationGuard = useRef(new Map<string, SynthesisMutationKind>());
 
@@ -122,6 +130,7 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     return JSON.stringify(draft) !== JSON.stringify(createEmptySynthesisDraft());
   }, [activeDetail, draft]);
   const isActiveArchiveBusy = activeDetail !== null && archivingIds.includes(activeDetail.id);
+  const isWorkspaceBusy = isSaving || archivingIds.length > 0 || isRefreshing || isDeleting;
   const mutationBusyIds = useMemo(() => [
     savingId,
     ...archivingIds,
@@ -153,6 +162,39 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
       if (canCommitController(listAbort.current, controller)) setIsListLoading(false);
     }
   }, [fetchList, language, statusFilter]);
+
+  useEffect(() => {
+    onWorkspaceStatusChange({ dirty: isDraftDirty, busy: isWorkspaceBusy });
+  }, [isDraftDirty, isWorkspaceBusy, onWorkspaceStatusChange]);
+
+  useEffect(() => {
+    if (handledRestoreEpoch.current === restoreEpoch) return;
+    handledRestoreEpoch.current = restoreEpoch;
+    listAbort.current?.abort();
+    detailAbort.current?.abort();
+    mutationGuard.current.clear();
+    deleteGuard.current = false;
+    setSummaries([]);
+    setIsListLoading(true);
+    setIsDetailLoading(false);
+    setIsSaving(false);
+    setSavingId(null);
+    setArchivingIds([]);
+    setIsRefreshing(false);
+    setRefreshingSynthesisId(null);
+    setRefreshingRelationId(null);
+    setIsDeleting(false);
+    setDeletingId(null);
+    setPendingDelete(null);
+    setPendingNavigation(null);
+    setCreateNeedsReselection(false);
+    setMessage(null);
+    setError(null);
+    createReferenceIds.current = [];
+    commitWorkspaceState({ activeDetail: null, draft: createEmptySynthesisDraft() });
+    setMode("edit");
+    void reloadList(statusFilter);
+  }, [commitWorkspaceState, reloadList, restoreEpoch, statusFilter]);
 
   const loadDetail = useCallback(async (id: string) => {
     detailAbort.current?.abort();
@@ -405,7 +447,13 @@ export function SynthesisWorkspace(props: SynthesisWorkspaceProps): React.JSX.El
     <section className="synthesis-workspace">
       <header className="synthesis-workspace-header">
         <button className="ghost-button" type="button" onClick={() => requestNavigation({ kind: "back" })}>{copy.referencesView}</button>
-        {isDetailLoading ? <p role="status">{language === "zh" ? "正在加载..." : "Loading..."}</p> : null}
+        <div className="synthesis-workspace-header__actions">
+          {isDetailLoading ? <p role="status">{language === "zh" ? "正在加载..." : "Loading..."}</p> : null}
+          <button className="ghost-button" type="button" onClick={onOpenDataManagement} disabled={isWorkspaceBusy}>
+            <DatabaseBackup aria-hidden="true" size={16} />
+            {copy.dataManagement}
+          </button>
+        </div>
       </header>
       <SynthesisList
         language={language}

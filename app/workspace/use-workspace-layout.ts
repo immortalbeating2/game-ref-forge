@@ -251,6 +251,22 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
       : { ...current, rightCollapsed: false });
   }, []);
 
+  const applyPreferences = useCallback((next: WorkspaceLayoutPreferences) => {
+    const normalized = parseWorkspaceLayoutPreferences(
+      serializeWorkspaceLayoutPreferences(next),
+    );
+    try {
+      window.localStorage.setItem(
+        WORKSPACE_LAYOUT_STORAGE_KEY,
+        serializeWorkspaceLayoutPreferences(normalized),
+      );
+      setPreferences(normalized);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const workspaceStyle = useMemo<WorkspaceStyle>(() => ({
     "--workspace-left-handle-width": `${metrics.leftHandleWidth}px`,
     "--workspace-left-width": `${metrics.leftWidth}px`,
@@ -259,6 +275,7 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
   }), [metrics]);
 
   return {
+    applyPreferences,
     workspaceRef: workspaceRef as RefObject<HTMLElement>,
     preferences,
     metrics,

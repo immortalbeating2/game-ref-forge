@@ -199,6 +199,19 @@ describe("Backup v1 domain contract", () => {
     expect(parseRefForgeBackup(backup).ok).toBe(valid);
   });
 
+  it.each([
+    "2026-07-27T14:11:47.7Z",
+    "2026-07-27T14:11:47.75Z",
+    "2026-07-27T14:11:47.123456Z",
+  ])("accepts valid variable-precision fractional seconds from D1: %s", (timestamp) => {
+    const backup = makeBackupFixture();
+    backup.data.references[1].created_at = timestamp;
+    backup.data.references[1].updated_at = timestamp;
+    backup.data.synthesis_references[1].snapshot.reference_updated_at = timestamp;
+
+    expect(parseRefForgeBackup(backup).ok).toBe(true);
+  });
+
   it.each(["references", "syntheses", "synthesis_references"] as const)(
     "reports a non-array data.%s as validation_failed",
     (field) => {

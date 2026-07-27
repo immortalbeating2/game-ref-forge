@@ -44,7 +44,7 @@ export type DataManagementAction =
   | { type: "file_selection_started" }
   | { type: "file_selected"; file: NonNullable<DataManagementState["selectedFile"]>; backup: RefForgeBackupV1 }
   | { type: "preview_started" }
-  | { type: "preview_succeeded"; preview: BackupPreview }
+  | { type: "preview_succeeded"; preview: BackupPreview; noticeCode?: string }
   | { type: "preview_failed"; errorCode: string; issues?: DataManagementIssue[] }
   | { type: "overwrite_confirmation_changed"; value: boolean }
   | { type: "restore_preferences_changed"; value: boolean }
@@ -128,7 +128,13 @@ export function dataManagementReducer(
       return state.parsedBackup ? { ...state, status: "previewing", errorCode: null, issues: [] } : state;
     case "preview_succeeded":
       return state.parsedBackup
-        ? { ...state, preview: action.preview, status: "ready", errorCode: null, issues: [] }
+        ? {
+            ...state,
+            preview: action.preview,
+            status: "ready",
+            errorCode: action.noticeCode ?? null,
+            issues: [],
+          }
         : state;
     case "preview_failed":
       return {

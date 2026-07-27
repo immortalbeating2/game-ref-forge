@@ -16,6 +16,16 @@ describe("workspace layout interaction source", () => {
     expect(source).not.toContain("preferencesRef");
   });
 
+  it("applies restored workspace preferences only after durable local storage succeeds", () => {
+    const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
+
+    expect(source).toContain("const applyPreferences = useCallback");
+    expect(source).toMatch(
+      /const applyPreferences[\s\S]*parseWorkspaceLayoutPreferences\([\s\S]*serializeWorkspaceLayoutPreferences\(next\)[\s\S]*window\.localStorage\.setItem\([\s\S]*WORKSPACE_LAYOUT_STORAGE_KEY[\s\S]*setPreferences\(normalized\)[\s\S]*return true[\s\S]*catch[\s\S]*return false/,
+    );
+    expect(source).toMatch(/return \{[\s\S]*applyPreferences,[\s\S]*workspaceRef/);
+  });
+
   it("starts pointer resizing from the current resolved panel track", () => {
     const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
     expect(source).toMatch(

@@ -275,6 +275,10 @@ label {
 }
 
 .export-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-width: 118px;
 }
 
@@ -895,6 +899,21 @@ label {
   gap: 12px;
 }
 
+.synthesis-workspace-header__actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.synthesis-workspace-header__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+}
+
 .synthesis-workspace-header p,
 .synthesis-list-message,
 .synthesis-message,
@@ -1376,6 +1395,14 @@ label {
   border-bottom: 1px solid var(--border);
 }
 
+.data-management-tabs button,
+.data-management-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 .data-management-tabs button {
   min-height: 38px;
   border: 0;
@@ -1518,17 +1545,14 @@ label {
   justify-content: flex-end;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 820px) {
   .data-management-overlay {
-    padding: 0;
+    padding: 12px;
   }
 
   .data-management-dialog {
-    width: 100%;
-    max-height: 100dvh;
-    min-height: 100dvh;
-    border: 0;
-    border-radius: 0;
+    width: min(100%, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
     padding: 16px;
   }
 
@@ -1547,6 +1571,14 @@ label {
 
   .data-management-actions button {
     min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .data-management-dialog,
+  .data-management-dialog button,
+  .data-management-file-picker {
+    transition: none;
   }
 }
 

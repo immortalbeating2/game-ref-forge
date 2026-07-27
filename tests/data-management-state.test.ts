@@ -138,6 +138,27 @@ describe("data management state", () => {
     expect(canSubmitRestore(state)).toBe(false);
   });
 
+  it("keeps the stale-preview notice after the automatic replacement preview succeeds", () => {
+    const stale = dataManagementReducer(
+      {
+        ...previewReadyState(),
+        overwriteConfirmed: true,
+      },
+      { type: "restore_failed", errorCode: "preview_stale" },
+    );
+    const previewing = dataManagementReducer(stale, { type: "preview_started" });
+    const refreshed = dataManagementReducer(previewing, {
+      type: "preview_succeeded",
+      preview: { ...preview, state_digest: "replacement-state" },
+      noticeCode: "preview_stale",
+    });
+
+    expect(refreshed.status).toBe("ready");
+    expect(refreshed.errorCode).toBe("preview_stale");
+    expect(refreshed.preview?.state_digest).toBe("replacement-state");
+    expect(refreshed.overwriteConfirmed).toBe(false);
+  });
+
   it("keeps a bounded preview issue list separate from its safe error code", () => {
     const state = dataManagementReducer(
       dataManagementReducer(createDataManagementState(), {

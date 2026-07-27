@@ -223,6 +223,7 @@ describe("DataManagementDialog interactions", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
     await waitFor(() => expect(summaryValue(3)).toBeTruthy());
+    expect(screen.getByText("Research data changed after preview. Preview again.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Restore data" })).toBeTruthy();
   });
 

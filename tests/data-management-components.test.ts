@@ -17,6 +17,41 @@ describe("data management dialog source contracts", () => {
     expect(source).toContain('type="checkbox"');
   });
 
+  it("is owned once by the page and opened from both workspace views", () => {
+    const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+    expect(page).toContain('import { DataManagementDialog } from "./data-management/data-management-dialog"');
+    expect(page.match(/<DataManagementDialog/g)).toHaveLength(1);
+    expect(page).toContain("setIsDataManagementOpen(true)");
+    expect(page).toContain("onOpenDataManagement={openDataManagement}");
+    expect(page).toContain("onWorkspaceStatusChange={setSynthesisWorkspaceStatus}");
+    expect(page).toContain("restoreEpoch={restoreEpoch}");
+    expect(page).not.toContain("createReferenceJsonExport");
+    expect(page).not.toContain("exportLibraryJson");
+  });
+
+  it("coordinates dirty and busy gates with restored library and device preferences", () => {
+    const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+    expect(page).toContain("const hasUnsavedDraft");
+    expect(page).toContain("const businessMutationBusy");
+    expect(page).toContain("reloadReferenceLibrary");
+    expect(page).toContain("applyPreferences");
+    expect(page).toContain("persistedReferenceIds.has(id)");
+    expect(page).toContain("PINNED_REFERENCES_STORAGE_KEY");
+    expect(page).toContain('return "failed"');
+    expect(page).toContain('return "applied"');
+    expect(page).toContain('return "not_requested"');
+  });
+
+  it("keeps data-management icons and labels aligned at desktop and mobile widths", () => {
+    const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+
+    expect(css).toMatch(
+      /\.data-management-tabs button,[\s\S]*?\.data-management-actions button\s*\{[\s\S]*?display:\s*inline-flex;[\s\S]*?align-items:\s*center;[\s\S]*?justify-content:\s*center;[\s\S]*?gap:\s*6px;/,
+    );
+  });
+
   it("uses the three Backup v1 endpoints without rendering the parsed JSON", () => {
     const source = readFileSync(dialogPath, "utf8");
 

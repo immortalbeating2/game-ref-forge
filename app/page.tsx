@@ -1,6 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { DatabaseBackup } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import type { BackupDevicePreferences } from "../lib/backup";
 import {
   ASSET_CATEGORIES,
   AssetCategory,
@@ -78,12 +80,14 @@ import {
   type ReferenceDataSource,
 } from "../lib/synthesis-selection";
 import type { SynthesisDraft } from "../lib/synthesis-draft";
+import { DataManagementDialog } from "./data-management/data-management-dialog";
 import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
 import { SynthesisConfirmation } from "./synthesis/synthesis-confirmation";
 import { useWorkspaceLayout } from "./workspace/use-workspace-layout";
 import { WorkspaceSeparator } from "./workspace/workspace-separator";
 
 type WorkspaceView = "references" | "syntheses";
+type SynthesisWorkspaceStatus = { dirty: boolean; busy: boolean };
 
 const seedReferences: ReferenceRecord[] = [
   {
@@ -204,6 +208,7 @@ export default function Home() {
     separatorHandlers,
     togglePanel,
     restorePanel,
+    applyPreferences,
   } = useWorkspaceLayout(workspaceView);
   const [comparisonSelection, setComparisonSelection] = useState<ComparisonSelectionState>({
     isActive: false,
@@ -237,11 +242,16 @@ export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewStatus, setPreviewStatus] = useState<MetadataPreviewStatus>("idle");
+  const [isSavingReference, setIsSavingReference] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [referenceDataSource, setReferenceDataSource] =
     useState<ReferenceDataSource>("loading");
+  const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
+  const [synthesisWorkspaceStatus, setSynthesisWorkspaceStatus] =
+    useState<SynthesisWorkspaceStatus>({ dirty: false, busy: false });
+  const [restoreEpoch, setRestoreEpoch] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const copy = uiCopy(language);
   const isComparisonSelectionMode = comparisonSelection.isActive;
@@ -402,25 +412,37 @@ export default function Home() {
     }
   }
 
+  const reloadReferenceLibrary = useCallback(async (preferredId?: string | null) => {
+    const response = await fetch("/api/references");
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.error ?? "Failed to load references");
+    }
+
+    const rows = payload.references as ReferenceRecord[];
+    const nextSource: ReferenceDataSource = rows.length > 0 ? "persisted" : "seed";
+    const visibleRows = rows.length > 0 ? rows : seedReferences;
+    setReferenceDataSource(nextSource);
+    setComparisonSelection((current) =>
+      reconcileComparisonSelectionSource(current, nextSource),
+    );
+    setReferences(visibleRows);
+    setSelectedId((current) => {
+      const candidate = preferredId === undefined ? current : preferredId;
+      return candidate && visibleRows.some((reference) => reference.id === candidate)
+        ? candidate
+        : visibleRows[0]?.id ?? null;
+    });
+    return rows;
+  }, []);
+
   useEffect(() => {
-    async function loadReferences() {
-      try {
-        const response = await fetch("/api/references");
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload.error ?? "Failed to load references");
-        }
-
-        const rows = payload.references as ReferenceRecord[];
-        const nextSource = rows.length > 0 ? "persisted" : "seed";
-        setReferenceDataSource(nextSource);
-        setComparisonSelection((current) =>
-          reconcileComparisonSelectionSource(current, nextSource),
-        );
-        setReferences(rows.length > 0 ? rows : seedReferences);
-        setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
-      } catch (error) {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      void reloadReferenceLibrary(null).catch((error) => {
+        if (cancelled) return;
         setReferenceDataSource("seed");
         setComparisonSelection((current) =>
           reconcileComparisonSelectionSource(current, "seed"),
@@ -428,11 +450,13 @@ export default function Home() {
         setReferences(seedReferences);
         setSelectedId(seedReferences[0]?.id ?? null);
         setMessage(error instanceof Error ? error.message : null);
-      }
-    }
+      });
+    });
 
-    loadReferences();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadReferenceLibrary]);
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -472,6 +496,19 @@ export default function Home() {
     references,
     selectedId,
   );
+  const editedReference = editingId
+    ? references.find((reference) => reference.id === editingId) ?? null
+    : null;
+  const hasUnsavedDraft =
+    (isFormOpen && JSON.stringify(draft) !== JSON.stringify(createEmptyReferenceDraft())) ||
+    Boolean(editDraft && editedReference && isReferenceDraftDirty(editDraft, editedReference)) ||
+    synthesisWorkspaceStatus.dirty;
+  const businessMutationBusy =
+    isPreviewing ||
+    isSavingReference ||
+    isSavingEdit ||
+    isDeleting ||
+    synthesisWorkspaceStatus.busy;
   const isEditingSelected = Boolean(
     selectedReference && editingId === selectedReference.id && editDraft,
   );
@@ -697,15 +734,8 @@ export default function Home() {
     setComparisonSelection({ isActive: false, referenceIds: [] });
 
     try {
-      const response = await fetch("/api/references");
-      const payload = await response.json();
-      if (!response.ok) throw new Error("reference reload failed");
-
-      const rows = payload.references as ReferenceRecord[];
+      const rows = await reloadReferenceLibrary(null);
       const nextSource: ReferenceDataSource = rows.length > 0 ? "persisted" : "seed";
-      setReferenceDataSource(nextSource);
-      setReferences(rows.length > 0 ? rows : seedReferences);
-      setSelectedId(rows[0]?.id ?? seedReferences[0]?.id ?? null);
       setComparisonSelection(
         nextSource === "persisted"
           ? { isActive: true, referenceIds: [] }
@@ -764,6 +794,10 @@ export default function Home() {
 
   async function saveReference(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSavingReference) {
+      return;
+    }
+    setIsSavingReference(true);
     setMessage(null);
 
     const input = draftToReferenceInput(draft);
@@ -795,6 +829,8 @@ export default function Home() {
       setMessage(copy.savedPrivate);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : copy.saveFailed);
+    } finally {
+      setIsSavingReference(false);
     }
   }
 
@@ -938,6 +974,66 @@ export default function Home() {
 
   function togglePinnedReference(referenceId: string) {
     setPinnedReferenceIds((current) => togglePinnedReferenceId(current, referenceId));
+  }
+
+  const openDataManagement = useCallback(() => {
+    setIsDataManagementOpen(true);
+  }, []);
+
+  async function handleRestoreCommitted(
+    preferences: BackupDevicePreferences | null,
+  ): Promise<"applied" | "failed" | "not_requested"> {
+    const preferredSelectedId = selectedId;
+    setIsFormOpen(false);
+    setDraft(createEmptyReferenceDraft());
+    setPreviewStatus("idle");
+    setEditingId(null);
+    setEditDraft(null);
+    clearQualityEditSession();
+    setPendingDeleteId(null);
+    setPendingComparisonStart(false);
+    setComparisonSelection({ isActive: false, referenceIds: [] });
+    setPendingSynthesisReferenceIds([]);
+    setPendingSynthesisDraft(null);
+    setMessage(null);
+
+    const persistedRows = await reloadReferenceLibrary(preferredSelectedId);
+    setRestoreEpoch((current) => current + 1);
+
+    if (!preferences) {
+      return "not_requested";
+    }
+
+    const persistedReferenceIds = new Set(persistedRows.map((reference) => reference.id));
+    const restoredPinnedIds = preferences.pinned_reference_ids.filter((id) =>
+      persistedReferenceIds.has(id),
+    );
+    let previousPinned: string | null;
+    try {
+      previousPinned = window.localStorage.getItem(PINNED_REFERENCES_STORAGE_KEY);
+      window.localStorage.setItem(
+        PINNED_REFERENCES_STORAGE_KEY,
+        serializePinnedReferenceIds(restoredPinnedIds),
+      );
+    } catch {
+      return "failed";
+    }
+
+    if (!applyPreferences(preferences.workspace_layout)) {
+      try {
+        if (previousPinned === null) {
+          window.localStorage.removeItem(PINNED_REFERENCES_STORAGE_KEY);
+        } else {
+          window.localStorage.setItem(PINNED_REFERENCES_STORAGE_KEY, previousPinned);
+        }
+      } catch {
+        // The server restore remains successful even when device preference rollback is unavailable.
+      }
+      return "failed";
+    }
+
+    setPinnedReferenceIds(restoredPinnedIds);
+    return "applied";
   }
 
   function downloadText(content: string, filename: string, type: string) {
@@ -1199,6 +1295,15 @@ export default function Home() {
               </select>
             </label>
             <div className="export-actions">
+              <button
+                className="ghost-button"
+                type="button"
+                onClick={openDataManagement}
+                disabled={businessMutationBusy}
+              >
+                <DatabaseBackup aria-hidden="true" size={16} />
+                {copy.dataManagement}
+              </button>
               <button
                 className="ghost-button"
                 type="button"
@@ -1510,7 +1615,9 @@ export default function Home() {
               <button type="button" className="ghost-button" onClick={previewMetadata} disabled={isPreviewing}>
                 {isPreviewing ? copy.previewingMetadata : copy.previewMetadata}
               </button>
-              <button type="submit">{copy.savePrivateReference}</button>
+              <button type="submit" disabled={isSavingReference}>
+                {isSavingReference ? copy.saving : copy.savePrivateReference}
+              </button>
             </div>
             {metadataPreviewMessage(previewStatus) ? (
               <p className={`form-status form-status--${previewStatus}`}>
@@ -2315,8 +2422,23 @@ export default function Home() {
           onInitialDraftConsumed={() => setPendingSynthesisDraft(null)}
           onReselectReferences={reselectSynthesisReferences}
           onBackToReferences={() => setWorkspaceView("references")}
+          onOpenDataManagement={openDataManagement}
+          onWorkspaceStatusChange={setSynthesisWorkspaceStatus}
+          restoreEpoch={restoreEpoch}
         />
       )}
+      <DataManagementDialog
+        open={isDataManagementOpen}
+        language={language}
+        devicePreferences={{
+          pinned_reference_ids: pinnedReferenceIds,
+          workspace_layout: workspacePreferences,
+        }}
+        hasUnsavedDraft={hasUnsavedDraft}
+        businessMutationBusy={businessMutationBusy}
+        onClose={() => setIsDataManagementOpen(false)}
+        onRestoreCommitted={handleRestoreCommitted}
+      />
     </main>
   );
 }

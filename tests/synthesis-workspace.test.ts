@@ -131,6 +131,43 @@ describe("synthesis workspace state regressions", () => {
     expect(workspaceSource).toContain("<SynthesisConfirmation");
   });
 
+  it("reports dirty and busy state to the root workspace", () => {
+    const source = readFileSync(
+      new URL("../app/synthesis/synthesis-workspace.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("onWorkspaceStatusChange");
+    expect(source).toContain("const isWorkspaceBusy");
+    expect(source).toMatch(
+      /useEffect\(\(\) => \{[\s\S]*onWorkspaceStatusChange\(\{ dirty: isDraftDirty, busy: isWorkspaceBusy \}\)/,
+    );
+  });
+
+  it("resets synthesis transients and reloads the active filter after restore", () => {
+    const source = readFileSync(
+      new URL("../app/synthesis/synthesis-workspace.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("restoreEpoch");
+    expect(source).toContain("handledRestoreEpoch");
+    expect(source).toMatch(
+      /restoreEpoch[\s\S]*listAbort\.current\?\.abort\(\)[\s\S]*detailAbort\.current\?\.abort\(\)[\s\S]*setPendingDelete\(null\)[\s\S]*setPendingNavigation\(null\)[\s\S]*createEmptySynthesisDraft\(\)[\s\S]*reloadList\(statusFilter\)/,
+    );
+  });
+
+  it("opens the shared data management dialog from the synthesis header", () => {
+    const source = readFileSync(
+      new URL("../app/synthesis/synthesis-workspace.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("onOpenDataManagement");
+    expect(source).toContain("<DatabaseBackup");
+    expect(source).toMatch(/synthesis-workspace-header[\s\S]*onClick=\{onOpenDataManagement\}/);
+  });
+
   it("does not start Save A while Archive A is pending", async () => {
     const guard = { current: new Map() };
     const requests: string[] = [];
