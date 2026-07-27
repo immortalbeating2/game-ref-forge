@@ -209,7 +209,10 @@ function makeLargeValidBackup(input: {
   };
 }
 
-function useNativeD1(options: { rejectBatch?: boolean } = {}) {
+function useNativeD1(options: {
+  rejectBatch?: boolean;
+  rejectEmptyBatch?: boolean;
+} = {}) {
   const prepared: Array<{
     sql: string;
     params: unknown[];
@@ -227,9 +230,15 @@ function useNativeD1(options: { rejectBatch?: boolean } = {}) {
     prepared.push(statement);
     return statement;
   });
-  const batch = options.rejectBatch
-    ? vi.fn().mockRejectedValue(new Error("injected D1 batch failure"))
-    : vi.fn().mockResolvedValue([]);
+  const batch = vi.fn(async (statements: unknown[]) => {
+    if (options.rejectBatch) {
+      throw new Error("injected D1 batch failure");
+    }
+    if (options.rejectEmptyBatch && statements.length === 0) {
+      throw new Error("D1 rejects an empty batch");
+    }
+    return [];
+  });
   const binding = { prepare, batch };
   vi.mocked(getD1Binding).mockReturnValue(binding as never);
   return { binding, prepared };
@@ -635,6 +644,100 @@ describe("backup restore operation generation", () => {
 });
 
 describe("guarded backup restore", () => {
+  it.each([
+    ["empty library", null, false],
+    ["preferences-only", {
+      pinned_reference_ids: [],
+      workspace_layout: {
+        version: 1 as const,
+        leftWidth: 260,
+        rightWidth: 420,
+        leftCollapsed: false,
+        rightCollapsed: false,
+      },
+    }, true],
+  ])("returns the current preview for a zero-operation %s backup without D1 access", async (
+    _case,
+    preferences,
+    currentHasData,
+  ) => {
+    const backup = makeLargeValidBackup({
+      references: 0,
+      syntheses: 0,
+      relations: 0,
+    });
+    backup.preferences = preferences;
+    const currentBackup = makeBackupFixture();
+    const inventory = currentHasData
+      ? {
+          references: currentBackup.data.references,
+          syntheses: currentBackup.data.syntheses,
+          relations: currentBackup.data.synthesis_references,
+        }
+      : { references: [], syntheses: [], relations: [] };
+    const readDb = configureBackupReadDb(currentHasData
+      ? completeRows()
+      : { references: [], syntheses: [], relations: [] });
+    const { binding } = useNativeD1({ rejectEmptyBatch: true });
+    const backupDigest = await createBackupDigest(backup);
+    const stateDigest = await createStateDigest(inventory);
+
+    const result = await restoreBackup({
+      backup,
+      backup_digest: backupDigest,
+      state_digest: stateDigest,
+      confirm_overwrite: false,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      preview: {
+        references: { create: 0, overwrite: 0, preserve: currentHasData ? 2 : 0 },
+        syntheses: { create: 0, overwrite: 0, preserve: currentHasData ? 1 : 0 },
+        relations: { restore: 0, historical: 0 },
+        contains_preferences: preferences !== null,
+        backup_digest: backupDigest,
+        state_digest: stateDigest,
+      },
+    });
+    expect(readDb.batch).toHaveBeenCalledTimes(1);
+    expect(getD1Binding).not.toHaveBeenCalled();
+    expect(binding.prepare).not.toHaveBeenCalled();
+    expect(binding.batch).not.toHaveBeenCalled();
+  });
+
+  it("still verifies both digests before a zero-operation restore succeeds", async () => {
+    const backup = makeLargeValidBackup({
+      references: 0,
+      syntheses: 0,
+      relations: 0,
+    });
+    const backupDigest = await createBackupDigest(backup);
+
+    await expect(restoreBackup({
+      backup,
+      backup_digest: "0".repeat(64),
+      state_digest: "1".repeat(64),
+      confirm_overwrite: false,
+    })).resolves.toEqual({ ok: false, code: "backup_changed" });
+    expect(getDb).not.toHaveBeenCalled();
+    expect(getD1Binding).not.toHaveBeenCalled();
+
+    const readDb = configureBackupReadDb({
+      references: [],
+      syntheses: [],
+      relations: [],
+    });
+    await expect(restoreBackup({
+      backup,
+      backup_digest: backupDigest,
+      state_digest: "0".repeat(64),
+      confirm_overwrite: false,
+    })).resolves.toEqual({ ok: false, code: "preview_stale" });
+    expect(readDb.batch).toHaveBeenCalledTimes(1);
+    expect(getD1Binding).not.toHaveBeenCalled();
+  });
+
   it("rechecks digests and executes every operation in one native D1 batch", async () => {
     const backup = makeBackupFixture();
     const inventory = {

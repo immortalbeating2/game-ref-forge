@@ -589,6 +589,9 @@ export async function restoreBackup(
 
   try {
     const operations = buildBackupRestoreOperations(parsed.backup);
+    if (operations.length === 0) {
+      return { ok: true, preview };
+    }
     const binding = getD1Binding();
     const statements = operations.map(({ sql, params }) =>
       binding.prepare(sql).bind(...params));
