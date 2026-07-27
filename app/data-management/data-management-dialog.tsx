@@ -160,6 +160,7 @@ export function DataManagementDialog({
   const exportToken = useRef(0);
   const restoreToken = useRef(0);
   const previewAbort = useRef<AbortController | null>(null);
+  const exportAbort = useRef<AbortController | null>(null);
   const titleId = useId();
   const statusId = useId();
   const backupTabId = useId();
@@ -167,7 +168,10 @@ export function DataManagementDialog({
   const backupPanelId = useId();
   const restorePanelId = useId();
   const isRestoring = state.status === "restoring";
-  const isBusy = isRestoring || businessMutationBusy;
+  const isPreviewing = state.status === "previewing";
+  const isExporting = state.exportStatus === "exporting";
+  const isBusy = isRestoring || isPreviewing || isExporting || businessMutationBusy;
+  const isFileSelectionBlocked = isRestoring || isExporting || businessMutationBusy;
   const activeDialogLayer = getDataManagementDialogLayer(confirmDiscardDraft);
   const message = state.exportErrorCode
     ? backupErrorMessage(state.exportErrorCode, language)
@@ -182,6 +186,8 @@ export function DataManagementDialog({
     restoreToken.current += 1;
     previewAbort.current?.abort();
     previewAbort.current = null;
+    exportAbort.current?.abort();
+    exportAbort.current = null;
     restoreGuard.current = false;
     exportGuard.current = false;
   }, []);
@@ -296,13 +302,17 @@ export function DataManagementDialog({
   }
 
   async function handleBackup() {
-    if (businessMutationBusy || isRestoring || exportGuard.current) return;
+    if (isBusy || exportGuard.current) return;
     const token = ++exportToken.current;
+    const controller = new AbortController();
+    const isCurrentExport = () => exportToken.current === token && !controller.signal.aborted;
     exportGuard.current = true;
+    exportAbort.current = controller;
     dispatch({ type: "export_started" });
     try {
-      const response = await fetch("/api/backup");
+      const response = await fetch("/api/backup", { signal: controller.signal });
       const payload = await readResponseJson(response);
+      if (!isCurrentExport()) return;
       if (!response.ok) throw new Error(readErrorCode(payload, "backup_operation_failed"));
       const parsed = parseRefForgeBackup(payload);
       if (!parsed.ok) throw new Error("backup_operation_failed");
@@ -310,24 +320,32 @@ export function DataManagementDialog({
         parsed.backup,
         state.includePreferences ? devicePreferences : null,
       );
+      if (!isCurrentExport()) return;
       const objectUrl = URL.createObjectURL(new Blob([canonicalBackupJson(backup)], { type: "application/json" }));
       try {
+        if (!isCurrentExport()) return;
         const download = document.createElement("a");
         download.href = objectUrl;
         download.download = createBackupFilename(backup.exported_at);
+        if (!isCurrentExport()) return;
         document.body.append(download);
+        if (!isCurrentExport()) {
+          download.remove();
+          return;
+        }
         download.click();
         download.remove();
       } finally {
         URL.revokeObjectURL(objectUrl);
       }
-      if (exportToken.current === token) dispatch({ type: "export_finished" });
+      if (isCurrentExport()) dispatch({ type: "export_finished" });
     } catch (error) {
-      if (exportToken.current === token) {
+      if (isCurrentExport()) {
         dispatch({ type: "export_failed", errorCode: errorCodeFromUnknown(error, "backup_operation_failed") });
       }
     } finally {
       if (exportToken.current === token) exportGuard.current = false;
+      if (exportToken.current === token) exportAbort.current = null;
     }
   }
 
@@ -370,7 +388,7 @@ export function DataManagementDialog({
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
-    if (!file || isRestoring) return;
+    if (!file || isFileSelectionBlocked) return;
     const token = ++fileReadToken.current;
     previewToken.current += 1;
     previewAbort.current?.abort();
@@ -475,16 +493,16 @@ export function DataManagementDialog({
             <p className="data-management-dialog__eyebrow"><DatabaseBackup aria-hidden="true" size={18} /> {copy.dataManagement}</p>
             <h2 ref={titleRef} id={titleId} tabIndex={-1}>{copy.dataManagement}</h2>
           </div>
-          <button type="button" className="ghost-button data-management-dialog__close" onClick={handleClose} disabled={isRestoring} aria-label={copy.closeDataManagement}>
+          <button type="button" className="ghost-button data-management-dialog__close" onClick={handleClose} disabled={isBusy} aria-label={copy.closeDataManagement}>
             <X aria-hidden="true" size={18} />
           </button>
         </header>
 
         <div className="data-management-tabs" role="tablist" aria-label={copy.dataManagement}>
-          <button ref={backupTabRef} id={backupTabId} type="button" role="tab" aria-selected={state.tab === "backup"} aria-controls={backupPanelId} tabIndex={state.tab === "backup" ? 0 : -1} onClick={() => selectTab("backup")} onKeyDown={handleTabKeyDown} disabled={isRestoring}>
+          <button ref={backupTabRef} id={backupTabId} type="button" role="tab" aria-selected={state.tab === "backup"} aria-controls={backupPanelId} tabIndex={state.tab === "backup" ? 0 : -1} onClick={() => selectTab("backup")} onKeyDown={handleTabKeyDown} disabled={isFileSelectionBlocked}>
             <Download aria-hidden="true" size={16} /> {copy.backupTab}
           </button>
-          <button ref={restoreTabRef} id={restoreTabId} type="button" role="tab" aria-selected={state.tab === "restore"} aria-controls={restorePanelId} tabIndex={state.tab === "restore" ? 0 : -1} onClick={() => selectTab("restore")} onKeyDown={handleTabKeyDown} disabled={isRestoring}>
+          <button ref={restoreTabRef} id={restoreTabId} type="button" role="tab" aria-selected={state.tab === "restore"} aria-controls={restorePanelId} tabIndex={state.tab === "restore" ? 0 : -1} onClick={() => selectTab("restore")} onKeyDown={handleTabKeyDown} disabled={isFileSelectionBlocked}>
             <Upload aria-hidden="true" size={16} /> {copy.restoreTab}
           </button>
         </div>
@@ -508,7 +526,7 @@ export function DataManagementDialog({
             </label>
             <p className="data-management-note">{copy.transparentJsonWarning}</p>
             <div className="data-management-actions">
-              <button type="button" onClick={() => void handleBackup()} disabled={businessMutationBusy || isRestoring || state.exportStatus === "exporting"}>
+              <button type="button" onClick={() => void handleBackup()} disabled={isBusy}>
                 <Download aria-hidden="true" size={16} /> {state.exportStatus === "exporting" ? copy.exportingBackup : copy.fullBackup}
               </button>
             </div>
@@ -518,7 +536,7 @@ export function DataManagementDialog({
             <label className="data-management-file-picker">
               <Upload aria-hidden="true" size={16} />
               <span>{state.selectedFile ? copy.changeBackupFile : copy.chooseBackupFile}</span>
-              <input type="file" accept=".json,application/json" onChange={(event) => void handleFileChange(event)} disabled={isRestoring} />
+              <input type="file" accept=".json,application/json" onChange={(event) => void handleFileChange(event)} disabled={isFileSelectionBlocked} />
             </label>
 
             {state.selectedFile ? <p className="data-management-file-name"><strong>{copy.backupFileDetails}</strong> {state.selectedFile.name} ({Math.ceil(state.selectedFile.size / 1024)} KB)</p> : null}

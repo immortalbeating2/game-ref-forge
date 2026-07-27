@@ -103,6 +103,7 @@ describe("DataManagementDialog interactions", () => {
 
     await chooseBackup(user, backupFile("a.json"));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole("button", { name: "Close data management" })).toHaveProperty("disabled", true);
     await chooseBackup(user, backupFile("b.json"));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 
@@ -127,24 +128,84 @@ describe("DataManagementDialog interactions", () => {
     await waitFor(() => expect(screen.queryByText(/Create 7/)).toBeNull());
   });
 
-  it("keeps export single-flight and does not replace an active restore preview", async () => {
+  it("keeps export single-flight and locks restore controls while export is pending", async () => {
     const user = userEvent.setup();
     const exportRequest = deferred<Response>();
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
     const fetchMock = vi.fn()
-      .mockReturnValueOnce(exportRequest.promise)
-      .mockResolvedValueOnce(response({ preview: makePreview(9) }));
+      .mockResolvedValueOnce(response({ preview: makePreview(9) }))
+      .mockReturnValueOnce(exportRequest.promise);
     vi.stubGlobal("fetch", fetchMock);
     render(<DataManagementDialog {...props()} />);
 
-    await user.dblClick(screen.getByRole("button", { name: "Export full backup" }));
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-
     await chooseBackup(user);
     await waitFor(() => expect(summaryValue(9)).toBeTruthy());
+    await user.click(screen.getByRole("tab", { name: "Backup" }));
+    await user.dblClick(screen.getByRole("button", { name: "Export full backup" }));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("tab", { name: "Restore" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Close data management" })).toHaveProperty("disabled", true);
+
     exportRequest.resolve(response(makeBackupFixture()));
+    await waitFor(() => expect(screen.getByRole("tab", { name: "Restore" })).toHaveProperty("disabled", false));
+    await user.click(screen.getByRole("tab", { name: "Restore" }));
     await waitFor(() => expect(summaryValue(9)).toBeTruthy());
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("aborts a deferred export on close and reopen before it can download", async () => {
+    const user = userEvent.setup();
+    const exportRequest = deferred<Response>();
+    const download = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const fetchMock = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(
+      () => exportRequest.promise,
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(<DataManagementDialog {...props()} />);
+
+    await user.click(screen.getByRole("button", { name: "Export full backup" }));
+    const request = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    view.rerender(<DataManagementDialog {...props({ open: false })} />);
+    view.rerender(<DataManagementDialog {...props({ open: true })} />);
+    exportRequest.resolve(response(makeBackupFixture()));
+
+    await waitFor(() => expect(request.signal?.aborted).toBe(true));
+    await waitFor(() => expect(download).not.toHaveBeenCalled());
+  });
+
+  it("does not download when export JSON resolves after the dialog closes", async () => {
+    const user = userEvent.setup();
+    const payload = deferred<unknown>();
+    const json = vi.fn(() => payload.promise);
+    const download = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve({ ok: true, status: 200, json } as unknown as Response)));
+    const view = render(<DataManagementDialog {...props()} />);
+
+    await user.click(screen.getByRole("button", { name: "Export full backup" }));
+    await waitFor(() => expect(json).toHaveBeenCalledTimes(1));
+    payload.resolve(makeBackupFixture());
+    view.rerender(<DataManagementDialog {...props({ open: false })} />);
+
+    await waitFor(() => expect(download).not.toHaveBeenCalled());
+  });
+
+  it("aborts a deferred export on unmount before it can download", async () => {
+    const user = userEvent.setup();
+    const exportRequest = deferred<Response>();
+    const download = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const fetchMock = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(
+      () => exportRequest.promise,
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(<DataManagementDialog {...props()} />);
+
+    await user.click(screen.getByRole("button", { name: "Export full backup" }));
+    const request = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    view.unmount();
+    exportRequest.resolve(response(makeBackupFixture()));
+
+    await waitFor(() => expect(request.signal?.aborted).toBe(true));
+    await waitFor(() => expect(download).not.toHaveBeenCalled());
   });
 
   it("clears stale digests and automatically previews the retained parsed file again", async () => {
@@ -163,6 +224,29 @@ describe("DataManagementDialog interactions", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
     await waitFor(() => expect(summaryValue(3)).toBeTruthy());
     expect(screen.getByRole("button", { name: "Restore data" })).toBeTruthy();
+  });
+
+  it("disables close while restore is pending", async () => {
+    const user = userEvent.setup();
+    const restoreRequest = deferred<Response>();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response({ preview: makePreview(1) }))
+      .mockReturnValueOnce(restoreRequest.promise);
+    vi.stubGlobal("fetch", fetchMock);
+    render(<DataManagementDialog {...props()} />);
+
+    await chooseBackup(user);
+    await waitFor(() => expect(summaryValue(1)).toBeTruthy());
+    await user.click(screen.getByRole("button", { name: "Restore data" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(screen.getByRole("button", { name: "Close data management" })).toHaveProperty("disabled", true);
+    restoreRequest.resolve(response({ restored: true }));
+  });
+
+  it("disables close while an external business mutation is busy", () => {
+    render(<DataManagementDialog {...props({ businessMutationBusy: true })} />);
+
+    expect(screen.getByRole("button", { name: "Close data management" })).toHaveProperty("disabled", true);
   });
 
   it("locks both dirty-confirmation actions when business work becomes busy and restores focus after success", async () => {

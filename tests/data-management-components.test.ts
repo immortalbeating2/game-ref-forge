@@ -20,7 +20,7 @@ describe("data management dialog source contracts", () => {
   it("uses the three Backup v1 endpoints without rendering the parsed JSON", () => {
     const source = readFileSync(dialogPath, "utf8");
 
-    expect(source).toContain('fetch("/api/backup")');
+    expect(source).toContain('fetch("/api/backup", { signal: controller.signal })');
     expect(source).toContain('fetch("/api/backup/preview"');
     expect(source).toContain('fetch("/api/backup/restore"');
     expect(source).not.toMatch(/JSON\.stringify\(parsedBackup\)/);
@@ -28,11 +28,13 @@ describe("data management dialog source contracts", () => {
     expect(source).toContain("slice(0, 3)");
   });
 
-  it("keeps restore single-flight and download URLs cleaned up", () => {
+  it("keeps business operations guarded and download URLs cleaned up", () => {
     const source = readFileSync(dialogPath, "utf8");
 
     expect(source).toContain("isRestoring");
-    expect(source).toMatch(/onClick=\{handleClose\}[\s\S]{0,120}disabled=\{isRestoring\}/);
+    expect(source).toContain("const isBusy = isRestoring || isPreviewing || isExporting || businessMutationBusy");
+    expect(source).toMatch(/onClick=\{handleClose\}[\s\S]{0,120}disabled=\{isBusy\}/);
+    expect(source).toContain("exportAbort.current?.abort()");
     expect(source).toContain("URL.revokeObjectURL");
     expect(source).toContain("tryAcquireOperationGuard");
   });
