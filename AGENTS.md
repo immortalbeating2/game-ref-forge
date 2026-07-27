@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 12 complete; Round 13 design-ready`
+- 当前阶段：`Round 13 design confirmed; written spec review pending`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,12 +142,12 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 12 complete; Round 13 design-ready`。Round 12 已完成可调三栏工作台、折叠恢复、键盘控制、版本化本地偏好和响应式降级，已合并到 `main`、通过最终独立审查与 merged-main 门禁，并以 Sites version 14 完成认证生产站只读布局复测。Round 11 的 reference/synthesis 生产 CRUD 基线保持不变。
+本项目当前为 `Round 13 design confirmed; written spec review pending`。Round 13 已确认全库 Backup v1、受控恢复、差异预览、可选设备偏好和生产临时数据复测方向，书面规格位于 `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`；尚未编写实现计划或修改应用。Round 12 与 Sites version 14 继续作为稳定生产基线。
 
 当前默认目标：
 
-- Round 13 开始前先完成设计确认和实现计划，不直接扩张代码范围。
-- 将 Sites version 14 作为当前稳定生产基线；后续修改继续执行认证生产回归，并保持只读布局测试不写业务数据。
+- 先完成 Round 13 书面规格复核与实现计划确认，不直接修改应用代码。
+- 将 Sites version 14 作为当前稳定生产基线；布局 smoke 继续保持只读，已批准的数据功能使用唯一 QA 前缀写入并在验证后清理。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。

@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-07-22
+Updated: 2026-07-27
 
 ## Current Stage
 
-`Round 12 complete; Round 13 design-ready`
+`Round 13 design confirmed; written spec review pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -33,6 +33,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Sites version 14 deployed successfully. Authenticated production QA passed real left/right pointer drag, reload persistence, keyboard adjustment, detail collapse/reload/recovery, 1280px and 390px no-overflow metrics, and console error 0; final preferences were reset to `260/420`.
 - No dependency, API, D1, migration, reference/synthesis model, or production business-data change is included in Round 12. Production reference count remained 2 throughout read-only QA.
 - The Round 12 worktree and local feature branch are removed; no remote Round 12 feature branch exists.
+- Round 13 design sections are confirmed. The proposed scope is a versioned full-library Backup v1, zero-write diff preview, controlled same-ID overwrite with unrelated data preserved, atomic D1 batch restore, optional device preferences, and authenticated production recovery with temporary QA data.
+- The Round 13 written specification is `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`. It is pending written-spec review; no implementation plan, application, API, D1, migration, dependency, or production-data change has started.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -233,4 +235,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Begin Round 13 with design clarification and an approved implementation plan. Keep Sites version 14 stable until a new product scope is approved.
+Review and approve the committed Round 13 written specification, then create the TDD implementation plan. Keep Sites version 14 stable until implementation is reviewed and deployed.

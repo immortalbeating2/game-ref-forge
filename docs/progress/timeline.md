@@ -1498,3 +1498,11 @@
 - Sites source 推送到 `7db349a08d7dfe50e9fe06af7646bfb0ce3cc0fd`，保存 Sites version 14 并以 deployment `appgdep_6a60dcd2f09481919dc981b8bba830ac` 私有发布成功。
 - 认证生产只读 QA 通过：1600px 外层无溢出；Chrome 左右 pointer drag 到 `320/470` 并刷新持久化；详情折叠刷新后保持且选中项不丢失；键盘 `470 -> 454`；1280px 与 390px document/body 横向溢出为 0，控制隐藏；console error 0。最终偏好复位 `260/420`，reference 数量保持 2，无业务写入。
 - Round 12 worktree 与本地功能分支已删除，远程不存在对应功能分支；阶段更新为 `Round 12 complete; Round 13 design-ready`。生产基线为 Sites version 14，后续证据文档提交不改变 runtime source。
+
+## 2026-07-27
+
+- Round 13 进入 Superpowers brainstorming，方向确定为全库备份与受控恢复。
+- 用户确认同 ID 覆盖、备份外数据保留的受控恢复；研究数据始终备份，设备置顶和工作台布局可选；仅支持新的透明 JSON Backup v1。
+- 本机旧格式扫描只发现一份含两个 seed 示例的 2026-06-29 reference-only JSON，因此不增加旧格式兼容。
+- 用户确认领域级导出/预览/恢复 API、差异与 digest 门禁、D1 batch 原子恢复、数据管理对话框和生产临时 QA 数据完整恢复测试。
+- 写入 `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`；阶段更新为 `Round 13 design confirmed; written spec review pending`。当前只改变文档，Sites version 14 保持稳定。
