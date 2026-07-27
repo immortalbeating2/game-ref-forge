@@ -1506,3 +1506,5 @@
 - 本机旧格式扫描只发现一份含两个 seed 示例的 2026-06-29 reference-only JSON，因此不增加旧格式兼容。
 - 用户确认领域级导出/预览/恢复 API、差异与 digest 门禁、D1 batch 原子恢复、数据管理对话框和生产临时 QA 数据完整恢复测试。
 - 写入 `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`；阶段更新为 `Round 13 design confirmed; written spec review pending`。当前只改变文档，Sites version 14 保持稳定。
+- 用户批准 Round 13 书面规格并要求继续执行到完成；实现计划写入 `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md`，采用 Subagent-Driven TDD、逐任务审查、merged-main 门禁、Sites 部署和生产临时数据恢复闭环。
+- 计划前复核当前 Cloudflare D1 官方限制，恢复写入确定为小于 1 MB 的 JSON1 分块、最多 40 条原生 D1 batch 语句；不采用逐记录 upsert，保持 Free 计划单 invocation 查询上限内。

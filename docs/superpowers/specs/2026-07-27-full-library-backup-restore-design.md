@@ -2,7 +2,7 @@
 
 日期：2026-07-27
 
-状态：设计章节已确认，书面规格待用户复核
+状态：已批准，进入实现计划
 
 ## 背景
 
@@ -117,7 +117,7 @@ relation 不直接暴露数据库中的 `snapshot_json` 字符串。导出时解
 {
   "pinned_reference_ids": [],
   "workspace_layout": {
-    "schema_version": 1,
+    "version": 1,
     "leftWidth": 260,
     "rightWidth": 420,
     "leftCollapsed": false,
@@ -158,8 +158,14 @@ relation 不直接暴露数据库中的 `snapshot_json` 字符串。导出时解
 - 从 references、syntheses 和 synthesis relations 生成完整领域备份。
 - 读取当前库并计算 state digest。
 - 计算新增、覆盖、保留和 relation 统计。
-- 将受控恢复编译为一个 D1 batch。
+- 将受控恢复编译为使用 JSON1 的有界 D1 prepared-statement batch。
 - 保留领域 ID、时间戳、relation 顺序和 snapshot。
+
+### `db/index.ts`
+
+- 保留现有 `getDb()` Drizzle 读取路径。
+- 新增聚焦的 D1 binding getter，仅供需要原生 `prepare().bind()` 与 `batch()` 的备份恢复写入使用。
+- 不把 binding 或凭据暴露给浏览器。
 
 ### API routes
 
@@ -223,7 +229,15 @@ relation 不直接暴露数据库中的 `snapshot_json` 字符串。导出时解
 3. upsert 备份 syntheses。
 4. 插入备份 relations。
 
-所有语句进入同一个 D1 batch。任何 SQL 失败时整批回滚，不能返回部分成功。
+实现不能为每条记录生成一条 SQL。D1 Free 计划每次 Worker 调用最多 50 条查询，且单条查询最多 100 个绑定参数、SQL 文本不超过 100 KB、字符串或 BLOB 不超过 2 MB。恢复写入必须：
+
+- 将三个领域数组规范化后按小于 `1 MB` 的 JSON 块切分。
+- 每个块使用一个 bound JSON 参数，通过 SQLite JSON extension 的 `json_each(?)` 与 `json_extract(...)` 批量写入。
+- 使用单独一个 JSON ID 数组参数删除导入 syntheses 的旧 relations。
+- 在调用 D1 前断言整个恢复 batch 不超过 `40` 条语句，为同一 invocation 的 state 读取保留余量。
+- 保证每条 SQL 文本小于 100 KB，单条绑定 JSON 小于 1 MB。
+
+所有 prepared statements 进入同一个原生 D1 `batch()`。D1 将 batch 作为 SQL transaction 顺序执行；任何语句失败时整批回滚，不能返回部分成功。
 
 ## 预览新鲜度与并发边界
 
@@ -403,6 +417,7 @@ relation 不直接暴露数据库中的 `snapshot_json` 字符串。导出时解
 ## 风险与控制
 
 - 大批量 D1 batch：首版通过 5 MB 与记录数量上限控制；超限不分批恢复。
+- D1 invocation 限制：使用小于 1 MB 的 JSON1 块和最多 40 条 batch 语句，禁止逐记录查询或逐记录 upsert。
 - preview 与 restore 并发窗口：使用全库 state digest、临近写入复核和单用户边界控制；不声称具有多人场景的强 CAS。
 - `app/page.tsx` 复杂度：新增聚焦对话框和状态 helper，页面只协调顶层数据刷新与草稿保护。
 - 恢复覆盖错误数据：先预览、明确覆盖数量、要求确认且不提供整库删除。

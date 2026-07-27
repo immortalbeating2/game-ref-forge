@@ -4,7 +4,7 @@ Updated: 2026-07-27
 
 ## Current Stage
 
-`Round 13 design confirmed; written spec review pending`
+`Round 13 design and plan approved; implementation ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -34,7 +34,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - No dependency, API, D1, migration, reference/synthesis model, or production business-data change is included in Round 12. Production reference count remained 2 throughout read-only QA.
 - The Round 12 worktree and local feature branch are removed; no remote Round 12 feature branch exists.
 - Round 13 design sections are confirmed. The proposed scope is a versioned full-library Backup v1, zero-write diff preview, controlled same-ID overwrite with unrelated data preserved, atomic D1 batch restore, optional device preferences, and authenticated production recovery with temporary QA data.
-- The Round 13 written specification is `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`. It is pending written-spec review; no implementation plan, application, API, D1, migration, dependency, or production-data change has started.
+- The approved Round 13 specification is `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`; the TDD plan is `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md`. No application, API, D1, migration, dependency, or production-data change has started.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`
@@ -235,4 +235,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Review and approve the committed Round 13 written specification, then create the TDD implementation plan. Keep Sites version 14 stable until implementation is reviewed and deployed.
+Push the approved design/plan baseline, create `codex/round-13-backup-restore` with an isolated worktree, and execute the TDD tasks with task-level review. Keep Sites version 14 stable until the reviewed implementation is deployed.
