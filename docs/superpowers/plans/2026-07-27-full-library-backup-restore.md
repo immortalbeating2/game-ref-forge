@@ -308,15 +308,19 @@ git commit -m "feat: 定义全库备份合同 / define full-library backup contr
   - `BackupPreview`
   - `createFullBackup(exportedAt?: string): Promise<RefForgeBackupV1>`
   - `previewBackup(backup: RefForgeBackupV1): Promise<BackupPreview>`
-  - exported `referenceRecordToRow`, `synthesisRowToRecord`, `synthesisRecordToRow`
+  - exported CRUD converters plus storage-exact `referenceRecordToStorageRow` and `synthesisRecordToStorageRow`
 
-- [ ] **Step 1: Export existing row converters without changing CRUD behavior**
+- [ ] **Step 1: Export CRUD converters and add storage-exact converters**
 
-Rename/export only these functions:
+Keep CRUD behavior unchanged, and add explicit storage-exact converters for backup restore:
 
 ```ts
 // lib/reference-db.ts
 export function referenceRecordToRow(
+  record: ReferenceRecord,
+): typeof references.$inferInsert
+
+export function referenceRecordToStorageRow(
   record: ReferenceRecord,
 ): typeof references.$inferInsert
 
@@ -328,9 +332,13 @@ export function synthesisRowToRecord(
 export function synthesisRecordToRow(
   record: SynthesisRecord,
 ): typeof syntheses.$inferInsert
+
+export function synthesisRecordToStorageRow(
+  record: SynthesisRecord,
+): typeof syntheses.$inferInsert
 ```
 
-Update internal call sites to the public names. Run existing reference and synthesis tests before adding backup behavior:
+CRUD converters may retain existing normalization; storage-exact converters must serialize parser-valid arrays and inspiration entries without trim, filter or generated IDs. Update internal call sites to the public names. Run existing reference and synthesis tests before adding backup behavior:
 
 ```powershell
 npx vitest run --config vitest.config.ts tests/reference.test.ts tests/synthesis-db.test.ts tests/synthesis-routes.test.ts
@@ -340,7 +348,7 @@ Expected: PASS.
 
 - [ ] **Step 2: Write failing complete-export tests**
 
-In `tests/backup-db.test.ts`, mock `getDb()` with three deterministic selects and assert:
+In `tests/backup-db.test.ts`, mock `getDb()` with one deterministic three-query `batch()` and assert:
 
 ```ts
 it("exports all tables in stable id order with structured snapshots", async () => {
@@ -381,7 +389,7 @@ type BackupInventory = {
 
 async function readBackupInventory(): Promise<BackupInventory> {
   const db = getDb();
-  const [referenceRows, synthesisRows, relationRows] = await Promise.all([
+  const [referenceRows, synthesisRows, relationRows] = await db.batch([
     db.select().from(references).orderBy(references.id),
     db.select().from(syntheses).orderBy(syntheses.id),
     db.select().from(synthesisReferences)
@@ -565,7 +573,7 @@ const REFERENCE_RESTORE_COLUMNS = [
 ] as const;
 ```
 
-Add complete equivalent maps for all synthesis and relation columns. Convert domain records through `referenceRecordToRow` and `synthesisRecordToRow`; serialize relation snapshots exactly once. Chunk normalized row arrays by UTF-8 byte length below 1,000,000 bytes.
+Add complete equivalent maps for all synthesis and relation columns. Convert domain records through the storage-exact `referenceRecordToStorageRow` and `synthesisRecordToStorageRow`; do not use CRUD normalizers that trim or filter parser-valid backup values. Serialize relation snapshots exactly once. Chunk exact row arrays by UTF-8 byte length below 1,000,000 bytes.
 
 - [ ] **Step 5: Generate deterministic JSON1 SQL**
 
