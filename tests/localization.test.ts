@@ -6,9 +6,49 @@ import {
   labelForPublicStatus,
   labelForQualityStatus,
   labelForSynthesisStatus,
+  backupErrorMessage,
   synthesisErrorMessage,
   uiCopy,
 } from "../lib/localization";
+
+const dataManagementCopyKeys = [
+  "dataManagement",
+  "closeDataManagement",
+  "backupTab",
+  "restoreTab",
+  "fullBackup",
+  "includeDevicePreferences",
+  "transparentJsonWarning",
+  "chooseBackupFile",
+  "changeBackupFile",
+  "backupFileDetails",
+  "backupVersion",
+  "previewBackup",
+  "previewingBackup",
+  "restoreBackup",
+  "retryRestore",
+  "restoreDevicePreferences",
+  "confirmOverwrite",
+  "unsavedDraftRestoreTitle",
+  "unsavedDraftRestoreBody",
+  "discardDraftAndRestore",
+  "restoreSucceeded",
+  "preferencesRestoreFailed",
+  "backupIssues",
+] as const;
+
+const backupErrorCodes = [
+  "invalid_json",
+  "unsupported_format",
+  "unsupported_version",
+  "backup_too_large",
+  "validation_failed",
+  "backup_changed",
+  "preview_stale",
+  "overwrite_confirmation_required",
+  "restore_failed",
+  "database_unavailable",
+] as const;
 
 const synthesisCopyKeys = [
   "referencesView",
@@ -150,6 +190,10 @@ describe("uiCopy", () => {
     expect(uiCopy().collapseDetailsPanel).toBe("收起详情面板");
     expect(uiCopy().expandDetailsPanel).toBe("展开详情面板");
     expect(uiCopy().resetPanelWidth).toBe("双击恢复默认宽度");
+    expect(uiCopy().dataManagement).toBe("数据管理");
+    expect(uiCopy().backupIssues).toBe("校验问题");
+    for (const key of dataManagementCopyKeys) expect(uiCopy()[key]).not.toHaveLength(0);
+    for (const code of backupErrorCodes) expect(backupErrorMessage(code)).not.toHaveLength(0);
   });
 
   it("returns English interface copy when requested", () => {
@@ -189,5 +233,9 @@ describe("uiCopy", () => {
     expect(uiCopy("en").collapseDetailsPanel).toBe("Collapse details panel");
     expect(uiCopy("en").expandDetailsPanel).toBe("Expand details panel");
     expect(uiCopy("en").resetPanelWidth).toBe("Double-click to reset width");
+    expect(uiCopy("en").dataManagement).toBe("Data management");
+    expect(uiCopy("en").backupIssues).toBe("Validation issues");
+    for (const key of dataManagementCopyKeys) expect(uiCopy("en")[key]).not.toHaveLength(0);
+    for (const code of backupErrorCodes) expect(backupErrorMessage(code, "en")).not.toHaveLength(0);
   });
 });

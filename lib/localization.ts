@@ -199,6 +199,50 @@ const copy = {
     pinned: "已置顶",
     exportMarkdown: "导出 Markdown",
     exportJson: "导出 JSON",
+    dataManagement: "数据管理",
+    closeDataManagement: "关闭数据管理",
+    backupTab: "备份",
+    restoreTab: "恢复",
+    fullBackup: "导出完整备份",
+    exportingBackup: "正在导出备份...",
+    includeDevicePreferences: "包含本设备偏好",
+    transparentJsonWarning: "透明 JSON 可能包含私有来源和研究笔记。",
+    chooseBackupFile: "选择备份文件",
+    changeBackupFile: "更换文件",
+    backupFileDetails: "文件信息",
+    backupVersion: "备份版本",
+    backupExportedAt: "导出时间",
+    previewBackup: "预览恢复",
+    previewingBackup: "正在预览...",
+    restoreBackup: "恢复数据",
+    restoringBackup: "正在恢复...",
+    retryRestore: "重新尝试",
+    restoreDevicePreferences: "恢复本设备偏好",
+    confirmOverwrite: "我确认用备份内容覆盖同 ID 的现有记录。",
+    unsavedDraftRestoreTitle: "未保存草稿",
+    unsavedDraftRestoreBody: "恢复会放弃当前未保存的草稿。",
+    discardDraftAndRestore: "放弃草稿并恢复",
+    restoreSucceeded: "研究数据已恢复。",
+    preferencesRestoreApplied: "设备偏好已恢复。",
+    preferencesRestoreFailed: "研究数据已恢复，但设备偏好未能写入。",
+    backupReferences: "参考",
+    backupSyntheses: "综合稿",
+    backupRelations: "关联",
+    backupHistoricalSnapshots: "历史快照",
+    backupIssues: "校验问题",
+    backupCreate: "新增",
+    backupOverwrite: "覆盖",
+    backupPreserve: "保留",
+    backupInvalidJson: "文件不是有效的 JSON 备份。",
+    backupUnsupportedFormat: "该文件不是 RefForge Backup。",
+    backupUnsupportedVersion: "该备份版本暂不受支持。",
+    backupTooLarge: "备份文件或记录数量超过 5 MB 限制。",
+    backupValidationFailed: "备份内容未通过完整性校验。",
+    backupChanged: "备份文件在预览后发生变化，请重新选择并预览。",
+    backupPreviewStale: "研究数据在预览后发生变化，请重新预览。",
+    backupOverwriteConfirmationRequired: "请确认覆盖现有记录后再恢复。",
+    backupRestoreFailed: "恢复未完成，当前研究数据未被部分写入。",
+    backupDatabaseUnavailable: "备份服务暂不可用，请稍后重试。",
     exportUnavailable: "请选择一条参考后再导出。",
     inspirationEntryCount: "结构化灵感条目",
     reviewQueue: "整理队列",
@@ -426,6 +470,50 @@ const copy = {
     pinned: "Pinned",
     exportMarkdown: "Export Markdown",
     exportJson: "Export JSON",
+    dataManagement: "Data management",
+    closeDataManagement: "Close data management",
+    backupTab: "Backup",
+    restoreTab: "Restore",
+    fullBackup: "Export full backup",
+    exportingBackup: "Exporting backup...",
+    includeDevicePreferences: "Include this device's preferences",
+    transparentJsonWarning: "Transparent JSON may contain private sources and research notes.",
+    chooseBackupFile: "Choose backup file",
+    changeBackupFile: "Change file",
+    backupFileDetails: "File details",
+    backupVersion: "Backup version",
+    backupExportedAt: "Exported at",
+    previewBackup: "Preview restore",
+    previewingBackup: "Previewing...",
+    restoreBackup: "Restore data",
+    restoringBackup: "Restoring...",
+    retryRestore: "Try again",
+    restoreDevicePreferences: "Restore this device's preferences",
+    confirmOverwrite: "I confirm that backup data will overwrite existing records with the same ID.",
+    unsavedDraftRestoreTitle: "Unsaved draft",
+    unsavedDraftRestoreBody: "Restoring will discard the current unsaved draft.",
+    discardDraftAndRestore: "Discard draft and restore",
+    restoreSucceeded: "Research data restored.",
+    preferencesRestoreApplied: "Device preferences restored.",
+    preferencesRestoreFailed: "Research data restored, but device preferences could not be saved.",
+    backupReferences: "References",
+    backupSyntheses: "Syntheses",
+    backupRelations: "Relations",
+    backupHistoricalSnapshots: "Historical snapshots",
+    backupIssues: "Validation issues",
+    backupCreate: "Create",
+    backupOverwrite: "Overwrite",
+    backupPreserve: "Preserve",
+    backupInvalidJson: "The file is not valid JSON backup data.",
+    backupUnsupportedFormat: "This file is not a RefForge Backup.",
+    backupUnsupportedVersion: "This backup version is not supported.",
+    backupTooLarge: "The backup file or record count exceeds the 5 MB limit.",
+    backupValidationFailed: "The backup did not pass integrity validation.",
+    backupChanged: "The backup changed after preview. Choose and preview it again.",
+    backupPreviewStale: "Research data changed after preview. Preview again.",
+    backupOverwriteConfirmationRequired: "Confirm overwriting existing records before restoring.",
+    backupRestoreFailed: "Restore did not complete; no partial research data was written.",
+    backupDatabaseUnavailable: "Backup service is unavailable. Try again shortly.",
     exportUnavailable: "Select a reference before exporting.",
     inspirationEntryCount: "Structured inspiration entries",
     reviewQueue: "Review queue",
@@ -632,6 +720,48 @@ export function synthesisErrorMessage(
     case "operation_failed":
     default:
       return copy.synthesisOperationFailed;
+  }
+}
+
+export type BackupErrorCode =
+  | "invalid_json"
+  | "unsupported_format"
+  | "unsupported_version"
+  | "backup_too_large"
+  | "validation_failed"
+  | "backup_changed"
+  | "preview_stale"
+  | "overwrite_confirmation_required"
+  | "restore_failed"
+  | "database_unavailable";
+
+export function backupErrorMessage(
+  code: BackupErrorCode | string | undefined,
+  language: Language = "zh",
+) {
+  const copy = uiCopy(language);
+  switch (code) {
+    case "invalid_json":
+      return copy.backupInvalidJson;
+    case "unsupported_format":
+      return copy.backupUnsupportedFormat;
+    case "unsupported_version":
+      return copy.backupUnsupportedVersion;
+    case "backup_too_large":
+      return copy.backupTooLarge;
+    case "validation_failed":
+      return copy.backupValidationFailed;
+    case "backup_changed":
+      return copy.backupChanged;
+    case "preview_stale":
+      return copy.backupPreviewStale;
+    case "overwrite_confirmation_required":
+      return copy.backupOverwriteConfirmationRequired;
+    case "database_unavailable":
+      return copy.backupDatabaseUnavailable;
+    case "restore_failed":
+    default:
+      return copy.backupRestoreFailed;
   }
 }
 

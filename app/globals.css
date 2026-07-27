@@ -1294,6 +1294,244 @@ label {
   width: auto;
 }
 
+.data-management-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.64);
+  padding: 20px;
+}
+
+.data-management-dialog {
+  display: grid;
+  width: min(100%, 680px);
+  max-height: min(760px, calc(100dvh - 40px));
+  gap: 16px;
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 20px;
+}
+
+.data-management-dialog__header,
+.data-management-actions,
+.data-management-tabs,
+.data-management-check,
+.data-management-file-picker,
+.data-management-discard > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.data-management-dialog__header {
+  justify-content: space-between;
+}
+
+.data-management-dialog__header h2,
+.data-management-dialog__eyebrow,
+.data-management-status,
+.data-management-note,
+.data-management-file-name,
+.data-management-discard h3,
+.data-management-discard p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.data-management-dialog__eyebrow {
+  display: flex;
+  color: var(--accent-strong);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.data-management-dialog__close {
+  display: grid;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+}
+
+.data-management-tabs {
+  border-bottom: 1px solid var(--border);
+}
+
+.data-management-tabs button {
+  min-height: 38px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.data-management-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--foreground);
+}
+
+.data-management-content,
+.data-management-summary,
+.data-management-discard,
+.data-management-issues {
+  display: grid;
+  gap: 14px;
+}
+
+.data-management-status:empty {
+  display: none;
+}
+
+.data-management-status,
+.data-management-note,
+.data-management-discard,
+.data-management-issues {
+  border: 1px solid var(--warning);
+  border-radius: 6px;
+  background: var(--warning-soft);
+  color: #f7e4aa;
+  padding: 10px 12px;
+}
+
+.data-management-status--error,
+.data-management-discard {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.data-management-note {
+  color: var(--muted);
+}
+
+.data-management-issues h3,
+.data-management-issues ul {
+  margin: 0;
+}
+
+.data-management-issues ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 20px;
+}
+
+.data-management-issues li,
+.data-management-issues strong {
+  overflow-wrap: anywhere;
+}
+
+.data-management-check,
+.data-management-file-picker {
+  min-width: 0;
+  color: var(--foreground);
+}
+
+.data-management-check input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.data-management-check span,
+.data-management-file-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.data-management-check--warning {
+  color: #f7e4aa;
+}
+
+.data-management-file-picker {
+  position: relative;
+  width: fit-content;
+  min-height: 40px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: transparent;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.data-management-file-picker:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.data-management-file-picker input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.data-management-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.data-management-summary div {
+  min-width: 0;
+}
+
+.data-management-summary dt {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.data-management-summary dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.data-management-actions {
+  justify-content: flex-end;
+}
+
+.data-management-actions button,
+.data-management-discard .danger-button {
+  width: auto;
+}
+
+.data-management-discard > div {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .data-management-overlay {
+    padding: 0;
+  }
+
+  .data-management-dialog {
+    width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    padding: 16px;
+  }
+
+  .data-management-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .data-management-actions,
+  .data-management-actions button {
+    width: 100%;
+  }
+
+  .data-management-actions button {
+    min-height: 44px;
+  }
+}
+
 @media (min-width: 1281px) {
   .workspace {
     height: 100dvh;
