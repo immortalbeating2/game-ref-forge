@@ -85,6 +85,15 @@ const INSPIRATION_ENTRY_KEYS = [
   "id", "observation", "principle", "transferable_idea", "original_application", "avoid_copying",
 ] as const;
 const MAX_ID_LENGTH = 200;
+const MAX_BACKUP_JSON_DEPTH = 64;
+const MAX_BACKUP_JSON_NODES = 1_000_000;
+const SCORE_FIELDS = [
+  "rating",
+  "reference_value_score",
+  "transformability_score",
+  "copyright_risk_score",
+  "production_readiness_score",
+] as const;
 
 type PlainObject = Record<string, unknown>;
 
@@ -102,10 +111,35 @@ function hasExactKeys(value: PlainObject, keys: readonly string[]) {
 }
 
 function isPlainJsonValue(value: unknown): boolean {
-  if (value === null || typeof value === "string" || typeof value === "boolean") return true;
-  if (typeof value === "number") return Number.isFinite(value);
-  if (Array.isArray(value)) return value.every(isPlainJsonValue);
-  return isPlainObject(value) && Object.values(value).every(isPlainJsonValue);
+  const values: Array<{ value: unknown; depth: number }> = [{ value, depth: 0 }];
+  let nodes = 0;
+
+  while (values.length > 0) {
+    const current = values.pop();
+    if (current === undefined || current.depth > MAX_BACKUP_JSON_DEPTH || ++nodes > MAX_BACKUP_JSON_NODES) {
+      return false;
+    }
+    if (current.value === null || typeof current.value === "string" || typeof current.value === "boolean") continue;
+    if (typeof current.value === "number") {
+      if (!Number.isFinite(current.value)) return false;
+      continue;
+    }
+    if (Array.isArray(current.value)) {
+      if (current.value.length > MAX_BACKUP_JSON_NODES - nodes) return false;
+      for (let index = current.value.length - 1; index >= 0; index -= 1) {
+        values.push({ value: current.value[index], depth: current.depth + 1 });
+      }
+      continue;
+    }
+    if (!isPlainObject(current.value)) return false;
+    const entries = Object.values(current.value);
+    if (entries.length > MAX_BACKUP_JSON_NODES - nodes) return false;
+    for (let index = entries.length - 1; index >= 0; index -= 1) {
+      values.push({ value: entries[index], depth: current.depth + 1 });
+    }
+  }
+
+  return true;
 }
 
 function isNonEmptyId(value: unknown): value is string {
@@ -113,10 +147,25 @@ function isNonEmptyId(value: unknown): value is string {
 }
 
 function isIsoTimestamp(value: unknown): value is string {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) {
+  if (typeof value !== "string") {
     return false;
   }
-  return Number.isFinite(Date.parse(value));
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{3})?(?:Z|[+-](\d{2}):(\d{2}))$/.exec(value);
+  if (match === null) return false;
+  const [, rawYear, rawMonth, rawDay, rawHour, rawMinute, rawSecond, rawOffsetHour, rawOffsetMinute] = match;
+  const year = Number(rawYear);
+  const month = Number(rawMonth);
+  const day = Number(rawDay);
+  const hour = Number(rawHour);
+  const minute = Number(rawMinute);
+  const second = Number(rawSecond);
+  const daysInMonth = month === 2
+    ? (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28)
+    : [4, 6, 9, 11].includes(month) ? 30 : 31;
+
+  return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth &&
+    hour <= 23 && minute <= 59 && second <= 59 &&
+    (rawOffsetHour === undefined || (Number(rawOffsetHour) <= 23 && Number(rawOffsetMinute) <= 59));
 }
 
 function isNullableString(value: unknown): value is string | null {
@@ -125,6 +174,12 @@ function isNullableString(value: unknown): value is string | null {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isIntegerScore(value: unknown): value is number | null {
+  return value === null || (
+    typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 5
+  );
 }
 
 function isInspirationEntries(value: unknown) {
@@ -161,13 +216,12 @@ function validateReference(value: unknown, path: string, issues: BackupValidatio
     "transformation_ideas", "avoid_copying_notes", "related_original_asset",
   ];
   const arrayFields = ["style_tags", "use_tags", "mechanic_tags", "mood_tags", "visual_language_tags", "inspiration_points"];
-  const scoreFields = ["rating", "reference_value_score", "transformability_score", "copyright_risk_score", "production_readiness_score"];
   const hasValidTypes = isNonEmptyId(record.id) &&
     ["title", "source_url"].every((field) => typeof record[field] === "string") &&
     nullableFields.every((field) => isNullableString(record[field])) &&
     arrayFields.every((field) => isStringArray(record[field])) &&
     isInspirationEntries(record.inspiration_entries) &&
-    scoreFields.every((field) => record[field] === null || (typeof record[field] === "number" && Number.isFinite(record[field])));
+    SCORE_FIELDS.every((field) => isIntegerScore(record[field]));
   if (!hasValidTypes) {
     issues.push(issue(path, "contains invalid record fields"));
     return false;
@@ -256,14 +310,20 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
   const references = data?.references;
   const syntheses = data?.syntheses;
   const relations = data?.synthesis_references;
-  if (!Array.isArray(references) || references.length > MAX_BACKUP_REFERENCES) {
-    issues.push(issue("data.references", "exceeds the reference limit or is not an array", "backup_too_large"));
+  if (!Array.isArray(references)) {
+    issues.push(issue("data.references", "must be an array"));
+  } else if (references.length > MAX_BACKUP_REFERENCES) {
+    issues.push(issue("data.references", "exceeds the reference limit", "backup_too_large"));
   }
-  if (!Array.isArray(syntheses) || syntheses.length > MAX_BACKUP_SYNTHESES) {
-    issues.push(issue("data.syntheses", "exceeds the synthesis limit or is not an array", "backup_too_large"));
+  if (!Array.isArray(syntheses)) {
+    issues.push(issue("data.syntheses", "must be an array"));
+  } else if (syntheses.length > MAX_BACKUP_SYNTHESES) {
+    issues.push(issue("data.syntheses", "exceeds the synthesis limit", "backup_too_large"));
   }
-  if (!Array.isArray(relations) || relations.length > MAX_BACKUP_RELATIONS) {
-    issues.push(issue("data.synthesis_references", "exceeds the relation limit or is not an array", "backup_too_large"));
+  if (!Array.isArray(relations)) {
+    issues.push(issue("data.synthesis_references", "must be an array"));
+  } else if (relations.length > MAX_BACKUP_RELATIONS) {
+    issues.push(issue("data.synthesis_references", "exceeds the relation limit", "backup_too_large"));
   }
 
   if (!Array.isArray(references) || !Array.isArray(syntheses) || !Array.isArray(relations)) {
@@ -325,6 +385,10 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
     }
     if (!isIsoTimestamp(snapshot.reference_updated_at)) {
       issues.push(issue(`${path}.snapshot.reference_updated_at`, "must be a valid ISO-8601 timestamp"));
+      return;
+    }
+    if (!SCORE_FIELDS.every((field) => isIntegerScore(snapshot.scores[field]))) {
+      issues.push(issue(`${path}.snapshot`, "must contain integer scores from 1 through 5"));
       return;
     }
     if (relationIds.has(relation.id)) issues.push(issue(`${path}.id`, "must be unique"));

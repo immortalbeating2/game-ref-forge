@@ -176,6 +176,51 @@ describe("Backup v1 domain contract", () => {
   });
 
   it.each([
+    ["2026-02-29T00:00:00.000Z", false],
+    ["2026-02-31T00:00:00.000Z", false],
+    ["2024-02-29T00:00:00.000Z", true],
+    ["2026-07-27T08:00:00+08:00", true],
+    ["2026-07-27T08:00:00-05:30", true],
+  ])("validates calendar dates and timezone offsets for %s", (exportedAt, valid) => {
+    const backup = makeBackupFixture();
+    backup.exported_at = exportedAt;
+
+    expect(parseRefForgeBackup(backup).ok).toBe(valid);
+  });
+
+  it.each(["references", "syntheses", "synthesis_references"] as const)(
+    "reports a non-array data.%s as validation_failed",
+    (field) => {
+      const backup = makeBackupFixture();
+      const malformed = {
+        ...backup,
+        data: { ...backup.data, [field]: { invalid: true } },
+      };
+      const result = parseRefForgeBackup(malformed);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.issues.some((entry) =>
+        entry.path === `data.${field}` && entry.code === "validation_failed",
+      )).toBe(true);
+    },
+  );
+
+  it("returns a structured validation failure for deeply nested malformed JSON", () => {
+    let deeplyNested: unknown = "leaf";
+    for (let depth = 0; depth < 10_000; depth += 1) deeplyNested = { next: deeplyNested };
+    const backup = makeBackupFixture();
+    const malformed = {
+      ...backup,
+      data: { ...backup.data, references: deeplyNested },
+    };
+
+    expect(() => parseRefForgeBackup(malformed)).not.toThrow();
+    const result = parseRefForgeBackup(malformed);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.issues[0].code).toBe("validation_failed");
+  });
+
+  it.each([
     ["enum", (backup: ReturnType<typeof makeBackupFixture>) => ({
       ...backup,
       data: { ...backup.data, references: [{ ...backup.data.references[0], media_type: "invalid" }] },
@@ -196,6 +241,32 @@ describe("Backup v1 domain contract", () => {
     }), "data.synthesis_references[0].snapshot"],
   ])("rejects invalid %s domain values", (_label, mutate, path) => {
     expectInvalid(mutate(makeBackupFixture()), path);
+  });
+
+  it.each([
+    "rating",
+    "reference_value_score",
+    "transformability_score",
+    "copyright_risk_score",
+    "production_readiness_score",
+  ] as const)("rejects a fractional reference %s", (field) => {
+    const backup = makeBackupFixture();
+    backup.data.references[0][field] = 1.5;
+
+    expectInvalid(backup, "data.references[0]");
+  });
+
+  it.each([
+    "rating",
+    "reference_value_score",
+    "transformability_score",
+    "copyright_risk_score",
+    "production_readiness_score",
+  ] as const)("rejects a fractional snapshot %s", (field) => {
+    const backup = makeBackupFixture();
+    backup.data.synthesis_references[0].snapshot.scores[field] = 1.5;
+
+    expectInvalid(backup, "data.synthesis_references[0].snapshot");
   });
 
   it("rejects count limits before accepting records", () => {
