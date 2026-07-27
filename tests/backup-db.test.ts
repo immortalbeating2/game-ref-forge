@@ -4,8 +4,12 @@ vi.mock("../db", () => ({ getDb: vi.fn() }));
 
 import { getDb } from "../db";
 import { references, synthesisReferences, syntheses } from "../db/schema";
-import { referenceRecordToRow } from "../lib/reference-db";
-import { synthesisRecordToRow } from "../lib/synthesis-db";
+import { referenceRecordToRow, referenceRecordToStorageRow } from "../lib/reference-db";
+import {
+  synthesisRecordToRow,
+  synthesisRecordToStorageRow,
+  synthesisRowToRecord,
+} from "../lib/synthesis-db";
 import { createReferenceSnapshot, type SynthesisReferenceSnapshot } from "../lib/synthesis";
 import {
   makeBackupFixture,
@@ -25,6 +29,7 @@ type ReadRows = {
 };
 
 type FakeQuery = PromiseLike<unknown[]> & {
+  operations: Array<{ name: string; args: unknown[] }>;
   from(table: unknown): FakeQuery;
   orderBy(...columns: unknown[]): FakeQuery;
 };
@@ -52,10 +57,18 @@ function makeRelationRow(
   };
 }
 
-function makeFakeQuery(rows: unknown[]): FakeQuery {
+function makeFakeQuery(rows: unknown[], queries: FakeQuery[]): FakeQuery {
+  const operations: Array<{ name: string; args: unknown[] }> = [];
   const query = {
-    from: () => query,
-    orderBy: () => query,
+    operations,
+    from: (...args: unknown[]) => {
+      operations.push({ name: "from", args });
+      return query;
+    },
+    orderBy: (...args: unknown[]) => {
+      operations.push({ name: "orderBy", args });
+      return query;
+    },
     then<TResult1 = unknown[], TResult2 = never>(
       onFulfilled?: ((value: unknown[]) => TResult1 | PromiseLike<TResult1>) | null,
       onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
@@ -63,20 +76,28 @@ function makeFakeQuery(rows: unknown[]): FakeQuery {
       return Promise.resolve(rows).then(onFulfilled, onRejected);
     },
   };
-  return query;
+  const typedQuery = query as FakeQuery;
+  queries.push(typedQuery);
+  return typedQuery;
 }
 
 function useBackupReadDb(rows: ReadRows) {
   const selectResults = [rows.references, rows.syntheses, rows.relations];
+  const batchResults = [[rows.references, rows.syntheses, rows.relations]];
+  const batches: FakeQuery[][] = [];
+  const queries: FakeQuery[] = [];
   const db = {
-    select: vi.fn(() => makeFakeQuery(selectResults.shift() ?? [])),
+    select: vi.fn(() => makeFakeQuery(selectResults.shift() ?? [], queries)),
     insert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    batch: vi.fn(),
+    batch: vi.fn(async (statements: FakeQuery[]) => {
+      batches.push(statements);
+      return batchResults.shift() ?? [];
+    }),
   };
   vi.mocked(getDb).mockReturnValue(db as never);
-  return db;
+  return { ...db, batches, queries };
 }
 
 function completeRows(): ReadRows {
@@ -149,6 +170,33 @@ describe("backup database reads", () => {
       snapshot: { schema_version: 1, reference_id: "ref-1" },
     });
     expect(backup.preferences).toBeNull();
+  });
+
+  it("round trips parser-valid records through storage-exact mappers without cleanup", async () => {
+    const reference = makeReference({
+      style_tags: ["  deliberately retained  "],
+      inspiration_entries: [{
+        ...makeReference().inspiration_entries[0],
+        id: " entry-id-with-space ",
+        observation: "  deliberately retained  ",
+      }],
+    });
+    const row = referenceRecordToStorageRow(reference);
+    const rows = completeRows();
+    useBackupReadDb({
+      ...rows,
+      references: [row as typeof references.$inferSelect, rows.references[1]],
+    });
+
+    const backup = await createFullBackup("2026-07-27T00:00:00.000Z");
+    expect(backup.data.references.find(({ id }) => id === reference.id)).toEqual(reference);
+    expect(row.styleTags).toBe(JSON.stringify(reference.style_tags));
+    expect(row.inspirationEntries).toBe(JSON.stringify(reference.inspiration_entries));
+
+    const synthesis = makeSynthesis({ title: "  retained synthesis title  " });
+    expect(synthesisRowToRecord(
+      synthesisRecordToStorageRow(synthesis) as typeof syntheses.$inferSelect,
+    )).toEqual(synthesis);
   });
 
   it("rejects an invalid stored snapshot instead of exporting an unavailable placeholder", async () => {
@@ -259,7 +307,22 @@ describe("backup database reads", () => {
     expect(fakeDb.insert).not.toHaveBeenCalled();
     expect(fakeDb.update).not.toHaveBeenCalled();
     expect(fakeDb.delete).not.toHaveBeenCalled();
-    expect(fakeDb.batch).not.toHaveBeenCalled();
+    expect(fakeDb.batch).toHaveBeenCalledTimes(1);
+    expect(fakeDb.batches).toHaveLength(1);
+    expect(fakeDb.batches[0]).toEqual(fakeDb.queries);
+    expect(fakeDb.queries).toHaveLength(3);
+    expect(fakeDb.queries[0].operations).toEqual([
+      { name: "from", args: [references] },
+      { name: "orderBy", args: [references.id] },
+    ]);
+    expect(fakeDb.queries[1].operations).toEqual([
+      { name: "from", args: [syntheses] },
+      { name: "orderBy", args: [syntheses.id] },
+    ]);
+    expect(fakeDb.queries[2].operations).toEqual([
+      { name: "from", args: [synthesisReferences] },
+      { name: "orderBy", args: [synthesisReferences.synthesisId, synthesisReferences.position] },
+    ]);
   });
 
   it("uses a deterministic state digest that changes with every persisted state field", async () => {
@@ -275,21 +338,94 @@ describe("backup database reads", () => {
     useBackupReadDb(rows);
     await expect(previewBackup(backup)).resolves.toMatchObject({ state_digest: unorderedDigest });
 
-    const variants: ReadRows[] = [
-      { ...rows, references: [toReferenceRow(makeReference({ title: "Changed" })), rows.references[1]] },
-      { ...rows, syntheses: [toSynthesisRow(makeSynthesis({ updated_at: "2026-07-27T01:00:00.000Z" }))] },
-      { ...rows, relations: [{ ...rows.relations[0], id: "link-1-changed" }, rows.relations[1]] },
-      {
-        ...rows,
-        relations: [
-          makeRelationRow(createReferenceSnapshot(makeReference({ title: "Changed snapshot" }))),
-          rows.relations[1],
-        ],
-      },
+    const variants: Array<[string, (state: ReadRows) => ReadRows]> = [
+      ["reference identity and content", (state) => ({
+        ...state,
+        references: [toReferenceRow(makeReference({ title: "Changed" })), state.references[1]],
+      })],
+      ["reference source metadata", (state) => ({
+        ...state,
+        references: [toReferenceRow(makeReference({ canonical_url: "https://example.com/changed" })), state.references[1]],
+      })],
+      ["reference tag arrays", (state) => ({
+        ...state,
+        references: [toReferenceRow(makeReference({ style_tags: ["changed"] })), state.references[1]],
+      })],
+      ["reference scores", (state) => ({
+        ...state,
+        references: [toReferenceRow(makeReference({ rating: 3 })), state.references[1]],
+      })],
+      ["reference inspiration", (state) => ({
+        ...state,
+        references: [toReferenceRow(makeReference({ inspiration_entries: [{
+          ...makeReference().inspiration_entries[0],
+          observation: "Changed observation",
+        }] })), state.references[1]],
+      })],
+      ["reference timestamps", (state) => ({
+        ...state,
+        references: [toReferenceRow(makeReference({ created_at: "2026-07-26T00:00:00.000Z" })), state.references[1]],
+      })],
+      ["synthesis content and status", (state) => ({
+        ...state,
+        syntheses: [toSynthesisRow(makeSynthesis({ title: "Changed", status: "draft" }))],
+      })],
+      ["synthesis timestamps", (state) => ({
+        ...state,
+        syntheses: [toSynthesisRow(makeSynthesis({ updated_at: "2026-07-27T01:00:00.000Z" }))],
+      })],
+      ["relation identity", (state) => ({
+        ...state,
+        relations: [{ ...state.relations[0], id: "link-1-changed" }, state.relations[1]],
+      })],
+      ["relation reference association", (state) => ({
+        ...state,
+        relations: [{ ...state.relations[0], referenceId: null }, state.relations[1]],
+      })],
+      ["relation positions", (state) => ({
+        ...state,
+        relations: [{ ...state.relations[0], position: 1 }, { ...state.relations[1], position: 0 }],
+      })],
+      ["snapshot identity and metadata", (state) => {
+        const snapshot = JSON.parse(state.relations[0].snapshotJson) as SynthesisReferenceSnapshot;
+        return {
+          ...state,
+          relations: [{ ...state.relations[0], snapshotJson: JSON.stringify({ ...snapshot, title: "Changed snapshot" }) }, state.relations[1]],
+        };
+      }],
+      ["snapshot scores", (state) => {
+        const snapshot = JSON.parse(state.relations[0].snapshotJson) as SynthesisReferenceSnapshot;
+        return {
+          ...state,
+          relations: [{ ...state.relations[0], snapshotJson: JSON.stringify({ ...snapshot, scores: { ...snapshot.scores, rating: 3 } }) }, state.relations[1]],
+        };
+      }],
+      ["snapshot tags and inspiration", (state) => {
+        const snapshot = JSON.parse(state.relations[0].snapshotJson) as SynthesisReferenceSnapshot;
+        return {
+          ...state,
+          relations: [{ ...state.relations[0], snapshotJson: JSON.stringify({
+            ...snapshot,
+            tags: { ...snapshot.tags, style_tags: ["changed"] },
+            inspiration: { ...snapshot.inspiration, inspiration_points: ["Changed"] },
+          }) }, state.relations[1]],
+        };
+      }],
+      ["snapshot and relation timestamps", (state) => {
+        const snapshot = JSON.parse(state.relations[0].snapshotJson) as SynthesisReferenceSnapshot;
+        return {
+          ...state,
+          relations: [{
+            ...state.relations[0],
+            snapshotJson: JSON.stringify({ ...snapshot, reference_updated_at: "2026-07-27T01:00:00.000Z" }),
+            snapshotUpdatedAt: "2026-07-27T02:00:00.000Z",
+          }, state.relations[1]],
+        };
+      }],
     ];
 
-    for (const variant of variants) {
-      useBackupReadDb(variant);
+    for (const [_fieldFamily, mutate] of variants) {
+      useBackupReadDb(mutate(rows));
       await expect(previewBackup(backup)).resolves.not.toMatchObject({ state_digest: unorderedDigest });
     }
   });

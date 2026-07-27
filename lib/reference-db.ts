@@ -88,6 +88,43 @@ export function referenceRecordToRow(record: ReferenceRecord): typeof references
   };
 }
 
+export function referenceRecordToStorageRow(record: ReferenceRecord): typeof references.$inferInsert {
+  return {
+    id: record.id,
+    title: record.title,
+    sourceUrl: record.source_url,
+    canonicalUrl: record.canonical_url,
+    siteName: record.site_name,
+    author: record.author,
+    previewUrl: record.preview_url,
+    mediaType: record.media_type,
+    assetCategory: record.asset_category,
+    sourceCategory: record.source_category,
+    styleTags: JSON.stringify(record.style_tags),
+    useTags: JSON.stringify(record.use_tags),
+    mechanicTags: JSON.stringify(record.mechanic_tags),
+    moodTags: JSON.stringify(record.mood_tags),
+    visualLanguageTags: JSON.stringify(record.visual_language_tags),
+    licenseStatus: record.license_status,
+    attributionText: record.attribution_text,
+    publicStatus: record.public_status,
+    qualityStatus: record.quality_status,
+    rating: record.rating,
+    referenceValueScore: record.reference_value_score,
+    transformabilityScore: record.transformability_score,
+    copyrightRiskScore: record.copyright_risk_score,
+    productionReadinessScore: record.production_readiness_score,
+    inspirationPoints: JSON.stringify(record.inspiration_points),
+    inspirationEntries: JSON.stringify(record.inspiration_entries),
+    deconstructionNotes: record.deconstruction_notes,
+    transformationIdeas: record.transformation_ideas,
+    avoidCopyingNotes: record.avoid_copying_notes,
+    relatedOriginalAsset: record.related_original_asset,
+    createdAt: record.created_at,
+    updatedAt: record.updated_at,
+  };
+}
+
 export async function listReferences() {
   const rows = await getDb()
     .select()

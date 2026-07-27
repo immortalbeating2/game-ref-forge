@@ -51,6 +51,10 @@ export function synthesisRowToRecord(row: SynthesisRow): SynthesisRecord {
 }
 
 export function synthesisRecordToRow(record: SynthesisRecord): typeof syntheses.$inferInsert {
+  return synthesisRecordToStorageRow(record);
+}
+
+export function synthesisRecordToStorageRow(record: SynthesisRecord): typeof syntheses.$inferInsert {
   return {
     id: record.id,
     title: record.title,

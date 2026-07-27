@@ -235,7 +235,7 @@ function relationRowToRecord(row: typeof synthesisReferences.$inferSelect): Back
 
 export async function readBackupInventory(): Promise<BackupInventory> {
   const db = getDb();
-  const [referenceRows, synthesisRows, relationRows] = await Promise.all([
+  const [referenceRows, synthesisRows, relationRows] = await db.batch([
     db.select().from(references).orderBy(references.id),
     db.select().from(syntheses).orderBy(syntheses.id),
     db.select().from(synthesisReferences)
