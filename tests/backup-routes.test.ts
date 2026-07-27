@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BackupPreview } from "../lib/backup-db";
+import {
+  MAX_BACKUP_REQUEST_BYTES,
+  readBoundedJson,
+} from "../app/api/backup/request";
 import { makeBackupFixture } from "./fixtures/backup";
 
 vi.mock("../lib/backup-db", () => ({
@@ -27,8 +31,6 @@ const preview: BackupPreview = {
   state_digest: "state-digest",
 };
 
-const MAX_BACKUP_REQUEST_BYTES = 5_000_000 + 131_072;
-
 let exportRoute: ExportRoute;
 let previewRoute: PreviewRoute;
 let restoreRoute: RestoreRoute;
@@ -54,6 +56,14 @@ function oversizedJsonRequest() {
   } as RequestInit & { duplex: "half" });
 }
 
+function streamingRequest(stream: ReadableStream<Uint8Array>) {
+  return new Request("http://local/api/backup/preview", {
+    method: "POST",
+    body: stream as unknown as BodyInit,
+    duplex: "half",
+  } as RequestInit & { duplex: "half" });
+}
+
 beforeEach(async () => {
   vi.resetAllMocks();
   [exportRoute, previewRoute, restoreRoute] = await Promise.all([
@@ -64,6 +74,80 @@ beforeEach(async () => {
 });
 
 describe("backup API routes", () => {
+  it("copies a received request chunk before waiting for the next chunk", async () => {
+    const encoder = new TextEncoder();
+    const first = encoder.encode('{"title":');
+    const second = encoder.encode('"backup"}');
+    let releaseSecondChunk: (() => void) | undefined;
+    let pullStarted: (() => void) | undefined;
+    const pullStartedPromise = new Promise<void>((resolve) => {
+      pullStarted = resolve;
+    });
+    const request = streamingRequest(new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(first);
+      },
+      pull(controller) {
+        pullStarted?.();
+        return new Promise<void>((resolve) => {
+          releaseSecondChunk = () => {
+            controller.enqueue(second);
+            controller.close();
+            resolve();
+          };
+        });
+      },
+    }));
+    const set = vi.spyOn(Uint8Array.prototype, "set");
+
+    const resultPromise = readBoundedJson(request);
+    await pullStartedPromise;
+
+    expect(set).toHaveBeenCalledWith(first, 0);
+    releaseSecondChunk?.();
+    await expect(resultPromise).resolves.toEqual({ ok: true, value: { title: "backup" } });
+    expect(request.body?.locked).toBe(false);
+    set.mockRestore();
+  });
+
+  it("reads a valid JSON body delivered in many small chunks", async () => {
+    const bytes = new TextEncoder().encode(JSON.stringify({ note: "x".repeat(250_000) }));
+    let offset = 0;
+    const request = streamingRequest(new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (offset === bytes.byteLength) {
+          controller.close();
+          return;
+        }
+        const end = Math.min(offset + 5, bytes.byteLength);
+        controller.enqueue(bytes.subarray(offset, end));
+        offset = end;
+      },
+    }));
+
+    await expect(readBoundedJson(request)).resolves.toEqual({
+      ok: true,
+      value: { note: "x".repeat(250_000) },
+    });
+    expect(request.body?.locked).toBe(false);
+  });
+
+  it("cancels and unlocks an oversized request stream", async () => {
+    let cancelled = false;
+    const request = streamingRequest(new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(MAX_BACKUP_REQUEST_BYTES + 1));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    }));
+
+    await expect(readBoundedJson(request)).resolves.toEqual({ ok: false, code: "backup_too_large" });
+    expect(cancelled).toBe(true);
+    expect(request.body?.locked).toBe(false);
+  });
+
   it("exports a complete Backup v1 as a non-cacheable download", async () => {
     const backup = makeBackupFixture();
     vi.mocked(createFullBackup).mockResolvedValue(backup);

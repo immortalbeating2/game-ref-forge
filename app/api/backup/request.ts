@@ -42,27 +42,24 @@ export async function readBoundedJson(request: Request): Promise<BoundedJsonResu
   const reader = request.body?.getReader();
   if (!reader) return { ok: false, code: "invalid_json" };
 
-  const chunks: Uint8Array[] = [];
+  const bytes = new Uint8Array(MAX_BACKUP_REQUEST_BYTES);
   let total = 0;
   try {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      total += value.byteLength;
-      if (total > MAX_BACKUP_REQUEST_BYTES) {
+      if (total + value.byteLength > MAX_BACKUP_REQUEST_BYTES) {
         await reader.cancel().catch(() => undefined);
         return { ok: false, code: "backup_too_large" };
       }
-      chunks.push(value);
+      bytes.set(value, total);
+      total += value.byteLength;
     }
 
-    const bytes = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.byteLength;
-    }
-    return { ok: true, value: JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) };
+    return {
+      ok: true,
+      value: JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(0, total))),
+    };
   } catch {
     return { ok: false, code: "invalid_json" };
   } finally {

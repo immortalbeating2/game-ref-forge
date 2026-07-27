@@ -116,30 +116,71 @@ function hasExactKeys(value: PlainObject, keys: readonly string[]) {
     keys.every((key) => Object.prototype.hasOwnProperty.call(value, key));
 }
 
-function isPlainJsonValue(value: unknown): boolean {
-  const values: Array<{ value: unknown; depth: number }> = [{ value, depth: 0 }];
+function* enumerableOwnKeys(value: PlainObject): Generator<string> {
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) yield key;
+  }
+}
 
-  while (values.length > 0) {
-    const current = values.pop();
-    if (current === undefined || current.depth > MAX_BACKUP_JSON_DEPTH) {
-      return false;
-    }
-    if (current.value === null || typeof current.value === "string" || typeof current.value === "boolean") continue;
-    if (typeof current.value === "number") {
-      if (!Number.isFinite(current.value)) return false;
-      continue;
-    }
-    if (Array.isArray(current.value)) {
-      for (let index = current.value.length - 1; index >= 0; index -= 1) {
-        values.push({ value: current.value[index], depth: current.depth + 1 });
+type PlainJsonFrame =
+  | { kind: "value"; value: unknown; depth: number }
+  | { kind: "array"; value: unknown[]; depth: number; index: number }
+  | { kind: "object"; value: PlainObject; depth: number; keys: Generator<string> };
+
+function isPlainJsonValue(value: unknown): boolean {
+  const frames: PlainJsonFrame[] = [{ kind: "value", value, depth: 0 }];
+
+  while (frames.length > 0) {
+    const current = frames[frames.length - 1];
+    if (current === undefined) return false;
+
+    if (current.kind === "value") {
+      if (current.depth > MAX_BACKUP_JSON_DEPTH) return false;
+      if (current.value === null || typeof current.value === "string" || typeof current.value === "boolean") {
+        frames.pop();
+        continue;
       }
+      if (typeof current.value === "number") {
+        if (!Number.isFinite(current.value)) return false;
+        frames.pop();
+        continue;
+      }
+      if (Array.isArray(current.value)) {
+        frames[frames.length - 1] = {
+          kind: "array",
+          value: current.value,
+          depth: current.depth,
+          index: 0,
+        };
+        continue;
+      }
+      if (!isPlainObject(current.value)) return false;
+      frames[frames.length - 1] = {
+        kind: "object",
+        value: current.value,
+        depth: current.depth,
+        keys: enumerableOwnKeys(current.value),
+      };
       continue;
     }
-    if (!isPlainObject(current.value)) return false;
-    const entries = Object.values(current.value);
-    for (let index = entries.length - 1; index >= 0; index -= 1) {
-      values.push({ value: entries[index], depth: current.depth + 1 });
+
+    if (current.kind === "array") {
+      if (current.index === current.value.length) {
+        frames.pop();
+        continue;
+      }
+      const index = current.index;
+      current.index += 1;
+      frames.push({ kind: "value", value: current.value[index], depth: current.depth + 1 });
+      continue;
     }
+
+    const next = current.keys.next();
+    if (next.done) {
+      frames.pop();
+      continue;
+    }
+    frames.push({ kind: "value", value: current.value[next.value], depth: current.depth + 1 });
   }
 
   return true;
@@ -306,48 +347,43 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
   if (value.schema_version !== BACKUP_SCHEMA_VERSION) {
     return { ok: false, issues: [issue("schema_version", "must be 1", "unsupported_version")] };
   }
+  if (!hasExactKeys(value, TOP_LEVEL_KEYS)) {
+    return { ok: false, issues: [issue("", "backup must be a closed JSON object")] };
+  }
+  if (!isPlainObject(value.data) || !hasExactKeys(value.data, DATA_KEYS)) {
+    return { ok: false, issues: [issue("data", "must be a closed data object")] };
+  }
+
+  const references = value.data.references;
+  const syntheses = value.data.syntheses;
+  const relations = value.data.synthesis_references;
+  if (!Array.isArray(references)) {
+    return { ok: false, issues: [issue("data.references", "must be an array")] };
+  }
+  if (references.length > MAX_BACKUP_REFERENCES) {
+    return { ok: false, issues: [issue("data.references", "exceeds the reference limit", "backup_too_large")] };
+  }
+  if (!Array.isArray(syntheses)) {
+    return { ok: false, issues: [issue("data.syntheses", "must be an array")] };
+  }
+  if (syntheses.length > MAX_BACKUP_SYNTHESES) {
+    return { ok: false, issues: [issue("data.syntheses", "exceeds the synthesis limit", "backup_too_large")] };
+  }
+  if (!Array.isArray(relations)) {
+    return { ok: false, issues: [issue("data.synthesis_references", "must be an array")] };
+  }
+  if (relations.length > MAX_BACKUP_RELATIONS) {
+    return { ok: false, issues: [issue("data.synthesis_references", "exceeds the relation limit", "backup_too_large")] };
+  }
   const issues: BackupValidationIssue[] = [];
-  if (!isPlainJsonValue(value) || !hasExactKeys(value, TOP_LEVEL_KEYS)) {
+  const isPlainJson = isPlainJsonValue(value);
+  if (!isPlainJson) {
     issues.push(issue("", "backup must be a closed JSON object"));
   }
   if (!isIsoTimestamp(value.exported_at)) issues.push(issue("exported_at", "must be a valid ISO-8601 timestamp"));
   if (!isPlainObject(value.app) || !hasExactKeys(value.app, APP_KEYS) || value.app.name !== "RefForge") {
     issues.push(issue("app", "must identify RefForge"));
   }
-  if (!isPlainObject(value.data) || !hasExactKeys(value.data, DATA_KEYS)) {
-    issues.push(issue("data", "must be a closed data object"));
-  }
-
-  const data = isPlainObject(value.data) ? value.data : undefined;
-  const references = data?.references;
-  const syntheses = data?.syntheses;
-  const relations = data?.synthesis_references;
-  if (!Array.isArray(references)) {
-    issues.push(issue("data.references", "must be an array"));
-  } else if (references.length > MAX_BACKUP_REFERENCES) {
-    issues.push(issue("data.references", "exceeds the reference limit", "backup_too_large"));
-  }
-  if (!Array.isArray(syntheses)) {
-    issues.push(issue("data.syntheses", "must be an array"));
-  } else if (syntheses.length > MAX_BACKUP_SYNTHESES) {
-    issues.push(issue("data.syntheses", "exceeds the synthesis limit", "backup_too_large"));
-  }
-  if (!Array.isArray(relations)) {
-    issues.push(issue("data.synthesis_references", "must be an array"));
-  } else if (relations.length > MAX_BACKUP_RELATIONS) {
-    issues.push(issue("data.synthesis_references", "exceeds the relation limit", "backup_too_large"));
-  }
-
-  if (!Array.isArray(references) || !Array.isArray(syntheses) || !Array.isArray(relations)) {
-    return { ok: false, issues };
-  }
-  if (references.length > MAX_BACKUP_REFERENCES || syntheses.length > MAX_BACKUP_SYNTHESES || relations.length > MAX_BACKUP_RELATIONS) {
-    return { ok: false, issues };
-  }
-  if (isPlainJsonValue(value) && new TextEncoder().encode(canonicalBackupJson(value)).byteLength > MAX_BACKUP_BYTES) {
-    return { ok: false, issues: [issue("", "canonical backup JSON exceeds the 5 MB limit", "backup_too_large")] };
-  }
-
   const referenceIds = new Set<string>();
   references.forEach((reference, index) => {
     const path = `data.references[${index}]`;
@@ -444,6 +480,9 @@ export function parseRefForgeBackup(value: unknown): BackupParseResult {
 
   const preferences = parsePreferences(value.preferences, issues);
   if (issues.length > 0 || preferences === undefined) return { ok: false, issues };
+  if (isPlainJson && new TextEncoder().encode(canonicalBackupJson(value)).byteLength > MAX_BACKUP_BYTES) {
+    return { ok: false, issues: [issue("", "canonical backup JSON exceeds the 5 MB limit", "backup_too_large")] };
+  }
 
   return {
     ok: true,

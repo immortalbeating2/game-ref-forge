@@ -216,6 +216,43 @@ describe("Backup v1 domain contract", () => {
     },
   );
 
+  it("rejects an open data object before traversing its fields", () => {
+    const backup = makeBackupFixture();
+    const data = { ...backup.data, extra: true } as Record<string, unknown>;
+    Object.defineProperty(data, "references", {
+      enumerable: true,
+      get() {
+        throw new Error("data fields must not be traversed before the closed-shape check");
+      },
+    });
+
+    expect(() => parseRefForgeBackup({ ...backup, data })).not.toThrow();
+    expectInvalid({ ...backup, data }, "data");
+  });
+
+  it("rejects an over-limit array before visiting any of its elements", () => {
+    const backup = makeBackupFixture();
+    const references: unknown[] = new Array(MAX_BACKUP_REFERENCES + 1);
+    Object.defineProperty(references, "0", {
+      enumerable: true,
+      get() {
+        throw new Error("over-limit entries must not be traversed");
+      },
+    });
+    const malformed = { ...backup, data: { ...backup.data, references } };
+
+    expect(() => parseRefForgeBackup(malformed)).not.toThrow();
+    const result = parseRefForgeBackup(malformed);
+    expect(result).toEqual({
+      ok: false,
+      issues: [{
+        code: "backup_too_large",
+        path: "data.references",
+        message: "exceeds the reference limit",
+      }],
+    });
+  });
+
   it("returns a structured validation failure for deeply nested malformed JSON", () => {
     let deeplyNested: unknown = "leaf";
     for (let depth = 0; depth < 20_000; depth += 1) deeplyNested = { next: deeplyNested };
@@ -231,12 +268,41 @@ describe("Backup v1 domain contract", () => {
     if (!result.ok) expect(result.issues[0].code).toBe("validation_failed");
   });
 
-  it("accepts a sub-5MB backup with a wide legal field array", () => {
+  it("accepts a sub-5MB backup with a wide legal field array without front-loading sibling traversal", () => {
     const backup = makeBackupFixture();
     backup.data.references[0].style_tags = Array.from({ length: 1_000_001 }, () => "x");
 
     expect(new TextEncoder().encode(canonicalBackupJson(backup)).byteLength).toBeLessThan(MAX_BACKUP_BYTES);
     expect(parseRefForgeBackup(backup).ok).toBe(true);
+  });
+
+  it("walks a wide array depth-first instead of reading all sibling entries first", () => {
+    const backup = makeBackupFixture();
+    const styleTags: unknown[] = Array.from({ length: 250_000 }, () => "x");
+    let laterSiblingRead = false;
+    Object.defineProperty(styleTags, "1", {
+      enumerable: true,
+      get() {
+        laterSiblingRead = true;
+        return "x";
+      },
+    });
+    Object.defineProperty(styleTags, "0", {
+      enumerable: true,
+      get() {
+        return {
+          get nested() {
+            if (laterSiblingRead) throw new Error("wide-array siblings were read before the first child");
+            return "x";
+          },
+        };
+      },
+    });
+    backup.data.references[0].style_tags = styleTags as string[];
+
+    const result = parseRefForgeBackup(backup);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.issues.some((entry) => entry.path === "data.references[0]")).toBe(true);
   });
 
   it.each([
