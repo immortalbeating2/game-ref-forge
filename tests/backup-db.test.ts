@@ -12,7 +12,11 @@ import {
   makeReference,
   makeSynthesis,
 } from "./fixtures/backup";
-import { createFullBackup, previewBackup } from "../lib/backup-db";
+import {
+  BackupStoredDataError,
+  createFullBackup,
+  previewBackup,
+} from "../lib/backup-db";
 
 type ReadRows = {
   references: Array<typeof references.$inferSelect>;
@@ -129,6 +133,47 @@ describe("backup database reads", () => {
     await expect(createFullBackup("2026-07-27T00:00:00.000Z")).rejects.toThrow(/stored backup data/i);
   });
 
+  it.each([
+    ["invalid JSON", { styleTags: "not-json" }],
+    ["a non-string JSON array member", { useTags: JSON.stringify(["environment", 3]) }],
+    ["a blank inspiration entry id", {
+      inspirationEntries: JSON.stringify([{
+        ...makeReference().inspiration_entries[0],
+        id: "",
+      }]),
+    }],
+    ["a missing inspiration entry id", {
+      inspirationEntries: JSON.stringify([{
+        observation: "Observation",
+        principle: "Principle",
+        transferable_idea: "Idea",
+        original_application: "Application",
+        avoid_copying: "Avoid copying",
+      }]),
+    }],
+  ])("rejects references with %s without cleaning stored values", async (_case, values) => {
+    const rows = completeRows();
+    useBackupReadDb({
+      ...rows,
+      references: [{ ...rows.references[0], ...values }, rows.references[1]],
+    });
+
+    await expect(createFullBackup("2026-07-27T00:00:00.000Z")).rejects.toBeInstanceOf(BackupStoredDataError);
+  });
+
+  it.each([
+    ["an invalid status", { status: "invalid" }],
+    ["an undefined nullable field", { targetAsset: undefined }],
+  ])("rejects synthesis rows with %s before creating a preview digest", async (_case, values) => {
+    const rows = completeRows();
+    useBackupReadDb({
+      ...rows,
+      syntheses: [{ ...rows.syntheses[0], ...values } as typeof syntheses.$inferSelect],
+    });
+
+    await expect(previewBackup(makeBackupFixture())).rejects.toBeInstanceOf(BackupStoredDataError);
+  });
+
   it("reports creates, overwrites, preserves and relations without writing", async () => {
     const backup = makeBackupFixture();
     const fakeDb = useBackupReadDb({
@@ -187,5 +232,17 @@ describe("backup database reads", () => {
       useBackupReadDb(variant);
       await expect(previewBackup(backup)).resolves.not.toMatchObject({ state_digest: unorderedDigest });
     }
+  });
+
+  it("keeps a valid inspiration entry id unchanged across repeated state digests", async () => {
+    const backup = makeBackupFixture();
+    const rows = completeRows();
+    useBackupReadDb(rows);
+    const first = await previewBackup(backup);
+
+    useBackupReadDb(rows);
+    const second = await previewBackup(backup);
+
+    expect(second.state_digest).toBe(first.state_digest);
   });
 });
