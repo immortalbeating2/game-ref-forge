@@ -243,6 +243,7 @@ const copy = {
     backupOverwriteConfirmationRequired: "请确认覆盖现有记录后再恢复。",
     backupRestoreFailed: "恢复未完成，当前研究数据未被部分写入。",
     backupDatabaseUnavailable: "备份服务暂不可用，请稍后重试。",
+    backupOperationFailed: "备份操作未完成，请稍后重试。",
     exportUnavailable: "请选择一条参考后再导出。",
     inspirationEntryCount: "结构化灵感条目",
     reviewQueue: "整理队列",
@@ -514,6 +515,7 @@ const copy = {
     backupOverwriteConfirmationRequired: "Confirm overwriting existing records before restoring.",
     backupRestoreFailed: "Restore did not complete; no partial research data was written.",
     backupDatabaseUnavailable: "Backup service is unavailable. Try again shortly.",
+    backupOperationFailed: "The backup operation did not complete. Try again shortly.",
     exportUnavailable: "Select a reference before exporting.",
     inspirationEntryCount: "Structured inspiration entries",
     reviewQueue: "Review queue",
@@ -733,7 +735,8 @@ export type BackupErrorCode =
   | "preview_stale"
   | "overwrite_confirmation_required"
   | "restore_failed"
-  | "database_unavailable";
+  | "database_unavailable"
+  | "backup_operation_failed";
 
 export function backupErrorMessage(
   code: BackupErrorCode | string | undefined,
@@ -759,9 +762,12 @@ export function backupErrorMessage(
       return copy.backupOverwriteConfirmationRequired;
     case "database_unavailable":
       return copy.backupDatabaseUnavailable;
+    case "backup_operation_failed":
+      return copy.backupOperationFailed;
     case "restore_failed":
-    default:
       return copy.backupRestoreFailed;
+    default:
+      return copy.backupOperationFailed;
   }
 }
 

@@ -30,6 +30,7 @@ import {
   canSubmitRestore,
   createDataManagementState,
   dataManagementReducer,
+  getDataManagementDialogLayer,
   type DataManagementIssue,
 } from "./data-management-state";
 
@@ -121,6 +122,7 @@ export function DataManagementDialog({
   const [confirmDiscardDraft, setConfirmDiscardDraft] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const discardDialogRef = useRef<HTMLDivElement>(null);
   const discardRestoreRef = useRef<HTMLButtonElement>(null);
   const restoreGuard = useRef(false);
   const titleId = useId();
@@ -131,6 +133,7 @@ export function DataManagementDialog({
   const restorePanelId = useId();
   const isRestoring = state.status === "restoring";
   const isBusy = isRestoring || businessMutationBusy;
+  const activeDialogLayer = getDataManagementDialogLayer(confirmDiscardDraft);
   const message = statusCopy(state.status, state.errorCode, state.preferenceResult, language);
 
   useEffect(() => {
@@ -150,8 +153,16 @@ export function DataManagementDialog({
 
   useEffect(() => {
     if (!confirmDiscardDraft) return;
+    const discardTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const fallbackTitle = titleRef.current;
     const frame = window.requestAnimationFrame(() => discardRestoreRef.current?.focus());
-    return () => window.cancelAnimationFrame(frame);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.requestAnimationFrame(() => {
+        if (discardTrigger?.isConnected) discardTrigger?.focus({ preventScroll: true });
+        else fallbackTitle?.focus({ preventScroll: true });
+      });
+    };
   }, [confirmDiscardDraft]);
 
   function handleClose() {
@@ -170,8 +181,27 @@ export function DataManagementDialog({
     if (action?.kind === "cancel") {
       if (!isRestoring) {
         event.preventDefault();
-        if (confirmDiscardDraft) setConfirmDiscardDraft(false);
-        else handleClose();
+        handleClose();
+      }
+    } else if (action?.kind === "focus") {
+      event.preventDefault();
+      if (action.index < 0) dialog.focus();
+      else focusable[action.index]?.focus();
+    }
+  }
+
+  function handleDiscardDialogKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    event.stopPropagation();
+    const dialog = discardDialogRef.current;
+    if (!dialog) return;
+    const focusableSelector = "button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])";
+    const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
+    const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
+    const action = getDialogKeyboardAction(event.key, event.shiftKey, activeIndex, focusable.length);
+    if (action?.kind === "cancel") {
+      if (!isRestoring) {
+        event.preventDefault();
+        setConfirmDiscardDraft(false);
       }
     } else if (action?.kind === "focus") {
       event.preventDefault();
@@ -241,6 +271,7 @@ export function DataManagementDialog({
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file || isRestoring) return;
+    dispatch({ type: "file_selection_started" });
     if (file.size > MAX_BACKUP_BYTES) {
       dispatch({ type: "preview_failed", errorCode: "backup_too_large" });
       return;
@@ -306,15 +337,18 @@ export function DataManagementDialog({
 
   return (
     <div className="data-management-overlay">
-      <div
+      <div className="data-management-dialog">
+        <div
         ref={dialogRef}
-        className="data-management-dialog"
+        className="data-management-dialog__background"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={statusId}
+        aria-hidden={confirmDiscardDraft || undefined}
+        inert={confirmDiscardDraft || undefined}
         tabIndex={-1}
-        onKeyDown={handleDialogKeyDown}
+        onKeyDown={activeDialogLayer === "dialog" ? handleDialogKeyDown : undefined}
       >
         <header className="data-management-dialog__header">
           <div>
@@ -402,9 +436,10 @@ export function DataManagementDialog({
             </div>
           </section>
         )}
+        </div>
 
         {confirmDiscardDraft ? (
-          <div className="data-management-discard" role="alertdialog" aria-modal="true" aria-labelledby={`${titleId}-discard`}>
+          <div ref={discardDialogRef} className="data-management-discard" role="alertdialog" aria-modal="true" aria-labelledby={`${titleId}-discard`} tabIndex={-1} onKeyDown={handleDiscardDialogKeyDown}>
             <h3 id={`${titleId}-discard`}>{copy.unsavedDraftRestoreTitle}</h3>
             <p>{copy.unsavedDraftRestoreBody}</p>
             <div>

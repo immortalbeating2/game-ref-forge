@@ -6,6 +6,7 @@ import {
   canSubmitRestore,
   createDataManagementState,
   dataManagementReducer,
+  getDataManagementDialogLayer,
 } from "../app/data-management/data-management-state";
 
 const preview: BackupPreview = {
@@ -48,6 +49,24 @@ describe("data management state", () => {
     expect(state.preview).toBeNull();
     expect(state.status).toBe("idle");
     expect(canSubmitRestore(state)).toBe(false);
+  });
+
+  it("clears an old backup immediately when choosing a replacement file that later fails validation", () => {
+    const selecting = dataManagementReducer(previewReadyState(), { type: "file_selection_started" });
+    const failed = dataManagementReducer(selecting, { type: "preview_failed", errorCode: "backup_too_large" });
+
+    expect(selecting.selectedFile).toBeNull();
+    expect(selecting.parsedBackup).toBeNull();
+    expect(selecting.preview).toBeNull();
+    expect(selecting.overwriteConfirmed).toBe(false);
+    expect(canSubmitRestore(selecting)).toBe(false);
+    expect(failed.selectedFile).toBeNull();
+    expect(canSubmitRestore(failed)).toBe(false);
+  });
+
+  it("selects the focused dialog layer without leaving the background interactive", () => {
+    expect(getDataManagementDialogLayer(false)).toBe("dialog");
+    expect(getDataManagementDialogLayer(true)).toBe("discard_confirmation");
   });
 
   it("disables restore while preview is loading", () => {

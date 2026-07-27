@@ -1305,6 +1305,7 @@ label {
 }
 
 .data-management-dialog {
+  position: relative;
   display: grid;
   width: min(100%, 680px);
   max-height: min(760px, calc(100dvh - 40px));
@@ -1316,6 +1317,11 @@ label {
   padding: 20px;
 }
 
+.data-management-dialog__background {
+  display: grid;
+  gap: 16px;
+}
+
 .data-management-dialog__header,
 .data-management-actions,
 .data-management-tabs,
@@ -1325,6 +1331,14 @@ label {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.data-management-discard {
+  position: absolute;
+  z-index: 1;
+  inset: 16px;
+  align-content: center;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
 }
 
 .data-management-dialog__header {
@@ -1516,6 +1530,10 @@ label {
     border: 0;
     border-radius: 0;
     padding: 16px;
+  }
+
+  .data-management-discard {
+    inset: 16px;
   }
 
   .data-management-summary {

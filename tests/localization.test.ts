@@ -35,6 +35,7 @@ const dataManagementCopyKeys = [
   "restoreSucceeded",
   "preferencesRestoreFailed",
   "backupIssues",
+  "backupOperationFailed",
 ] as const;
 
 const backupErrorCodes = [
@@ -48,6 +49,7 @@ const backupErrorCodes = [
   "overwrite_confirmation_required",
   "restore_failed",
   "database_unavailable",
+  "backup_operation_failed",
 ] as const;
 
 const synthesisCopyKeys = [
@@ -192,6 +194,7 @@ describe("uiCopy", () => {
     expect(uiCopy().resetPanelWidth).toBe("双击恢复默认宽度");
     expect(uiCopy().dataManagement).toBe("数据管理");
     expect(uiCopy().backupIssues).toBe("校验问题");
+    expect(backupErrorMessage("backup_operation_failed")).toBe("备份操作未完成，请稍后重试。");
     for (const key of dataManagementCopyKeys) expect(uiCopy()[key]).not.toHaveLength(0);
     for (const code of backupErrorCodes) expect(backupErrorMessage(code)).not.toHaveLength(0);
   });
@@ -235,6 +238,7 @@ describe("uiCopy", () => {
     expect(uiCopy("en").resetPanelWidth).toBe("Double-click to reset width");
     expect(uiCopy("en").dataManagement).toBe("Data management");
     expect(uiCopy("en").backupIssues).toBe("Validation issues");
+    expect(backupErrorMessage("backup_operation_failed", "en")).toBe("The backup operation did not complete. Try again shortly.");
     for (const key of dataManagementCopyKeys) expect(uiCopy("en")[key]).not.toHaveLength(0);
     for (const code of backupErrorCodes) expect(backupErrorMessage(code, "en")).not.toHaveLength(0);
   });

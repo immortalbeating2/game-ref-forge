@@ -15,6 +15,10 @@ export type DataManagementIssue = {
   message: string;
 };
 
+export function getDataManagementDialogLayer(confirmingDiscard: boolean) {
+  return confirmingDiscard ? "discard_confirmation" : "dialog";
+}
+
 export type DataManagementState = {
   tab: "backup" | "restore";
   includePreferences: boolean;
@@ -34,6 +38,7 @@ export type DataManagementAction =
   | { type: "close" }
   | { type: "tab_changed"; tab: DataManagementState["tab"] }
   | { type: "include_preferences_changed"; value: boolean }
+  | { type: "file_selection_started" }
   | { type: "file_selected"; file: NonNullable<DataManagementState["selectedFile"]>; backup: RefForgeBackupV1 }
   | { type: "preview_started" }
   | { type: "preview_succeeded"; preview: BackupPreview }
@@ -86,6 +91,20 @@ export function dataManagementReducer(
       return { ...state, tab: action.tab };
     case "include_preferences_changed":
       return { ...state, includePreferences: action.value };
+    case "file_selection_started":
+      return {
+        ...state,
+        tab: "restore",
+        selectedFile: null,
+        parsedBackup: null,
+        preview: null,
+        overwriteConfirmed: false,
+        restorePreferences: false,
+        status: "idle",
+        errorCode: null,
+        issues: [],
+        preferenceResult: "not_requested",
+      };
     case "file_selected":
       return {
         ...state,

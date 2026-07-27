@@ -36,4 +36,15 @@ describe("data management dialog source contracts", () => {
     expect(source).toContain("URL.revokeObjectURL");
     expect(source).toContain("tryAcquireOperationGuard");
   });
+
+  it("isolates the dirty discard alertdialog from the inert background dialog", () => {
+    const source = readFileSync(dialogPath, "utf8");
+
+    expect(source).toContain('aria-hidden={confirmDiscardDraft || undefined}');
+    expect(source).toContain('inert={confirmDiscardDraft || undefined}');
+    expect(source).toContain("handleDiscardDialogKeyDown");
+    expect(source).toContain("discardDialogRef");
+    expect(source).toContain("event.stopPropagation()");
+    expect(source).toContain("discardTrigger?.focus({ preventScroll: true })");
+  });
 });
