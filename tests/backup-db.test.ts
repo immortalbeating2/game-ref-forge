@@ -94,6 +94,37 @@ function completeRows(): ReadRows {
   };
 }
 
+function previewRowsWithPreservedData(): ReadRows {
+  const currentReference = makeReference({ id: "current-only" });
+  const currentSynthesis = makeSynthesis({ id: "current-syn" });
+  const firstReference = makeReference({ id: "ref-1" });
+
+  return {
+    references: [toReferenceRow(firstReference), toReferenceRow(currentReference)],
+    syntheses: [toSynthesisRow(makeSynthesis({ id: "syn-1" })), toSynthesisRow(currentSynthesis)],
+    relations: [
+      makeRelationRow(createReferenceSnapshot(firstReference)),
+      makeRelationRow(createReferenceSnapshot(firstReference), {
+        id: "link-2",
+        referenceId: null,
+        position: 1,
+      }),
+      makeRelationRow(createReferenceSnapshot(currentReference), {
+        id: "current-link-1",
+        synthesisId: currentSynthesis.id,
+        referenceId: currentReference.id,
+        position: 0,
+      }),
+      makeRelationRow(createReferenceSnapshot(currentReference), {
+        id: "current-link-2",
+        synthesisId: currentSynthesis.id,
+        referenceId: null,
+        position: 1,
+      }),
+    ],
+  };
+}
+
 afterEach(() => {
   vi.resetAllMocks();
 });
@@ -174,19 +205,48 @@ describe("backup database reads", () => {
     await expect(previewBackup(makeBackupFixture())).rejects.toBeInstanceOf(BackupStoredDataError);
   });
 
+  it.each([
+    ["a snapshot/reference id mismatch", (rows: ReadRows) => ({
+      ...rows,
+      relations: [{ ...rows.relations[0], referenceId: "ref-2" }, rows.relations[1]],
+    })],
+    ["non-contiguous relation positions", (rows: ReadRows) => ({
+      ...rows,
+      relations: [{ ...rows.relations[0], position: 2 }, rows.relations[1]],
+    })],
+    ["fewer than two relations for a synthesis", (rows: ReadRows) => ({
+      ...rows,
+      relations: [rows.relations[0]],
+    })],
+    ["an invalid snapshot reference timestamp", (rows: ReadRows) => {
+      const snapshot = JSON.parse(rows.relations[0].snapshotJson) as SynthesisReferenceSnapshot;
+      return {
+        ...rows,
+        relations: [{
+          ...rows.relations[0],
+          snapshotJson: JSON.stringify({ ...snapshot, reference_updated_at: "not-a-timestamp" }),
+        }, rows.relations[1]],
+      };
+    }],
+    ["an out-of-range snapshot score", (rows: ReadRows) => {
+      const snapshot = JSON.parse(rows.relations[0].snapshotJson) as SynthesisReferenceSnapshot;
+      return {
+        ...rows,
+        relations: [{
+          ...rows.relations[0],
+          snapshotJson: JSON.stringify({ ...snapshot, scores: { ...snapshot.scores, rating: 6 } }),
+        }, rows.relations[1]],
+      };
+    }],
+  ])("rejects preview inventory with %s before creating a digest", async (_case, mutate) => {
+    useBackupReadDb(mutate(completeRows()));
+
+    await expect(previewBackup(makeBackupFixture())).rejects.toBeInstanceOf(BackupStoredDataError);
+  });
+
   it("reports creates, overwrites, preserves and relations without writing", async () => {
     const backup = makeBackupFixture();
-    const fakeDb = useBackupReadDb({
-      references: [
-        toReferenceRow(makeReference({ id: "ref-1" })),
-        toReferenceRow(makeReference({ id: "current-only" })),
-      ],
-      syntheses: [
-        toSynthesisRow(makeSynthesis({ id: "syn-1" })),
-        toSynthesisRow(makeSynthesis({ id: "current-syn" })),
-      ],
-      relations: [],
-    });
+    const fakeDb = useBackupReadDb(previewRowsWithPreservedData());
 
     await expect(previewBackup(backup)).resolves.toMatchObject({
       references: { create: 1, overwrite: 1, preserve: 1 },
@@ -218,7 +278,7 @@ describe("backup database reads", () => {
     const variants: ReadRows[] = [
       { ...rows, references: [toReferenceRow(makeReference({ title: "Changed" })), rows.references[1]] },
       { ...rows, syntheses: [toSynthesisRow(makeSynthesis({ updated_at: "2026-07-27T01:00:00.000Z" }))] },
-      { ...rows, relations: [{ ...rows.relations[0], position: 1 }, rows.relations[1]] },
+      { ...rows, relations: [{ ...rows.relations[0], id: "link-1-changed" }, rows.relations[1]] },
       {
         ...rows,
         relations: [

@@ -56,6 +56,7 @@ const SYNTHESIS_NULLABLE_TEXT_FIELDS = [
   "next_actions",
   "additional_notes",
 ] as const;
+const INVENTORY_VALIDATION_EXPORTED_AT = "1970-01-01T00:00:00.000Z";
 
 function compareStrings(left: string, right: string) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -246,6 +247,7 @@ export async function readBackupInventory(): Promise<BackupInventory> {
     syntheses: synthesisRows.map(strictSynthesisRowToRecord),
     relations: relationRows.map(relationRowToRecord),
   });
+  ensureStoredBackupIsValid(toBackup(inventory, INVENTORY_VALIDATION_EXPORTED_AT));
   return inventory;
 }
 
