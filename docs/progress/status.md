@@ -4,7 +4,7 @@ Updated: 2026-07-27
 
 ## Current Stage
 
-`Round 13 design and plan approved; implementation ready`
+`Round 13 implemented and locally verified; merge pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -33,8 +33,11 @@ It helps collect source links from game asset and game design sites, normalize t
 - Sites version 14 deployed successfully. Authenticated production QA passed real left/right pointer drag, reload persistence, keyboard adjustment, detail collapse/reload/recovery, 1280px and 390px no-overflow metrics, and console error 0; final preferences were reset to `260/420`.
 - No dependency, API, D1, migration, reference/synthesis model, or production business-data change is included in Round 12. Production reference count remained 2 throughout read-only QA.
 - The Round 12 worktree and local feature branch are removed; no remote Round 12 feature branch exists.
-- Round 13 design sections are confirmed. The proposed scope is a versioned full-library Backup v1, zero-write diff preview, controlled same-ID overwrite with unrelated data preserved, atomic D1 batch restore, optional device preferences, and authenticated production recovery with temporary QA data.
-- The approved Round 13 specification is `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`; the TDD plan is `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md`. No application, API, D1, migration, dependency, or production-data change has started.
+- Round 13 implementation is complete on `codex/round-13-backup-restore`: Backup v1 exports complete references, syntheses, ordered relations and snapshots; preview is zero-write; restore uses guarded native D1 batch upserts while preserving backup-absent data; optional pinned/layout preferences are device-local.
+- Round 13 local automation passes with 31 test files / 390 tests, typecheck, lint, build and diff check. Real SQLite proves transaction rollback, and the accepted QA fixture uses 4 statements with a maximum JSON1 chunk of 2,386 bytes.
+- Local browser QA passes exact reference/synthesis/relation/snapshot restore, stale-preview 409 recovery, unsaved reference/synthesis gates, Chinese/English, keyboard focus/Escape, 1600/1280/390px zero-overflow layouts, console error 0 and zero QA residue.
+- The approved specification is `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`; implementation and QA evidence are in `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md` and `docs/qa/2026-07-27-full-library-backup-restore.md`.
+- Round 13 adds `lucide-react` and three backup API routes. It does not add or apply a D1 migration. Merge, Sites deployment and authenticated production recovery remain pending.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
   - slug: `game-ref-forge`

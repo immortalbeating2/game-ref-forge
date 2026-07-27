@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 13 design and plan approved; implementation ready`
+- 当前阶段：`Round 13 implemented and locally verified; merge pending`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,11 +142,11 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 13 design and plan approved; implementation ready`。Round 13 全库 Backup v1、受控恢复、差异预览、可选设备偏好和生产临时数据复测规格已批准，实现计划位于 `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md`；应用实现尚未开始。Round 12 与 Sites version 14 继续作为稳定生产基线。
+本项目当前为 `Round 13 implemented and locally verified; merge pending`。Round 13 已实现 Backup v1 全库导出、零写入差异预览、同 ID 覆盖且保留备份外数据的原子恢复、可选设备偏好和统一数据管理对话框。本地 31 个测试文件 / 390 项测试、typecheck、lint、build、真实 SQLite 回滚、D1 限额取证和浏览器恢复验收均通过；待合并 `main`、Sites 部署和认证生产临时数据恢复闭环。Sites version 14 在此之前仍是稳定生产基线。
 
 当前默认目标：
 
-- 从同步后的 `main` 创建 `codex/round-13-backup-restore` 和隔离 worktree，按 TDD 计划执行并逐任务审查。
+- 完成 `codex/round-13-backup-restore` 的 merged-main 门禁、GitHub 同步、Sites 精确源部署和认证生产 QA。
 - 将 Sites version 14 作为当前稳定生产基线；布局 smoke 继续保持只读，已批准的数据功能使用唯一 QA 前缀写入并在验证后清理。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。

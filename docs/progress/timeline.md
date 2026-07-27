@@ -1508,3 +1508,7 @@
 - 写入 `docs/superpowers/specs/2026-07-27-full-library-backup-restore-design.md`；阶段更新为 `Round 13 design confirmed; written spec review pending`。当前只改变文档，Sites version 14 保持稳定。
 - 用户批准 Round 13 书面规格并要求继续执行到完成；实现计划写入 `docs/superpowers/plans/2026-07-27-full-library-backup-restore.md`，采用 Subagent-Driven TDD、逐任务审查、merged-main 门禁、Sites 部署和生产临时数据恢复闭环。
 - 计划前复核当前 Cloudflare D1 官方限制，恢复写入确定为小于 1 MB 的 JSON1 分块、最多 40 条原生 D1 batch 语句；不采用逐记录 upsert，保持 Free 计划单 invocation 查询上限内。
+- 从同步的 `main` 创建 `codex/round-13-backup-restore` 隔离 worktree，按七任务 TDD 计划完成 Backup v1 格式合同、全库导出预览、原子 D1 恢复、三条 API、数据管理对话框和工作台接线。
+- 实现期间逐任务修复深度遍历、全库 state digest、批量读取、零操作 batch、枚举校验、请求边界、异步门禁和导出取消等审查问题；subagent 额度耗尽后由主代理完成 Task 6 与全分支复核，并在当日日志明确记录工具边界。
+- 本地浏览器恢复发现并修复 1-2 位小数 ISO 时间戳无法回导、自动重新预览后 stale 原因消失、390px 全宽按钮图标错位三项问题；临时数据最终回读 references 0、syntheses 0。
+- Round 13 本地最终门禁通过：31 个测试文件 / 390 项测试、typecheck、lint、build、diff check；真实验收备份生成 4 条 D1 batch 语句，最大 JSON1 块 2,386 字节；阶段更新为 `Round 13 implemented and locally verified; merge pending`。
