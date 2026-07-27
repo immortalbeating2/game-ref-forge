@@ -1275,7 +1275,7 @@ One browser action must be followed by an independent state read before the next
 
 Result: production real-UI create, preference-bearing export, post-export mutation, delete cleanup, zero-residue export, 1280/390px layout and console checks passed for `QA-R13-20260727-2326`. Chrome rejected automated file injection with `fileChooser.setFiles: Not allowed`, and the authenticated gateway rejected out-of-browser API fallback with 403. Production restore execution is therefore not claimed; complete local browser/API/SQLite evidence covers the restore path.
 
-- [ ] **Step 8: Close documentation and cleanup**
+- [x] **Step 8: Close documentation and cleanup**
 
 - Set stage to `Round 13 complete; Round 14 design-ready`.
 - Update all three progress documents and QA with exact production results.
@@ -1310,4 +1310,4 @@ Expected: one clean synchronized `main`, no Round 13 branch/worktree and Sites p
 - [x] Tests, typecheck, lint, build, task reviews, final review and merged-main gates pass.
 - [x] Sites deploy succeeds with no migration.
 - [ ] Production QA restores temporary data, preserves non-QA data and leaves zero residue. Restore execution was not directly observable because Chrome rejected file injection; production create/export/mutate/cleanup and local exact restore passed.
-- [ ] Three progress documents, QA, AGENTS, plan, GitHub main, Sites source and branch cleanup agree.
+- [x] Three progress documents, QA, AGENTS, plan, GitHub main, Sites source and branch cleanup agree.
