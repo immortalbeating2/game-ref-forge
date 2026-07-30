@@ -602,6 +602,7 @@ label {
 
 .reference-card__select {
   display: grid;
+  grid-template-rows: max-content 1fr;
   width: 100%;
   min-width: 0;
   min-height: 100%;

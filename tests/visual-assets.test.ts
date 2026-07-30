@@ -24,4 +24,12 @@ describe("Round 14 visual assets", () => {
       /\.reference-card__pin\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/,
     );
   });
+
+  it("keeps card preview tracks aligned when body content has different heights", () => {
+    const css = readFileSync(stylesheet, "utf8");
+
+    expect(css).toMatch(
+      /\.reference-card__select\s*\{[^}]*grid-template-rows:\s*max-content 1fr/,
+    );
+  });
 });

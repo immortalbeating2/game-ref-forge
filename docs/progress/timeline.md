@@ -1539,3 +1539,5 @@
 - GitHub 与 Sites runtime source 精确同步到 `4926de6207d0d601cb44390b6e435dc816b112d7`；保存 Sites version 16 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_a1683ea096b08191be0759de11cef149`，deployment `appgdep_6a6b276b59688191a430a7f9da007b5e` 私有发布成功，未新增或应用 migration。
 - 认证生产只读 QA 确认中文默认、紧凑/舒适密度刷新持久化、1280px 与真实 390x844 无横向溢出、移动置顶控件 `44x44px`；最终密度复位紧凑，未写入业务数据。连续点击自动化受浏览器 Statsig 网络等待影响超时，本地完整交互与 420 项测试覆盖该工具边界。
 - 阶段更新为 `Round 14 complete; Round 15 design-ready`；Sites version 16 为稳定生产基线，后续证据文档提交不要求重新部署。
+- 生产截图暴露相邻参考卡预览高度不一致；根因是等高卡片中的隐式 grid 行参与剩余高度拉伸，而非已批准的视觉选择。创建 `codex/fix-card-preview-alignment`，以 `grid-template-rows: max-content 1fr` 固定预览轨道，并先补失败回归再修复。
+- 本地双记录浏览器复测确认两张卡片均高 `480.71px`、两块预览均高 `134.91px`、横向溢出 `0`；临时记录清理后残留 `0`。完整门禁通过 39 个测试文件 / 421 项测试、typecheck、lint、build 和 diff check。

@@ -117,3 +117,18 @@ The in-app browser control client repeatedly waited on failed Statsig telemetry 
 ## Result
 
 Round 14 behavior, visual hierarchy, responsive layout, cleanup, console checks, merged-main command gate, exact-source deployment, and production read-only smoke passed. The post-repair independent review returned `Approved` with no Critical or Important findings. Round 14 is complete and Round 15 is design-ready.
+
+## Post-Deploy Card Preview Alignment Correction
+
+A production screenshot exposed unequal preview heights between adjacent equal-height reference cards. This was not an approved visual variation. The implicit rows in `.reference-card__select` stretched to distribute the card's remaining height, so a shorter body produced a taller preview.
+
+- Regression test added before the CSS repair and observed failing.
+- `.reference-card__select` now uses `grid-template-rows: max-content 1fr`.
+- Local fixture used one short and one wrapped-title reference.
+- Both cards measured `480.71px` high.
+- Both 16:9 previews measured `134.91px` high with identical top and bottom coordinates.
+- Document horizontal overflow was `0`.
+- Temporary fixture residue after cleanup was `0`.
+- Updated command gate: 39 files / 421 tests, typecheck, lint, build and diff check passed.
+
+The correction changes only card-internal layout and its regression test. It does not alter API, D1, migrations, Backup v1, dependencies, business data, or the Round 14 interaction contract.
