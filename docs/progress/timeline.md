@@ -1543,3 +1543,10 @@
 - 本地双记录浏览器复测确认两张卡片均高 `480.71px`、两块预览均高 `134.91px`、横向溢出 `0`；临时记录清理后残留 `0`。完整门禁通过 39 个测试文件 / 421 项测试、typecheck、lint、build 和 diff check。
 - 修复提交 `5c1803b` fast-forward 合并到 `main`，merged-main 全门禁再次通过并同步 GitHub 与 Sites source；保存 Sites version 17 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_cc84c828771c8191bcac16943e24f49e`，deployment `appgdep_6a6b4d18633c819196d68844c4cb5462` 私有发布成功。
 - 认证生产只读复测确认两张卡片均高 `520.52px`、两块预览均高 `142px`、上下边界一致、横向溢出 `0`、console error `0`；未写入 reference 或 synthesis。临时本地服务已停止，修复分支已删除，Sites version 17 成为稳定生产基线。
+
+## 2026-07-31
+
+- 用户指出舒适密度使用横向行图标却只让卡片变宽，确认这是控件语义与反馈差异不足，而不是已批准的横向列表能力。创建 `codex/fix-density-control-semantics` 进行小型 TDD 修复。
+- 先补失败回归，随后将紧凑/舒适图标改为 `Grid3X3` / `Grid2X2`；紧凑模式隐藏次要标签预览，舒适模式完整显示，移动端舒适回退继续恢复标签。
+- 本地浏览器确认紧凑卡宽约 `241px`、标签预览 0、舒适卡宽约 `322px`、标签预览 2；390px 下密度控件隐藏、标签预览 2、置顶目标 `44x44px`、横向溢出 `0`。临时记录清理残留 `0`。
+- 完整门禁通过 39 个测试文件 / 422 项测试、typecheck、lint、build 和 diff check；未修改 API、D1、migration、Backup v1、依赖或业务数据。

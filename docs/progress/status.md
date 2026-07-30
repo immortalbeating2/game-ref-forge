@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-07-30
+Updated: 2026-07-31
 
 ## Current Stage
 
@@ -52,6 +52,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Merged-main verification passes 39 test files / 421 tests, typecheck, lint, build and diff check. GitHub and Sites runtime source are synchronized to `5c1803b1d0ec6e718c4e275f0ca0a4bc71a875cd`.
 - Sites version 17 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_cc84c828771c8191bcac16943e24f49e`) deployed successfully through deployment `appgdep_6a6b4d18633c819196d68844c4cb5462`.
 - Authenticated production read-only QA for the alignment repair measured both reference cards at `520.52px`, both preview regions at `142px`, horizontal overflow `0`, and console error `0`; no reference or synthesis write was performed.
+- A follow-up density-control semantic repair replaces the misleading grid/list-looking pair with explicit small-grid/large-grid icons. Compact density now hides secondary tag previews, comfortable density keeps them visible, and the `<=820px` comfortable fallback still restores those previews.
+- The density semantic repair passes its red/green focused tests, 39 test files / 422 tests, typecheck, lint, build and diff check. Local browser evidence confirms compact `241px` cards with hidden tag previews, comfortable `322px` cards with visible previews, and 390px overflow `0` with `44x44px` pin targets.
 - Authenticated production read-only QA confirms Chinese default, compact/comfortable persistence across reload, zero horizontal overflow at 1280px and a real 390x844 tab, and `44x44px` mobile pin targets. Final density is compact and no production business data was written.
 - The in-app browser's multi-click automation timed out while its Statsig telemetry requests were delayed. The same comparison, keyboard, modal-focus, splitter and disclosure interactions passed locally and in the automated suite; this is a non-blocking control-channel evidence boundary.
 - Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 17 is the current stable production baseline.

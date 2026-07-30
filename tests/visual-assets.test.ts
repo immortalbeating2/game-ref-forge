@@ -32,4 +32,18 @@ describe("Round 14 visual assets", () => {
       /\.reference-card__select\s*\{[^}]*grid-template-rows:\s*max-content 1fr/,
     );
   });
+
+  it("uses secondary tag visibility to distinguish compact and comfortable density", () => {
+    const css = readFileSync(stylesheet, "utf8");
+
+    expect(css).toMatch(
+      /\.reference-card--compact \.tag-preview\s*\{[^}]*display:\s*none/,
+    );
+    expect(css).toMatch(
+      /\.reference-card--comfortable \.tag-preview\s*\{[^}]*display:\s*block/,
+    );
+    expect(css).toMatch(
+      /@media \(max-width: 820px\)[\s\S]*\.reference-card--compact \.tag-preview\s*\{[^}]*display:\s*block/,
+    );
+  });
 });

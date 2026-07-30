@@ -5,8 +5,8 @@ import {
   DatabaseBackup,
   GitCompareArrows,
   Grid2X2,
+  Grid3X3,
   Plus,
-  Rows3,
   Search,
 } from "lucide-react";
 import type { Ref } from "react";
@@ -113,7 +113,7 @@ export function ReferenceToolbar({
             title={copy.compactDensity}
             onClick={() => onDensityChange("compact")}
           >
-            <Grid2X2 aria-hidden="true" size={16} />
+            <Grid3X3 aria-hidden="true" size={16} />
             <span>{copy.compactDensity}</span>
           </button>
           <button
@@ -123,7 +123,7 @@ export function ReferenceToolbar({
             title={copy.comfortableDensity}
             onClick={() => onDensityChange("comfortable")}
           >
-            <Rows3 aria-hidden="true" size={16} />
+            <Grid2X2 aria-hidden="true" size={16} />
             <span>{copy.comfortableDensity}</span>
           </button>
         </div>

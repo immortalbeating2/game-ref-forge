@@ -806,6 +806,14 @@ label {
   font-size: 0.78rem !important;
 }
 
+.reference-card--compact .tag-preview {
+  display: none;
+}
+
+.reference-card--comfortable .tag-preview {
+  display: block;
+}
+
 .detail-panel {
   position: sticky;
   top: 0;
@@ -2216,6 +2224,10 @@ label {
   .reference-card--compact .card-body {
     gap: 10px;
     padding: 12px;
+  }
+
+  .reference-card--compact .tag-preview {
+    display: block;
   }
 
   .reference-card__pin {

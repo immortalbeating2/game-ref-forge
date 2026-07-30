@@ -49,6 +49,12 @@ describe("ReferenceToolbar", () => {
     );
     expect(screen.getByRole("combobox", { name: "Sort by" })).toBeTruthy();
     expect(screen.getByRole("radiogroup", { name: "Reference card density" })).toBeTruthy();
+    expect(
+      screen.getByRole("radio", { name: "Compact" }).querySelector(".lucide-grid-3x3"),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("radio", { name: "Comfortable" }).querySelector(".lucide-grid-2x2"),
+    ).toBeTruthy();
     expect(screen.getByRole("button", { name: "Start comparison" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "+ Add reference" })).toBeTruthy();
   });
