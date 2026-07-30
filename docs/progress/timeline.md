@@ -1541,3 +1541,5 @@
 - 阶段更新为 `Round 14 complete; Round 15 design-ready`；Sites version 16 为稳定生产基线，后续证据文档提交不要求重新部署。
 - 生产截图暴露相邻参考卡预览高度不一致；根因是等高卡片中的隐式 grid 行参与剩余高度拉伸，而非已批准的视觉选择。创建 `codex/fix-card-preview-alignment`，以 `grid-template-rows: max-content 1fr` 固定预览轨道，并先补失败回归再修复。
 - 本地双记录浏览器复测确认两张卡片均高 `480.71px`、两块预览均高 `134.91px`、横向溢出 `0`；临时记录清理后残留 `0`。完整门禁通过 39 个测试文件 / 421 项测试、typecheck、lint、build 和 diff check。
+- 修复提交 `5c1803b` fast-forward 合并到 `main`，merged-main 全门禁再次通过并同步 GitHub 与 Sites source；保存 Sites version 17 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_cc84c828771c8191bcac16943e24f49e`，deployment `appgdep_6a6b4d18633c819196d68844c4cb5462` 私有发布成功。
+- 认证生产只读复测确认两张卡片均高 `520.52px`、两块预览均高 `142px`、上下边界一致、横向溢出 `0`、console error `0`；未写入 reference 或 synthesis。临时本地服务已停止，修复分支已删除，Sites version 17 成为稳定生产基线。

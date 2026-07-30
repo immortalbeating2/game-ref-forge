@@ -132,3 +132,14 @@ A production screenshot exposed unequal preview heights between adjacent equal-h
 - Updated command gate: 39 files / 421 tests, typecheck, lint, build and diff check passed.
 
 The correction changes only card-internal layout and its regression test. It does not alter API, D1, migrations, Backup v1, dependencies, business data, or the Round 14 interaction contract.
+
+Production closure:
+
+- Runtime source: `5c1803b1d0ec6e718c4e275f0ca0a4bc71a875cd`.
+- Sites version 17: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_cc84c828771c8191bcac16943e24f49e`.
+- Deployment: `appgdep_6a6b4d18633c819196d68844c4cb5462`, status `succeeded`.
+- Both production cards measured `520.52px` high.
+- Both production previews measured `142px` high with identical top and bottom coordinates.
+- Production horizontal overflow was `0`; console error count was `0`.
+- The production check was read-only and performed no reference or synthesis write.
+- The local feature branch and temporary server were removed after closure.

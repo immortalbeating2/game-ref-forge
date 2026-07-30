@@ -49,11 +49,12 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local final evidence passes 39 test files / 420 tests, typecheck, lint, build, diff check, Impeccable detector, same-viewport target comparison, 1600/1280/1024/390px overflow checks, bilingual interaction QA, console error 0, and temporary reference cleanup 0.
 - A post-deploy card-height regression was traced to implicit grid-row stretching inside equal-height reference cards. The reference-card selection grid now uses `max-content 1fr`, keeping adjacent 16:9 preview regions aligned while the body absorbs remaining height.
 - The alignment repair passes 39 test files / 421 tests, typecheck, lint, build and diff check. A two-record local browser fixture measured both cards at `480.71px`, both previews at `134.91px`, horizontal overflow `0`, and cleanup residue `0`.
-- Merged-main verification passes 39 test files / 420 tests, typecheck, lint, build and diff check. GitHub and Sites runtime source are synchronized to `4926de6207d0d601cb44390b6e435dc816b112d7`.
-- Sites version 16 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_a1683ea096b08191be0759de11cef149`) deployed successfully through deployment `appgdep_6a6b276b59688191a430a7f9da007b5e`.
+- Merged-main verification passes 39 test files / 421 tests, typecheck, lint, build and diff check. GitHub and Sites runtime source are synchronized to `5c1803b1d0ec6e718c4e275f0ca0a4bc71a875cd`.
+- Sites version 17 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_cc84c828771c8191bcac16943e24f49e`) deployed successfully through deployment `appgdep_6a6b4d18633c819196d68844c4cb5462`.
+- Authenticated production read-only QA for the alignment repair measured both reference cards at `520.52px`, both preview regions at `142px`, horizontal overflow `0`, and console error `0`; no reference or synthesis write was performed.
 - Authenticated production read-only QA confirms Chinese default, compact/comfortable persistence across reload, zero horizontal overflow at 1280px and a real 390x844 tab, and `44x44px` mobile pin targets. Final density is compact and no production business data was written.
 - The in-app browser's multi-click automation timed out while its Statsig telemetry requests were delayed. The same comparison, keyboard, modal-focus, splitter and disclosure interactions passed locally and in the automated suite; this is a non-blocking control-channel evidence boundary.
-- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 16 is the current stable production baseline.
+- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 17 is the current stable production baseline.
 - Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
@@ -255,4 +256,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Merge the reviewed Round 14 branch into `main`, rerun the merged-main gate, push the exact runtime source, deploy the next Sites version, and complete authenticated production read-only UI smoke before removing the owned worktree and local feature branch.
+Start Round 15 only after design confirmation and an approved implementation plan. Keep Sites version 17 as the stable production baseline until the next exact-source deployment.
