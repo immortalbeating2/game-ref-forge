@@ -93,6 +93,7 @@ import { useWorkspaceLayout } from "./workspace/use-workspace-layout";
 import { WorkspaceSeparator } from "./workspace/workspace-separator";
 import { ReferenceToolbar } from "./workspace/reference-toolbar";
 import { ReferenceCard } from "./workspace/reference-card";
+import { ComparisonDock } from "./workspace/comparison-dock";
 
 type WorkspaceView = "references" | "syntheses";
 type SynthesisWorkspaceStatus = { dirty: boolean; busy: boolean };
@@ -1126,6 +1127,9 @@ export default function Home() {
     referenceDataSource,
     comparisonReferenceIds,
   );
+  const comparisonReferences = comparisonReferenceIds
+    .map((id) => references.find((reference) => reference.id === id))
+    .filter((reference): reference is ReferenceRecord => Boolean(reference));
 
   return (
     <main
@@ -1721,21 +1725,15 @@ export default function Home() {
           })}
         </div>
         {isComparisonSelectionMode ? (
-          <div className="comparison-selection-bar" role="status" aria-live="polite">
-            <p>{copy.comparisonCount.replace("{count}", String(comparisonReferenceIds.length))}</p>
-            <div>
-              <button className="ghost-button" type="button" onClick={cancelComparisonSelection}>
-                {copy.cancelComparison}
-              </button>
-              <button
-                type="button"
-                onClick={enterSynthesisWorkspace}
-                disabled={!comparisonAvailability.canHandoff}
-              >
-                {copy.enterSynthesis}
-              </button>
-            </div>
-          </div>
+          <ComparisonDock
+            canHandoff={comparisonAvailability.canHandoff}
+            copy={copy}
+            language={language}
+            onCancel={cancelComparisonSelection}
+            onEnter={enterSynthesisWorkspace}
+            onRemove={toggleComparisonSelection}
+            references={comparisonReferences}
+          />
         ) : null}
         {pendingComparisonStart ? (
           <SynthesisConfirmation

@@ -2154,35 +2154,173 @@ label {
   overflow-wrap: anywhere;
 }
 
-.comparison-selection-bar {
+.comparison-dock {
   position: sticky;
   z-index: 4;
   bottom: 0;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--border-strong);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: rgba(13, 16, 17, 0.98);
+  box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.28);
+  padding: 12px;
+}
+
+.comparison-dock__header,
+.comparison-dock__header > div,
+.comparison-dock__actions {
   display: flex;
-  min-height: 64px;
+  min-width: 0;
   align-items: center;
+  gap: 10px;
+}
+
+.comparison-dock__header {
   justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--accent);
-  background: rgba(16, 18, 20, 0.96);
-  padding: 10px 0;
 }
 
-.comparison-selection-bar p {
-  margin: 0;
-  color: var(--accent-strong);
-  font-weight: 800;
-}
-
-.comparison-selection-bar > div {
-  display: flex;
+.comparison-dock__header > div {
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
 }
 
-.comparison-selection-bar button {
-  min-height: 44px;
+.comparison-dock__header p,
+.comparison-dock__header strong,
+.comparison-dock__header span {
+  margin: 0;
+}
+
+.comparison-dock__header strong {
+  color: var(--accent-strong);
+}
+
+.comparison-dock__header span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.comparison-dock__toggle,
+.comparison-dock__remove {
+  display: grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  place-items: center;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted-strong);
+  padding: 0;
+}
+
+.comparison-dock__items {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comparison-dock__items li {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto 54px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  padding: 8px;
+}
+
+.comparison-dock__position {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #0d1d18;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.comparison-dock__thumbnail {
+  display: grid;
+  overflow: hidden;
+  width: 54px;
+  aspect-ratio: 16 / 10;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.comparison-dock__thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comparison-dock__identity {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.comparison-dock__identity strong,
+.comparison-dock__identity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparison-dock__identity strong {
+  font-size: 0.78rem;
+}
+
+.comparison-dock__identity span {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.comparison-dock__actions {
+  justify-content: flex-end;
+}
+
+.comparison-dock__actions button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.comparison-dock--collapsed {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.comparison-dock--collapsed .comparison-dock__actions {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+@media (max-width: 1280px) {
+  .comparison-dock {
+    position: static;
+    border-bottom: 1px solid var(--border-strong);
+    border-radius: 8px;
+  }
+
+  .comparison-dock__items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
@@ -2190,16 +2328,23 @@ label {
     min-height: 44px;
   }
 
-  .comparison-selection-bar {
-    align-items: stretch;
-    flex-direction: column;
+  .comparison-dock,
+  .comparison-dock--collapsed {
+    grid-template-columns: 1fr;
   }
 
-  .comparison-selection-bar > div {
+  .comparison-dock__items {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-dock__actions,
+  .comparison-dock--collapsed .comparison-dock__actions {
+    grid-column: 1;
+    grid-row: auto;
     justify-content: stretch;
   }
 
-  .comparison-selection-bar > div button {
+  .comparison-dock__actions button {
     flex: 1 1 0;
   }
 }
