@@ -1550,3 +1550,7 @@
 - 先补失败回归，随后将紧凑/舒适图标改为 `Grid3X3` / `Grid2X2`；紧凑模式隐藏次要标签预览，舒适模式完整显示，移动端舒适回退继续恢复标签。
 - 本地浏览器确认紧凑卡宽约 `241px`、标签预览 0、舒适卡宽约 `322px`、标签预览 2；390px 下密度控件隐藏、标签预览 2、置顶目标 `44x44px`、横向溢出 `0`。临时记录清理残留 `0`。
 - 完整门禁通过 39 个测试文件 / 422 项测试、typecheck、lint、build 和 diff check；未修改 API、D1、migration、Backup v1、依赖或业务数据。
+- 修复提交 `4ec8659` fast-forward 合并到 `main`，merged-main 全门禁再次通过；GitHub 与 Sites runtime source 精确同步到 `4ec8659c9cfa35f2dbfd561edd8ae6bef80c2408`。
+- 保存 Sites version 18 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_4feca4628b8481919ea44838b92879a4`，deployment `appgdep_6a6bb53489c081918c25eaacffd17230` 私有发布成功。
+- 认证生产只读 QA 确认小网格/大网格图标、紧凑 `241px` 卡与标签隐藏、舒适 `322px` 卡与标签显示、刷新持久化、横向溢出 `0` 和 console error `0`；最终密度复位紧凑，未写入 reference 或 synthesis。
+- 发布后一次普通刷新短时命中旧静态资源；带 version 18 查询的新导航、再次刷新及正式入口回读均稳定为新资源，记录为非阻塞边缘缓存传播。

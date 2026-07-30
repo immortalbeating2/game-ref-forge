@@ -49,14 +49,16 @@ It helps collect source links from game asset and game design sites, normalize t
 - Local final evidence passes 39 test files / 420 tests, typecheck, lint, build, diff check, Impeccable detector, same-viewport target comparison, 1600/1280/1024/390px overflow checks, bilingual interaction QA, console error 0, and temporary reference cleanup 0.
 - A post-deploy card-height regression was traced to implicit grid-row stretching inside equal-height reference cards. The reference-card selection grid now uses `max-content 1fr`, keeping adjacent 16:9 preview regions aligned while the body absorbs remaining height.
 - The alignment repair passes 39 test files / 421 tests, typecheck, lint, build and diff check. A two-record local browser fixture measured both cards at `480.71px`, both previews at `134.91px`, horizontal overflow `0`, and cleanup residue `0`.
-- Merged-main verification passes 39 test files / 421 tests, typecheck, lint, build and diff check. GitHub and Sites runtime source are synchronized to `5c1803b1d0ec6e718c4e275f0ca0a4bc71a875cd`.
-- Sites version 17 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_cc84c828771c8191bcac16943e24f49e`) deployed successfully through deployment `appgdep_6a6b4d18633c819196d68844c4cb5462`.
+- Merged-main verification passes 39 test files / 422 tests, typecheck, lint, build and diff check. GitHub and Sites runtime source are synchronized to `4ec8659c9cfa35f2dbfd561edd8ae6bef80c2408`.
+- Sites version 18 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_4feca4628b8481919ea44838b92879a4`) deployed successfully through deployment `appgdep_6a6bb53489c081918c25eaacffd17230`.
 - Authenticated production read-only QA for the alignment repair measured both reference cards at `520.52px`, both preview regions at `142px`, horizontal overflow `0`, and console error `0`; no reference or synthesis write was performed.
 - A follow-up density-control semantic repair replaces the misleading grid/list-looking pair with explicit small-grid/large-grid icons. Compact density now hides secondary tag previews, comfortable density keeps them visible, and the `<=820px` comfortable fallback still restores those previews.
 - The density semantic repair passes its red/green focused tests, 39 test files / 422 tests, typecheck, lint, build and diff check. Local browser evidence confirms compact `241px` cards with hidden tag previews, comfortable `322px` cards with visible previews, and 390px overflow `0` with `44x44px` pin targets.
+- Authenticated production read-only QA on Sites version 18 confirms `Grid3X3` / `Grid2X2`, compact `241px` cards with hidden secondary tags, comfortable `322px` cards with visible tags, reload persistence, horizontal overflow `0`, console error `0`, and final compact preference. No reference or synthesis write was performed.
+- Immediately after deployment one ordinary reload briefly returned the prior static bundle. A versioned navigation and two subsequent reads of the canonical production URL returned version 18 consistently; this was recorded as transient edge-cache propagation rather than an application rollback.
 - Authenticated production read-only QA confirms Chinese default, compact/comfortable persistence across reload, zero horizontal overflow at 1280px and a real 390x844 tab, and `44x44px` mobile pin targets. Final density is compact and no production business data was written.
 - The in-app browser's multi-click automation timed out while its Statsig telemetry requests were delayed. The same comparison, keyboard, modal-focus, splitter and disclosure interactions passed locally and in the automated suite; this is a non-blocking control-channel evidence boundary.
-- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 17 is the current stable production baseline.
+- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 18 is the current stable production baseline.
 - Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
@@ -258,4 +260,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Start Round 15 only after design confirmation and an approved implementation plan. Keep Sites version 17 as the stable production baseline until the next exact-source deployment.
+Start Round 15 only after design confirmation and an approved implementation plan. Keep Sites version 18 as the stable production baseline until the next exact-source deployment.
