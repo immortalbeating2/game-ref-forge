@@ -257,7 +257,11 @@ label {
 
 .toolbar-actions {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(148px, 0.55fr) auto;
+  grid-template-columns:
+    minmax(220px, 1.2fr)
+    minmax(148px, 0.55fr)
+    auto
+    minmax(260px, auto);
   gap: 12px;
   align-items: end;
 }
@@ -265,6 +269,68 @@ label {
 .search-label,
 .sort-label {
   min-width: 0;
+}
+
+.search-label > span,
+.sort-label > span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.search-label kbd {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--field);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
+.density-control {
+  display: grid;
+  grid-template-columns: repeat(2, 38px);
+  gap: 4px;
+  align-items: end;
+}
+
+.density-control > span {
+  grid-column: 1 / -1;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.density-control button {
+  display: grid;
+  width: 38px;
+  min-width: 38px;
+  height: 40px;
+  min-height: 40px;
+  place-items: center;
+  border-color: var(--border);
+  background: var(--field);
+  color: var(--muted-strong);
+  padding: 0;
+}
+
+.density-control button span {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.density-control button[aria-checked="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .export-actions {
@@ -280,6 +346,10 @@ label {
   justify-content: center;
   gap: 6px;
   min-width: 118px;
+}
+
+.export-actions button:last-child {
+  white-space: nowrap;
 }
 
 .status-message,
@@ -1769,6 +1839,15 @@ label {
     grid-template-columns: 1fr;
   }
 
+  .toolbar-actions {
+    grid-template-columns: minmax(220px, 1fr) minmax(148px, 0.5fr) auto;
+  }
+
+  .export-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
   .workspace-separator,
   .workspace-collapse-button {
     display: none;
@@ -1804,6 +1883,14 @@ label {
   .score-summary,
   .quality-checklist-grid {
     grid-template-columns: 1fr;
+  }
+
+  .density-control {
+    display: none;
+  }
+
+  .export-actions {
+    grid-column: auto;
   }
 
   .sidebar {

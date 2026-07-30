@@ -1,7 +1,6 @@
 "use client";
 
-import { DatabaseBackup } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BackupDevicePreferences } from "../lib/backup";
 import {
   ASSET_CATEGORIES,
@@ -72,6 +71,13 @@ import {
 } from "../lib/localization";
 import { buildReferenceSearchText, getVisibleDetailReference } from "../lib/ui-state";
 import {
+  DEFAULT_WORKSPACE_VIEW_PREFERENCES,
+  parseWorkspaceViewPreferences,
+  serializeWorkspaceViewPreferences,
+  WORKSPACE_VIEW_PREFERENCES_STORAGE_KEY,
+  type WorkspaceDensity,
+} from "../lib/workspace-view-preferences";
+import {
   getComparisonStartDecision,
   getComparisonAvailability,
   reconcileComparisonSelectionSource,
@@ -85,6 +91,7 @@ import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
 import { SynthesisConfirmation } from "./synthesis/synthesis-confirmation";
 import { useWorkspaceLayout } from "./workspace/use-workspace-layout";
 import { WorkspaceSeparator } from "./workspace/workspace-separator";
+import { ReferenceToolbar } from "./workspace/reference-toolbar";
 
 type WorkspaceView = "references" | "syntheses";
 type SynthesisWorkspaceStatus = { dirty: boolean; busy: boolean };
@@ -196,6 +203,12 @@ function ensureInspirationEntryIds(entries: InspirationEntry[]) {
   }));
 }
 
+function isEditableTarget(target: EventTarget | null) {
+  return target instanceof HTMLElement &&
+    (target.matches("input, textarea, select, [contenteditable='true']") ||
+      target.isContentEditable);
+}
+
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("references");
@@ -227,6 +240,16 @@ export default function Home() {
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
   const [reviewQueue, setReviewQueue] = useState<ReviewQueueMode>("all");
   const [sortMode, setSortMode] = useState<ReferenceSortMode>("updated_desc");
+  const [workspaceViewPreferences, setWorkspaceViewPreferences] = useState(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_WORKSPACE_VIEW_PREFERENCES;
+    }
+
+    return parseWorkspaceViewPreferences(
+      window.localStorage.getItem(WORKSPACE_VIEW_PREFERENCES_STORAGE_KEY),
+    );
+  });
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [pinnedReferenceIds, setPinnedReferenceIds] = useState<string[]>(() => {
     if (typeof window === "undefined") {
       return [];
@@ -257,6 +280,42 @@ export default function Home() {
   const isComparisonSelectionMode = comparisonSelection.isActive;
   const comparisonReferenceIds = comparisonSelection.referenceIds;
   const isUsingSeedReferences = referenceDataSource === "seed";
+
+  const setWorkspaceDensity = useCallback((density: WorkspaceDensity) => {
+    const next = { version: 1 as const, density };
+    setWorkspaceViewPreferences(next);
+
+    try {
+      window.localStorage.setItem(
+        WORKSPACE_VIEW_PREFERENCES_STORAGE_KEY,
+        serializeWorkspaceViewPreferences(next),
+      );
+    } catch {
+      // Density remains available for this session when storage is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    function focusSearch(event: KeyboardEvent) {
+      if (
+        event.key !== "/" ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        isEditableTarget(event.target)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    }
+
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
 
   function labelForReferenceSortMode(mode: ReferenceSortMode) {
     switch (mode) {
@@ -1078,6 +1137,7 @@ export default function Home() {
         workspaceView === "references" && workspacePreferences.rightCollapsed
           ? "workspace--right-collapsed"
           : "",
+        `workspace--density-${workspaceViewPreferences.density}`,
         draggingSide ? `workspace--dragging-${draggingSide}` : "",
       ].filter(Boolean).join(" ")}
     >
@@ -1263,69 +1323,33 @@ export default function Home() {
       {workspaceView === "references" ? (
         <>
       <section className="gallery-pane">
-        <header className="toolbar">
-          <div className="deck-heading">
-            <p className="panel-kicker">{copy.referenceDeck}</p>
-            <h2>{sortedReferences.length} {copy.references}</h2>
-            <span>{copy.safetySummary}</span>
-          </div>
-          <div className="toolbar-actions">
-            <label className="search-label">
-              {copy.search}
-              <input
-                value={query}
-                onChange={(event) => {
-                  closeEditIfHiddenByView({ query: event.target.value });
-                  setQuery(event.target.value);
-                }}
-                placeholder={copy.searchPlaceholder}
-              />
-            </label>
-            <label className="sort-label">
-              {copy.sortBy}
-              <select
-                value={sortMode}
-                onChange={(event) => setSortMode(event.target.value as ReferenceSortMode)}
-              >
-                {REFERENCE_SORT_MODES.map((mode) => (
-                  <option key={mode} value={mode}>
-                    {labelForReferenceSortMode(mode)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="export-actions">
-              <button
-                className="ghost-button"
-                type="button"
-                onClick={openDataManagement}
-                disabled={businessMutationBusy}
-              >
-                <DatabaseBackup aria-hidden="true" size={16} />
-                {copy.dataManagement}
-              </button>
-              <button
-                className="ghost-button"
-                type="button"
-                onClick={startComparisonSelection}
-                disabled={
-                  !comparisonAvailability.canStartComparison ||
-                  isComparisonSelectionMode ||
-                  isSavingEdit
-                }
-              >
-                {copy.startComparison}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsFormOpen((value) => !value)}
-                disabled={isComparisonSelectionMode}
-              >
-                {copy.addReference}
-              </button>
-            </div>
-          </div>
-        </header>
+        <ReferenceToolbar
+          addDisabled={isComparisonSelectionMode}
+          comparisonActive={isComparisonSelectionMode}
+          comparisonDisabled={
+            !comparisonAvailability.canStartComparison || isSavingEdit
+          }
+          copy={copy}
+          dataManagementDisabled={businessMutationBusy}
+          density={workspaceViewPreferences.density}
+          onDensityChange={setWorkspaceDensity}
+          onOpenDataManagement={openDataManagement}
+          onQueryChange={(nextQuery) => {
+            closeEditIfHiddenByView({ query: nextQuery });
+            setQuery(nextQuery);
+          }}
+          onSortChange={setSortMode}
+          onStartComparison={startComparisonSelection}
+          onToggleAdd={() => setIsFormOpen((value) => !value)}
+          query={query}
+          resultCount={sortedReferences.length}
+          searchInputRef={searchInputRef}
+          sortMode={sortMode}
+          sortOptions={REFERENCE_SORT_MODES.map((mode) => ({
+            value: mode,
+            label: labelForReferenceSortMode(mode),
+          }))}
+        />
 
         {message ? <p className="status-message">{message}</p> : null}
 
