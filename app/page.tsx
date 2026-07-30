@@ -92,6 +92,7 @@ import { SynthesisConfirmation } from "./synthesis/synthesis-confirmation";
 import { useWorkspaceLayout } from "./workspace/use-workspace-layout";
 import { WorkspaceSeparator } from "./workspace/workspace-separator";
 import { ReferenceToolbar } from "./workspace/reference-toolbar";
+import { ReferenceCard } from "./workspace/reference-card";
 
 type WorkspaceView = "references" | "syntheses";
 type SynthesisWorkspaceStatus = { dirty: boolean; busy: boolean };
@@ -1683,7 +1684,6 @@ export default function Home() {
 
         <div className="reference-grid" aria-live="polite">
           {sortedReferences.map((reference) => {
-            const quality = evaluateReferenceQuality(reference);
             const isSelectedForComparison = comparisonReferenceIds.includes(reference.id);
             const isComparisonSelectionAtLimit =
               isComparisonSelectionMode &&
@@ -1692,22 +1692,21 @@ export default function Home() {
             const isCardDisabled = isSavingEdit || isComparisonSelectionAtLimit;
 
             return (
-              <article
-                className={`reference-card ${
-                  isComparisonSelectionMode
-                    ? isSelectedForComparison
-                      ? "comparison-selected"
-                      : ""
-                    : reference.id === selectedReference?.id
-                      ? "selected"
-                      : ""
-                } ${isComparisonSelectionAtLimit ? "comparison-limit-reached" : ""}`}
+              <ReferenceCard
+                copy={copy}
+                density={workspaceViewPreferences.density}
+                disabled={isCardDisabled}
+                isComparisonMode={isComparisonSelectionMode}
+                isComparisonSelected={isSelectedForComparison}
+                isPinned={pinnedReferenceIds.includes(reference.id)}
+                isSelected={
+                  !isComparisonSelectionMode &&
+                  reference.id === selectedReference?.id
+                }
                 key={reference.id}
-                onClick={() => {
-                  if (isCardDisabled) {
-                    return;
-                  }
-
+                language={language}
+                limitReached={isComparisonSelectionAtLimit}
+                onActivate={() => {
                   if (isComparisonSelectionMode) {
                     toggleComparisonSelection(reference.id);
                     return;
@@ -1715,93 +1714,9 @@ export default function Home() {
 
                   selectReference(reference.id);
                 }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    if (isCardDisabled) {
-                      return;
-                    }
-
-                    if (isComparisonSelectionMode) {
-                      toggleComparisonSelection(reference.id);
-                      return;
-                    }
-
-                    selectReference(reference.id);
-                  }
-                }}
-                role={isComparisonSelectionMode ? "checkbox" : "button"}
-                tabIndex={isCardDisabled ? -1 : 0}
-                aria-checked={isComparisonSelectionMode ? isSelectedForComparison : undefined}
-                aria-pressed={isComparisonSelectionMode ? undefined : reference.id === selectedReference?.id}
-                aria-disabled={isCardDisabled}
-              >
-                <div className={`thumbnail accent-${reference.asset_category}`}>
-                  {reference.preview_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={reference.preview_url} alt={reference.title} />
-                  ) : (
-                    <span>{labelForAssetCategory(reference.asset_category, language)}</span>
-                  )}
-                </div>
-                <div className="card-body">
-                  <div className="card-topline">
-                    {isComparisonSelectionMode ? (
-                      <span className="comparison-selection-indicator">
-                        {isSelectedForComparison ? copy.selectedForComparison : ""}
-                      </span>
-                    ) : pinnedReferenceIds.includes(reference.id) ? (
-                      <span>{copy.pinned}</span>
-                    ) : (
-                      <span />
-                    )}
-                    <button
-                      type="button"
-                      className="pin-button"
-                      aria-pressed={pinnedReferenceIds.includes(reference.id)}
-                      disabled={isSavingEdit || isComparisonSelectionMode}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        togglePinnedReference(reference.id);
-                      }}
-                    >
-                      {pinnedReferenceIds.includes(reference.id) ? copy.unpinReference : copy.pinReference}
-                    </button>
-                  </div>
-                  <div className="card-meta">
-                    <h2>{reference.title}</h2>
-                    <p>{reference.site_name ?? copy.unknownSource}</p>
-                  </div>
-                  <div className="badge-row">
-                    <span>{labelForAssetCategory(reference.asset_category, language)}</span>
-                    <span>{labelForLicenseStatus(reference.license_status, language)}</span>
-                    <span>{labelForPublicStatus(reference.public_status, language)}</span>
-                    <span>{labelForQualityStatus(reference.quality_status, language)}</span>
-                  </div>
-                  <div className="compact-score-row" aria-label={copy.scoreSummary}>
-                    <span>{copy.referenceValueScore}: {reference.reference_value_score ?? "-"}</span>
-                    <span>{copy.transformabilityScore}: {reference.transformability_score ?? "-"}</span>
-                    <span>{copy.copyrightRiskScore}: {reference.copyright_risk_score ?? "-"}</span>
-                  </div>
-                  <div className="quality-chip-row" aria-label={copy.qualityChecklist}>
-                    <span className={`quality-chip ${quality.issueCount > 0 ? "warning" : "success"}`}>
-                      {quality.issueCount > 0
-                        ? `${copy.qualityIssueCount}: ${quality.issueCount}`
-                        : copy.qualityComplete}
-                    </span>
-                    {quality.badges.slice(0, 2).map((badge) => (
-                      <span className="quality-chip" key={badge.kind}>
-                        {labelForQualityBadge(badge.kind)}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="tag-preview">
-                    {[...reference.mechanic_tags, ...reference.mood_tags, ...reference.visual_language_tags]
-                      .slice(0, 3)
-                      .join(" · ") || copy.defaultInspiration}
-                  </p>
-                </div>
-              </article>
+                onTogglePinned={() => togglePinnedReference(reference.id)}
+                reference={reference}
+              />
             );
           })}
         </div>
