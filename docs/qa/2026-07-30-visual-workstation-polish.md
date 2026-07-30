@@ -100,6 +100,20 @@ See `design-qa.md` for the visual decision record.
 - Clean-tab console error count: `0`.
 - Workspace density and splitter width were reset to compact and `260px`.
 
+## Production Evidence
+
+- Runtime source: `4926de6207d0d601cb44390b6e435dc816b112d7`.
+- Sites version 16: `appgprj_6a246b271d848191b88b60d1633030c7~appgver_a1683ea096b08191be0759de11cef149`.
+- Deployment: `appgdep_6a6b276b59688191a430a7f9da007b5e`, status `succeeded`.
+- Production URL: `https://game-ref-forge.yeep-6613.chatgpt.site`.
+- Authenticated DOM confirmed Chinese default, the Round 14 toolbar, compact/comfortable controls, dense reference cards, and structured detail sections.
+- Comfortable density survived a production reload; final density was reset to compact.
+- The default 1280px production tab had zero document/body horizontal overflow.
+- A fresh tab created with a real `390x844` viewport reported `innerWidth=390`, `clientWidth=375`, `scrollWidth=375`, zero horizontal overflow, and two `44x44px` pin targets.
+- No reference or synthesis write was performed.
+
+The in-app browser control client repeatedly waited on failed Statsig telemetry requests. Long multi-click calls therefore timed out even when an earlier action completed. Comparison, keyboard, modal focus, disclosure, splitter, and cleanup behavior remain covered by the complete local browser run and 420 automated tests. This is a non-blocking automation evidence boundary, not a confirmed application failure.
+
 ## Result
 
-Local Round 14 behavior, visual hierarchy, responsive layout, cleanup, console checks, and the full command gate passed. The post-repair independent review returned `Approved` with no Critical or Important findings.
+Round 14 behavior, visual hierarchy, responsive layout, cleanup, console checks, merged-main command gate, exact-source deployment, and production read-only smoke passed. The post-repair independent review returned `Approved` with no Critical or Important findings. Round 14 is complete and Round 15 is design-ready.

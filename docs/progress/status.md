@@ -4,7 +4,7 @@ Updated: 2026-07-30
 
 ## Current Stage
 
-`Round 14 implemented and locally verified; merge pending`
+`Round 14 complete; Round 15 design-ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -44,10 +44,14 @@ It helps collect source links from game asset and game design sites, normalize t
 - The project-bound visual target is `docs/product/assets/round-14-visual-target.png`; the binding written specification is `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md`.
 - Round 14 is limited to visual assets and focused frontend interactions. It does not change reference/synthesis data, API routes, D1, migrations, or Backup v1.
 - The approved TDD implementation plan is `docs/superpowers/plans/2026-07-30-visual-workstation-polish.md`; execution uses one isolated Round 14 branch/worktree with main-agent inline delivery and one independent final reviewer.
-- Round 14 implementation is complete on `codex/round-14-visual-workstation`: dense compact/comfortable cards, ordered comparison dock, structured detail disclosure, refined toolbar, `/` search focus, safe `Escape` collapse, generated graphite texture, and mobile comfortable touch geometry.
+- Round 14 implementation is merged into `main`: dense compact/comfortable cards, ordered comparison dock, structured detail disclosure, refined toolbar, `/` search focus, safe `Escape` collapse, generated graphite texture, and mobile comfortable touch geometry.
 - The first independent review found four Important gaps in Escape behavior, modal shortcut focus, mobile touch density, and failed-preview retry. Commit `20a4999` repaired all four with regression tests; the final re-review is `Approved` with no Critical or Important findings.
 - Local final evidence passes 39 test files / 420 tests, typecheck, lint, build, diff check, Impeccable detector, same-viewport target comparison, 1600/1280/1024/390px overflow checks, bilingual interaction QA, console error 0, and temporary reference cleanup 0.
-- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 15 remains production until the reviewed branch is merged and deployed.
+- Merged-main verification passes 39 test files / 420 tests, typecheck, lint, build and diff check. GitHub and Sites runtime source are synchronized to `4926de6207d0d601cb44390b6e435dc816b112d7`.
+- Sites version 16 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_a1683ea096b08191be0759de11cef149`) deployed successfully through deployment `appgdep_6a6b276b59688191a430a7f9da007b5e`.
+- Authenticated production read-only QA confirms Chinese default, compact/comfortable persistence across reload, zero horizontal overflow at 1280px and a real 390x844 tab, and `44x44px` mobile pin targets. Final density is compact and no production business data was written.
+- The in-app browser's multi-click automation timed out while its Statsig telemetry requests were delayed. The same comparison, keyboard, modal-focus, splitter and disclosure interactions passed locally and in the automated suite; this is a non-blocking control-channel evidence boundary.
+- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 16 is the current stable production baseline.
 - Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`

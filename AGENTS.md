@@ -4,7 +4,7 @@
 
 本文件面向在 `game-ref-forge` 仓库中工作的智能编码代理与后续开发 session。
 
-项目已完成 RefForge / `灵感锻造台` 的文档基线、Sites 基础实现和 Round 1-13 迭代。开发重心是保持私有研究工作台稳定，小步提升人工整理效率，并持续验证真实生产可用性。
+项目已完成 RefForge / `灵感锻造台` 的文档基线、Sites 基础实现和 Round 1-14 迭代。开发重心是保持私有研究工作台稳定，小步提升人工整理效率，并持续验证真实生产可用性。
 
 优先做小而准、可验证、可追溯的改动。不要跳过设计、来源策略和留痕直接扩张实现范围。
 
@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 14 implemented and locally verified; merge pending`
+- 当前阶段：`Round 14 complete; Round 15 design-ready`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,13 +142,12 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 14 implemented and locally verified; merge pending`。Round 14 已在隔离分支完成高密度参考卡、重组工具栏、有序对比坞、结构化详情、版本化密度偏好、快捷搜索、原创石墨纹理和响应式触控修正。最终独立复审为 `Approved`；本地 39 个测试文件 / 420 项测试、typecheck、lint、build、diff check、同视口视觉比较和完整浏览器交互验收均通过。Round 14 未修改 API、D1、migration、Backup v1 或领域模型。
+本项目当前为 `Round 14 complete; Round 15 design-ready`。Round 14 已完成高密度参考卡、重组工具栏、有序对比坞、结构化详情、版本化密度偏好、快捷搜索、原创石墨纹理和响应式触控修正。最终独立复审为 `Approved`；本地及 merged-main 的 39 个测试文件 / 420 项测试、typecheck、lint、build、diff check、同视口视觉比较和完整浏览器交互验收均通过。运行时代码已同步到 GitHub 与 Sites source 的 `4926de6`，Sites version 16 已私有部署成功。Round 14 未修改 API、D1、migration、Backup v1 或领域模型。
 
 当前默认目标：
 
-- 将已验证的 Round 14 分支合并到 `main`，在合并结果上复跑门禁后同步 GitHub。
-- 从精确推送的运行时提交保存并部署下一版 Sites，完成认证生产只读 UI smoke。
-- Sites version 15 在新版本部署成功前继续作为稳定生产基线。
+- Round 15 开始前先完成设计确认和实现计划，不直接扩张代码范围。
+- 将 Sites version 16 作为当前稳定生产基线；后续生产 QA 继续优先采用只读验证，写入验证必须使用唯一前缀并清理。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。
 - 质量清单到编辑字段的引导补全路径已完成；下一轮功能必须先补设计和计划。
 - 继续聚焦私有研究工作台，不做公开展示页和下载站。
@@ -175,6 +174,10 @@ Round 11 最终本地证据：21 个测试文件 / 187 项测试、typecheck、l
 Round 12 最终本地证据：23 个测试文件 / 205 项测试、typecheck、lint、build、diff check 和最终独立审查通过；Chrome 完成左右 pointer drag、最小/最大边界、1400px 约束态和刷新持久化，内置浏览器完成键盘、折叠恢复、视图切换及 1600/1280/1024/390px 布局检查，干净 Chrome console error 0。
 
 Round 13 最终本地证据：31 个测试文件 / 390 项测试、typecheck、lint、build、diff check 通过；真实 SQLite 证明批次失败时四表回滚，验收 fixture 使用 4 条 D1 batch 语句且最大 JSON1 块为 2,386 字节。完整本地浏览器链路覆盖导出、预览、同 ID 覆盖恢复、备份外数据保留、relation/snapshot、设备偏好、stale、草稿门禁、中英文、响应式和零残留。
+
+Round 14 最终本地证据：39 个测试文件 / 420 项测试、typecheck、lint、build、diff check 和 Impeccable detector 通过；完整浏览器链路覆盖密度偏好刷新持久化、快捷搜索、搜索/排序、添加/编辑取消、数据管理、结构化详情、有序对比 `0/4-4/4`、分栏交互、中英文、1600/1280/1024/390px、console error 0 和零残留。
+
+Round 14 最终外部状态：GitHub 与 Sites runtime source 同步到 `4926de6`；Sites version 16 成功部署。认证生产只读 QA 确认中文默认、紧凑/舒适偏好刷新持久化、1280px 与真实 390px 无横向溢出，390px 置顶控件为 `44x44px`，最终密度复位为紧凑。内置浏览器连续点击链路受 Statsig 网络等待影响发生控制通道超时；相同交互已由本地真实浏览器和自动化测试完整覆盖，该边界不视为应用缺陷。
 
 Round 13 最终外部状态：GitHub 与 Sites runtime source 同步到 `25e0b7f`；Sites version 15 成功部署。认证生产批次 `QA-R13-20260727-2326` 通过真实 UI 创建 2 references 和 1 synthesis、含偏好 Backup v1 导出、业务与偏好变更、删除清理、1280/390px 无横向溢出和 console error 0；清理后导出回读三类业务记录均为 0。Chrome 控制桥对 `fileChooser.setFiles` 返回 `Not allowed`，认证网关同时阻止外部 API 替代，因此生产恢复执行本身未被控制通道直接观测；本地真实 D1/SQLite/API/UI 证据覆盖该层，该边界不阻塞 Round 13 收口。
 

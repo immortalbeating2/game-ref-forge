@@ -1535,3 +1535,7 @@
 - 本地浏览器通过搜索快捷键、双语、编辑/数据管理、对比 `0/4-4/4`、分栏拖拽、1600/1280/1024/390px、console error 0 和 QA 数据零残留；同视口目标/实现比较记录于 `design-qa.md`。
 - 首轮独立审查报告 `Escape`、模态快捷键焦点、移动触控密度和破图重试四项 Important；提交 `20a4999` 以 TDD 修复，复审 `Approved`。
 - Round 14 分支最终本地门禁为 39 个测试文件 / 420 项测试、typecheck、lint、build、diff check 和 Impeccable detector 通过；阶段更新为 `Round 14 implemented and locally verified; merge pending`。
+- `codex/round-14-visual-workstation` fast-forward 合并到 `main` 的 `4926de6`；移除已合并 worktree 后，merged-main 39 个测试文件 / 420 项测试、typecheck、lint、build 和 diff check 全部通过，临时分支与 worktree 已删除。
+- GitHub 与 Sites runtime source 精确同步到 `4926de6207d0d601cb44390b6e435dc816b112d7`；保存 Sites version 16 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_a1683ea096b08191be0759de11cef149`，deployment `appgdep_6a6b276b59688191a430a7f9da007b5e` 私有发布成功，未新增或应用 migration。
+- 认证生产只读 QA 确认中文默认、紧凑/舒适密度刷新持久化、1280px 与真实 390x844 无横向溢出、移动置顶控件 `44x44px`；最终密度复位紧凑，未写入业务数据。连续点击自动化受浏览器 Statsig 网络等待影响超时，本地完整交互与 420 项测试覆盖该工具边界。
+- 阶段更新为 `Round 14 complete; Round 15 design-ready`；Sites version 16 为稳定生产基线，后续证据文档提交不要求重新部署。
