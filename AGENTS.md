@@ -15,7 +15,7 @@
 - 产品名：`RefForge`
 - 中文名：`灵感锻造台`
 - 类型：游戏素材参考研究台 / Game asset reference research desk
-- 当前阶段：`Round 14 design confirmed; written spec review pending`
+- 当前阶段：`Round 14 implementation planned; execution authorized`
 - 目标技术路线：Codex App Sites + vinext/React + Cloudflare Worker-compatible APIs + D1
 - 当前产品文档目录：`docs/product/`
 - 当前工程文档目录：`docs/engineering/`
@@ -142,11 +142,11 @@ This is a single-context repo. Product docs live in `docs/product/`, engineering
 
 ## 当前阶段与默认目标
 
-本项目当前为 `Round 14 design confirmed; written spec review pending`。Round 13 已实现 Backup v1 全库导出、零写入差异预览、同 ID 覆盖且保留备份外数据的原子恢复、可选设备偏好和统一数据管理对话框。运行时代码已合并并同步到 GitHub `main` 的 `25e0b7f`，Sites version 15 已从同一提交部署成功。本地 31 个测试文件 / 390 项测试、typecheck、lint、build、真实 SQLite 回滚、D1 限额取证和完整浏览器恢复验收均通过；认证生产站完成真实 UI 创建、含偏好备份、变更、删除、零残留、1280/390px 和 console QA。Chrome 控制桥拒绝自动注入本地文件，因此生产 UI 文件选择后的恢复仍是已记录的工具证据边界，不视为应用缺陷。
+本项目当前为 `Round 14 implementation planned; execution authorized`。Round 13 已实现 Backup v1 全库导出、零写入差异预览、同 ID 覆盖且保留备份外数据的原子恢复、可选设备偏好和统一数据管理对话框。运行时代码已合并并同步到 GitHub `main` 的 `25e0b7f`，Sites version 15 已从同一提交部署成功。本地 31 个测试文件 / 390 项测试、typecheck、lint、build、真实 SQLite 回滚、D1 限额取证和完整浏览器恢复验收均通过；认证生产站完成真实 UI 创建、含偏好备份、变更、删除、零残留、1280/390px 和 console QA。Chrome 控制桥拒绝自动注入本地文件，因此生产 UI 文件选择后的恢复仍是已记录的工具证据边界，不视为应用缺陷。
 
 当前默认目标：
 
-- Round 14 已批准视觉目标并写入书面规格；用户审阅规格后再编写实现计划，不直接扩张代码范围。
+- Round 14 视觉目标、书面规格和 TDD 实现计划均已获准；按计划在隔离分支/worktree 中执行。
 - Round 14 采用第三张概念的研究流程、第二张的信息密度和第一张的石墨质感；不修改 API、D1、Backup v1 或领域模型。
 - 将 Sites version 15 作为当前稳定生产基线；后续生产写入 QA 继续使用唯一前缀并在验证后清理。
 - 以已批准设计和 `docs/superpowers/plans/` 中的逐轮计划推进实现与收口。

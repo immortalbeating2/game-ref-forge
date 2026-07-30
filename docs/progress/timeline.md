@@ -1528,3 +1528,6 @@
 - 新增 `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md`，并同步 `docs/product/frontend-design.md`。
 - Round 14 范围限定为视觉资产、参考工作区表现和聚焦交互；不修改 API、D1、migration、Backup v1 或领域模型。
 - 阶段更新为 `Round 14 design confirmed; written spec review pending`；Sites version 15 继续作为稳定生产基线。
+- 用户批准书面规格并要求按完整流程实施到完成；实现计划写入 `docs/superpowers/plans/2026-07-30-visual-workstation-polish.md`。
+- 计划拆分为密度偏好、工具栏与快捷搜索、参考卡、对比坞、结构化详情、生成纹理、视觉 QA 和部署收口八项；采用隔离 worktree、Inline TDD 和一名最终独立 reviewer。
+- 阶段更新为 `Round 14 implementation planned; execution authorized`。

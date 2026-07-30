@@ -4,7 +4,7 @@ Updated: 2026-07-30
 
 ## Current Stage
 
-`Round 14 design confirmed; written spec review pending`
+`Round 14 implementation planned; execution authorized`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -43,6 +43,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 14 high-fidelity visual direction was approved on 2026-07-30. The target uses concept 3's inspiration workflow, concept 2's density and field order, and concept 1's restrained graphite material language.
 - The project-bound visual target is `docs/product/assets/round-14-visual-target.png`; the binding written specification is `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md`.
 - Round 14 is limited to visual assets and focused frontend interactions. It does not change reference/synthesis data, API routes, D1, migrations, or Backup v1.
+- The approved TDD implementation plan is `docs/superpowers/plans/2026-07-30-visual-workstation-polish.md`; execution uses one isolated Round 14 branch/worktree with main-agent inline delivery and one independent final reviewer.
 - Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
@@ -244,4 +245,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Review and approve the Round 14 written specification, then write and approve the TDD implementation plan. Keep Sites version 15 as the stable production baseline until a reviewed Round 14 runtime change is ready.
+Create the isolated Round 14 branch/worktree and execute `docs/superpowers/plans/2026-07-30-visual-workstation-polish.md` task by task. Keep Sites version 15 as the stable production baseline until a reviewed Round 14 runtime change is ready.
