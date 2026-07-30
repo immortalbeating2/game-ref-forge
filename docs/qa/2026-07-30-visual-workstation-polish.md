@@ -25,7 +25,22 @@ The texture was generated specifically for RefForge and contains no third-party 
 - Structured detail section ordering and disclosure behavior.
 - Existing reference, synthesis, Backup v1, layout, API, and migration coverage remains green.
 
-Final command gate is recorded in the progress log after the independent review.
+Current full command gate:
+
+- `npm test`: 39 files / 420 tests passed.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `git diff --check`: passed.
+
+The density preference repair was retested in a clean browser tab after the hook implementation changed; comfortable and compact modes both survived the post-hydration reload state, and console error count remained `0`.
+
+The first independent review returned four Important findings. TDD repair coverage now includes:
+
+- `Escape` collapsing the expanded comparison dock without cancelling selection;
+- `/` remaining inside a dialog rather than focusing the background search field;
+- mobile comfortable card geometry and `44x44px` pin targets;
+- failed preview fallback and same-record URL retry in cards and the comparison dock.
 
 ## Local Browser Evidence
 
@@ -42,6 +57,8 @@ The local app ran at `http://localhost:57350/` against temporary Round 14 refere
 - Comparison mode passed `0/4`, `1/4`, `2/4`, `3/4`, and `4/4` gates.
 - Comparison order, collapse/recovery, item removal, and synthesis entry worked.
 - Left splitter passed keyboard adjustment, pointer drag, and double-click reset.
+- Expanded comparison dock collapsed on `Escape` while comparison mode and selection remained active.
+- Pressing `/` from the data management close button kept focus on that modal button.
 - Detail and filter panels remained reachable.
 - Category fallback visuals rendered for references without safe preview images.
 
@@ -77,6 +94,7 @@ See `design-qa.md` for the visual decision record.
 ## Cleanup
 
 - Four temporary local references were deleted through the local API.
+- Two additional review-repair references were deleted through the local API.
 - Post-cleanup query returned `qa_remaining=0` and `total=0`.
 - A fresh browser tab reloaded the zero-reference state.
 - Clean-tab console error count: `0`.
@@ -84,4 +102,4 @@ See `design-qa.md` for the visual decision record.
 
 ## Result
 
-Local Round 14 behavior, visual hierarchy, responsive layout, cleanup, and console checks passed. Independent review and the final full command gate remain the last pre-merge checks.
+Local Round 14 behavior, visual hierarchy, responsive layout, cleanup, console checks, and the full command gate passed. Independent review remains the last pre-merge check.

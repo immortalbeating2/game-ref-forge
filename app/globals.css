@@ -2204,6 +2204,26 @@ label {
     min-height: 0;
   }
 
+  .reference-card--compact {
+    min-height: 370px;
+  }
+
+  .reference-card--compact .thumbnail {
+    min-height: 142px;
+  }
+
+  .reference-card--compact .card-body {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .reference-card__pin {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
   .detail-panel dl div {
     grid-template-columns: 1fr;
     gap: 4px;

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ReferenceCard } from "../app/workspace/reference-card";
@@ -71,5 +71,29 @@ describe("ReferenceCard", () => {
 
     expect(props.onTogglePinned).toHaveBeenCalledTimes(1);
     expect(props.onActivate).not.toHaveBeenCalled();
+  });
+
+  it("retries the preview when the URL changes for the same reference", () => {
+    const props = makeProps();
+    props.reference = {
+      ...props.reference,
+      preview_url: "https://example.com/broken.jpg",
+    };
+
+    const { container, rerender } = render(<ReferenceCard {...props} />);
+    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("UI/HUD")).toBeTruthy();
+
+    props.reference = {
+      ...props.reference,
+      preview_url: "https://example.com/repaired.jpg",
+    };
+    rerender(<ReferenceCard {...props} />);
+
+    expect(container.querySelector("img")?.getAttribute("src")).toBe(
+      "https://example.com/repaired.jpg",
+    );
   });
 });

@@ -78,6 +78,10 @@ import {
   type ComparisonSelectionState,
   type ReferenceDataSource,
 } from "../lib/synthesis-selection";
+import {
+  hasBlockingWorkspaceLayer,
+  shouldFocusWorkspaceSearch,
+} from "../lib/workspace-shortcuts";
 import type { SynthesisDraft } from "../lib/synthesis-draft";
 import { DataManagementDialog } from "./data-management/data-management-dialog";
 import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
@@ -200,12 +204,6 @@ function ensureInspirationEntryIds(entries: InspirationEntry[]) {
   }));
 }
 
-function isEditableTarget(target: EventTarget | null) {
-  return target instanceof HTMLElement &&
-    (target.matches("input, textarea, select, [contenteditable='true']") ||
-      target.isContentEditable);
-}
-
 export default function Home() {
   const [language, setLanguage] = useState<Language>("zh");
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("references");
@@ -276,12 +274,7 @@ export default function Home() {
   useEffect(() => {
     function focusSearch(event: KeyboardEvent) {
       if (
-        event.key !== "/" ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey ||
-        isEditableTarget(event.target)
+        !shouldFocusWorkspaceSearch(event, hasBlockingWorkspaceLayer())
       ) {
         return;
       }

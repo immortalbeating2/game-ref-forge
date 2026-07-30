@@ -64,9 +64,11 @@ export function ReferenceCard({
   onTogglePinned,
   reference,
 }: ReferenceCardProps) {
-  const [previewFailed, setPreviewFailed] = useState(false);
+  const [failedPreviewUrl, setFailedPreviewUrl] = useState<string | null>(null);
   const quality = evaluateReferenceQuality(reference);
-  const previewVisible = Boolean(reference.preview_url) && !previewFailed;
+  const previewVisible =
+    Boolean(reference.preview_url) &&
+    failedPreviewUrl !== reference.preview_url;
   const tags = [
     ...reference.mechanic_tags,
     ...reference.mood_tags,
@@ -99,7 +101,7 @@ export function ReferenceCard({
             <img
               src={reference.preview_url ?? ""}
               alt=""
-              onError={() => setPreviewFailed(true)}
+              onError={() => setFailedPreviewUrl(reference.preview_url)}
             />
           ) : (
             <span>{labelForAssetCategory(reference.asset_category, language)}</span>

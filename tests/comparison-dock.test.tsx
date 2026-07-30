@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ComparisonDock } from "../app/workspace/comparison-dock";
@@ -66,5 +66,46 @@ describe("ComparisonDock", () => {
         "aria-expanded",
       ),
     ).toBe("false");
+  });
+
+  it("collapses on Escape without cancelling the comparison", async () => {
+    const user = userEvent.setup();
+    const props = makeProps(2);
+
+    render(<ComparisonDock {...props} />);
+    await user.keyboard("{Escape}");
+
+    expect(
+      screen.getByRole("button", { name: "Expand comparison dock" }).getAttribute(
+        "aria-expanded",
+      ),
+    ).toBe("false");
+    expect(props.onCancel).not.toHaveBeenCalled();
+  });
+
+  it("falls back after a preview error and retries a changed preview URL", () => {
+    const props = makeProps(1);
+    props.references[0] = makeReference({
+      id: "ref-1",
+      title: "Reference 1",
+      asset_category: "material_texture",
+      preview_url: "https://example.com/broken.jpg",
+    });
+
+    const { container, rerender } = render(<ComparisonDock {...props} />);
+    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("Material")).toBeTruthy();
+
+    props.references[0] = {
+      ...props.references[0],
+      preview_url: "https://example.com/repaired.jpg",
+    };
+    rerender(<ComparisonDock {...props} />);
+
+    expect(container.querySelector("img")?.getAttribute("src")).toBe(
+      "https://example.com/repaired.jpg",
+    );
   });
 });

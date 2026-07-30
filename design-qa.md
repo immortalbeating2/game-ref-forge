@@ -39,6 +39,17 @@ The implementation intentionally uses real RefForge fields and category fallback
 - Diagnosis: DOM order, layout metrics, dialog bounds, control overflow checks, and a clean browser reload all remained correct. Document/body horizontal overflow was `0`.
 - Result: treated as a browser capture artifact, not an application defect. Mobile acceptance uses measured layout and interactive readback rather than the malformed full-page capture.
 
+### Independent Review Repairs
+
+The first independent review returned `Not Approved` with four Important findings. The repaired build now:
+
+- collapses the expanded comparison dock on `Escape` without clearing selection;
+- blocks `/` search focus while a dialog or alertdialog owns the temporary layer;
+- forces comfortable card height, media spacing, and `44x44px` pin targets at `<=820px`;
+- replaces failed card and comparison previews with category fallbacks and retries when the same reference receives a new preview URL.
+
+Each behavior has a regression test and browser readback. A clean mobile check measured the compact-class card at `370px` minimum height, its pin target at `44x44px`, failed preview image count at `0`, and document/body horizontal overflow at `0`.
+
 ## Impeccable Pass
 
 - Project register: product workstation.

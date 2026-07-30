@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp, Sparkles, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   labelForAssetCategory,
   type Language,
@@ -10,6 +10,29 @@ import {
 import type { ReferenceRecord } from "../../lib/reference";
 
 type ComparisonCopy = ReturnType<typeof uiCopy>;
+
+function ComparisonPreview({
+  language,
+  reference,
+}: {
+  language: Language;
+  reference: ReferenceRecord;
+}) {
+  const previewUrl = reference.preview_url;
+  const [failedPreviewUrl, setFailedPreviewUrl] = useState<string | null>(null);
+  const previewVisible = Boolean(previewUrl) && failedPreviewUrl !== previewUrl;
+
+  return previewVisible ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={previewUrl ?? ""}
+      alt=""
+      onError={() => setFailedPreviewUrl(previewUrl)}
+    />
+  ) : (
+    <span>{labelForAssetCategory(reference.asset_category, language)}</span>
+  );
+}
 
 export type ComparisonDockProps = {
   canHandoff: boolean;
@@ -35,6 +58,21 @@ export function ComparisonDock({
   const toggleLabel = expanded
     ? copy.collapseComparisonDock
     : copy.expandComparisonDock;
+
+  useEffect(() => {
+    function collapseOnEscape(event: KeyboardEvent) {
+      if (
+        event.key === "Escape" &&
+        expanded &&
+        !document.querySelector('[role="dialog"], [role="alertdialog"]')
+      ) {
+        setExpanded(false);
+      }
+    }
+
+    window.addEventListener("keydown", collapseOnEscape);
+    return () => window.removeEventListener("keydown", collapseOnEscape);
+  }, [expanded]);
 
   return (
     <section
@@ -81,14 +119,10 @@ export function ComparisonDock({
               <span
                 className={`comparison-dock__thumbnail accent-${reference.asset_category}`}
               >
-                {reference.preview_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={reference.preview_url} alt="" />
-                ) : (
-                  <span>
-                    {labelForAssetCategory(reference.asset_category, language)}
-                  </span>
-                )}
+                <ComparisonPreview
+                  language={language}
+                  reference={reference}
+                />
               </span>
               <span className="comparison-dock__identity">
                 <strong>{reference.title}</strong>
