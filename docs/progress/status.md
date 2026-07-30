@@ -4,7 +4,7 @@ Updated: 2026-07-30
 
 ## Current Stage
 
-`Round 14 implementation planned; execution authorized`
+`Round 14 implemented and locally verified; merge pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -44,6 +44,10 @@ It helps collect source links from game asset and game design sites, normalize t
 - The project-bound visual target is `docs/product/assets/round-14-visual-target.png`; the binding written specification is `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md`.
 - Round 14 is limited to visual assets and focused frontend interactions. It does not change reference/synthesis data, API routes, D1, migrations, or Backup v1.
 - The approved TDD implementation plan is `docs/superpowers/plans/2026-07-30-visual-workstation-polish.md`; execution uses one isolated Round 14 branch/worktree with main-agent inline delivery and one independent final reviewer.
+- Round 14 implementation is complete on `codex/round-14-visual-workstation`: dense compact/comfortable cards, ordered comparison dock, structured detail disclosure, refined toolbar, `/` search focus, safe `Escape` collapse, generated graphite texture, and mobile comfortable touch geometry.
+- The first independent review found four Important gaps in Escape behavior, modal shortcut focus, mobile touch density, and failed-preview retry. Commit `20a4999` repaired all four with regression tests; the final re-review is `Approved` with no Critical or Important findings.
+- Local final evidence passes 39 test files / 420 tests, typecheck, lint, build, diff check, Impeccable detector, same-viewport target comparison, 1600/1280/1024/390px overflow checks, bilingual interaction QA, console error 0, and temporary reference cleanup 0.
+- Round 14 adds no API route, D1 change, migration, Backup v1 contract, dependency, or domain-model change. Sites version 15 remains production until the reviewed branch is merged and deployed.
 - Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
@@ -245,4 +249,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Create the isolated Round 14 branch/worktree and execute `docs/superpowers/plans/2026-07-30-visual-workstation-polish.md` task by task. Keep Sites version 15 as the stable production baseline until a reviewed Round 14 runtime change is ready.
+Merge the reviewed Round 14 branch into `main`, rerun the merged-main gate, push the exact runtime source, deploy the next Sites version, and complete authenticated production read-only UI smoke before removing the owned worktree and local feature branch.
