@@ -71,13 +71,6 @@ import {
 } from "../lib/localization";
 import { buildReferenceSearchText, getVisibleDetailReference } from "../lib/ui-state";
 import {
-  DEFAULT_WORKSPACE_VIEW_PREFERENCES,
-  parseWorkspaceViewPreferences,
-  serializeWorkspaceViewPreferences,
-  WORKSPACE_VIEW_PREFERENCES_STORAGE_KEY,
-  type WorkspaceDensity,
-} from "../lib/workspace-view-preferences";
-import {
   getComparisonStartDecision,
   getComparisonAvailability,
   reconcileComparisonSelectionSource,
@@ -95,6 +88,7 @@ import { ReferenceToolbar } from "./workspace/reference-toolbar";
 import { ReferenceCard } from "./workspace/reference-card";
 import { ComparisonDock } from "./workspace/comparison-dock";
 import { ReferenceDetail } from "./workspace/reference-detail";
+import { useWorkspaceViewPreferences } from "./workspace/use-workspace-view-preferences";
 
 type WorkspaceView = "references" | "syntheses";
 type SynthesisWorkspaceStatus = { dirty: boolean; busy: boolean };
@@ -243,15 +237,10 @@ export default function Home() {
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | "all">("all");
   const [reviewQueue, setReviewQueue] = useState<ReviewQueueMode>("all");
   const [sortMode, setSortMode] = useState<ReferenceSortMode>("updated_desc");
-  const [workspaceViewPreferences, setWorkspaceViewPreferences] = useState(() => {
-    if (typeof window === "undefined") {
-      return DEFAULT_WORKSPACE_VIEW_PREFERENCES;
-    }
-
-    return parseWorkspaceViewPreferences(
-      window.localStorage.getItem(WORKSPACE_VIEW_PREFERENCES_STORAGE_KEY),
-    );
-  });
+  const {
+    preferences: workspaceViewPreferences,
+    setDensity: setWorkspaceDensity,
+  } = useWorkspaceViewPreferences();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [pinnedReferenceIds, setPinnedReferenceIds] = useState<string[]>(() => {
     if (typeof window === "undefined") {
@@ -283,20 +272,6 @@ export default function Home() {
   const isComparisonSelectionMode = comparisonSelection.isActive;
   const comparisonReferenceIds = comparisonSelection.referenceIds;
   const isUsingSeedReferences = referenceDataSource === "seed";
-
-  const setWorkspaceDensity = useCallback((density: WorkspaceDensity) => {
-    const next = { version: 1 as const, density };
-    setWorkspaceViewPreferences(next);
-
-    try {
-      window.localStorage.setItem(
-        WORKSPACE_VIEW_PREFERENCES_STORAGE_KEY,
-        serializeWorkspaceViewPreferences(next),
-      );
-    } catch {
-      // Density remains available for this session when storage is unavailable.
-    }
-  }, []);
 
   useEffect(() => {
     function focusSearch(event: KeyboardEvent) {

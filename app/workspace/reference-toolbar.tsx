@@ -62,7 +62,6 @@ export function ReferenceToolbar({
         <h2>
           {resultCount} {copy.references}
         </h2>
-        <span>{copy.safetySummary}</span>
       </div>
 
       <div className="toolbar-actions">

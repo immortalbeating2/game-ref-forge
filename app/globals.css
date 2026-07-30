@@ -279,7 +279,7 @@ label {
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(180px, 0.9fr) minmax(300px, 1.4fr);
+  grid-template-columns: minmax(180px, 0.55fr) minmax(0, 1.45fr);
   gap: 14px;
   align-items: end;
   border: 1px solid var(--border);
@@ -294,10 +294,15 @@ label {
   grid-template-columns:
     minmax(220px, 1.2fr)
     minmax(148px, 0.55fr)
-    auto
-    minmax(260px, auto);
+    auto;
   gap: 12px;
   align-items: end;
+}
+
+.deck-heading .panel-kicker,
+.deck-heading h2 {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .search-label,
@@ -368,6 +373,7 @@ label {
 }
 
 .export-actions {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
