@@ -106,6 +106,21 @@ const synthesisCopyKeys = [
   "synthesisExportWarning",
 ] as const;
 
+const round14CopyKeys = [
+  "density",
+  "compactDensity",
+  "comfortableDensity",
+  "densityControl",
+  "searchShortcut",
+  "collapseComparisonDock",
+  "expandComparisonDock",
+  "removeFromComparison",
+  "comparisonNeedsMore",
+  "inspirationExtraction",
+  "reusablePrinciples",
+  "transformationDirection",
+] as const;
+
 describe("localized enum labels", () => {
   it("uses Chinese labels by default", () => {
     expect(labelForAssetCategory("ui_hud")).toBe("界面/HUD");
@@ -127,6 +142,13 @@ describe("localized enum labels", () => {
 describe("uiCopy", () => {
   it.each(["zh", "en"] as const)("provides complete synthesis copy in %s", (language) => {
     for (const key of synthesisCopyKeys) {
+      expect(uiCopy(language)[key], `${language}.${key}`).toBeTypeOf("string");
+      expect(uiCopy(language)[key].trim(), `${language}.${key}`).not.toBe("");
+    }
+  });
+
+  it.each(["zh", "en"] as const)("provides complete Round 14 copy in %s", (language) => {
+    for (const key of round14CopyKeys) {
       expect(uiCopy(language)[key], `${language}.${key}`).toBeTypeOf("string");
       expect(uiCopy(language)[key].trim(), `${language}.${key}`).not.toBe("");
     }
@@ -192,6 +214,8 @@ describe("uiCopy", () => {
     expect(uiCopy().collapseDetailsPanel).toBe("收起详情面板");
     expect(uiCopy().expandDetailsPanel).toBe("展开详情面板");
     expect(uiCopy().resetPanelWidth).toBe("双击恢复默认宽度");
+    expect(uiCopy().compactDensity).toBe("紧凑");
+    expect(uiCopy().comfortableDensity).toBe("舒适");
     expect(uiCopy().dataManagement).toBe("数据管理");
     expect(uiCopy().backupIssues).toBe("校验问题");
     expect(backupErrorMessage("backup_operation_failed")).toBe("备份操作未完成，请稍后重试。");
@@ -236,6 +260,8 @@ describe("uiCopy", () => {
     expect(uiCopy("en").collapseDetailsPanel).toBe("Collapse details panel");
     expect(uiCopy("en").expandDetailsPanel).toBe("Expand details panel");
     expect(uiCopy("en").resetPanelWidth).toBe("Double-click to reset width");
+    expect(uiCopy("en").compactDensity).toBe("Compact");
+    expect(uiCopy("en").comfortableDensity).toBe("Comfortable");
     expect(uiCopy("en").dataManagement).toBe("Data management");
     expect(uiCopy("en").backupIssues).toBe("Validation issues");
     expect(backupErrorMessage("backup_operation_failed", "en")).toBe("The backup operation did not complete. Try again shortly.");
