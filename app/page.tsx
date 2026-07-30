@@ -42,7 +42,6 @@ import {
 import {
   evaluateReferenceQuality,
   filterReferencesByReviewQueue,
-  ReferenceQualityBadgeKind,
   REVIEW_QUEUE_MODES,
   ReviewQueueMode,
 } from "../lib/reference-quality";
@@ -94,6 +93,7 @@ import { WorkspaceSeparator } from "./workspace/workspace-separator";
 import { ReferenceToolbar } from "./workspace/reference-toolbar";
 import { ReferenceCard } from "./workspace/reference-card";
 import { ComparisonDock } from "./workspace/comparison-dock";
+import { ReferenceDetail } from "./workspace/reference-detail";
 
 type WorkspaceView = "references" | "syntheses";
 type SynthesisWorkspaceStatus = { dirty: boolean; busy: boolean };
@@ -355,22 +355,6 @@ export default function Home() {
     }
   }
 
-  function labelForQualityBadge(kind: ReferenceQualityBadgeKind) {
-    switch (kind) {
-      case "high_value":
-        return copy.qualityBadgeHighValue;
-      case "low_risk":
-        return copy.qualityBadgeLowRisk;
-      case "production_ready":
-        return copy.qualityBadgeProductionReady;
-      case "transformable":
-        return copy.qualityBadgeTransformable;
-      case "analyzed":
-      default:
-        return copy.qualityBadgeAnalyzed;
-    }
-  }
-
   function labelForQualityIssue(issue: ReferenceQualityIssue) {
     switch (issue.field) {
       case "site_name":
@@ -403,30 +387,6 @@ export default function Home() {
       default:
         return copy.qualityMissingProductionReadiness;
     }
-  }
-
-  function labelForQualityGroup(group: ReferenceQualityIssue["group"]) {
-    switch (group) {
-      case "source":
-        return copy.qualitySourceGroup;
-      case "safety":
-        return copy.qualitySafetyGroup;
-      case "inspiration":
-        return copy.qualityInspirationGroup;
-      case "scores":
-      default:
-        return copy.qualityScoresGroup;
-    }
-  }
-
-  function groupQualityIssues(issues: ReferenceQualityIssue[]) {
-    return issues.reduce<Record<ReferenceQualityIssue["group"], ReferenceQualityIssue[]>>(
-      (groups, issue) => {
-        groups[issue.group].push(issue);
-        return groups;
-      },
-      { source: [], safety: [], inspiration: [], scores: [] },
-    );
   }
 
   function closeEditIfHiddenByView(nextView: {
@@ -2201,144 +2161,18 @@ export default function Home() {
                 </div>
               </form>
             ) : (
-              <>
-                <section className="detail-hero">
-                  <h3 className="detail-section-title">{copy.sourceAndSafety}</h3>
-                  <dl>
-                    <div><dt>{copy.site}</dt><dd>{selectedReference.site_name ?? copy.unknown}</dd></div>
-                    <div><dt>{copy.author}</dt><dd>{selectedReference.author ?? copy.unknown}</dd></div>
-                    <div><dt>{copy.media}</dt><dd>{labelForMediaType(selectedReference.media_type, language)}</dd></div>
-                    <div><dt>{copy.license}</dt><dd>{labelForLicenseStatus(selectedReference.license_status, language)}</dd></div>
-                    <div><dt>{copy.public}</dt><dd>{labelForPublicStatus(selectedReference.public_status, language)}</dd></div>
-                    <div><dt>{copy.qualityStatus}</dt><dd>{labelForQualityStatus(selectedReference.quality_status, language)}</dd></div>
-                  </dl>
-                  <p>{selectedReference.avoid_copying_notes ?? copy.defaultAvoidCopying}</p>
-                </section>
-
-                <section>
-                  <h3 className="detail-section-title">{copy.scoreMatrix}</h3>
-                  <div className="score-summary">
-                    <span>{copy.rating}: {selectedReference.rating ?? "-"}</span>
-                    <span>{copy.referenceValueScore}: {selectedReference.reference_value_score ?? "-"}</span>
-                    <span>{copy.transformabilityScore}: {selectedReference.transformability_score ?? "-"}</span>
-                    <span>{copy.copyrightRiskScore}: {selectedReference.copyright_risk_score ?? "-"}</span>
-                    <span>{copy.productionReadinessScore}: {selectedReference.production_readiness_score ?? "-"}</span>
-                  </div>
-                </section>
-
-                <section>
-                  <h3 className="detail-section-title">{copy.qualityChecklist}</h3>
-                  {(() => {
-                    const quality = evaluateReferenceQuality(selectedReference);
-                    const groupedIssues = groupQualityIssues(quality.issues);
-
-                    return (
-                      <div className="quality-checklist">
-                        <div className="quality-checklist-summary">
-                          <span className={`quality-chip ${quality.issueCount > 0 ? "warning" : "success"}`}>
-                            {quality.issueCount > 0
-                              ? `${copy.qualityIssueCount}: ${quality.issueCount}`
-                              : copy.qualityComplete}
-                          </span>
-                          {quality.badges.length > 0 ? (
-                            <span>{copy.qualityPositiveSignals}: {quality.badges.map((badge) => labelForQualityBadge(badge.kind)).join(", ")}</span>
-                          ) : null}
-                        </div>
-                        <div className="quality-checklist-grid">
-                          {(["source", "safety", "inspiration", "scores"] as const).map((group) => (
-                            <div className="quality-checklist-group" key={group}>
-                              <h4>{labelForQualityGroup(group)}</h4>
-                              {groupedIssues[group].length > 0 ? (
-                                <ul>
-                                  {groupedIssues[group].map((issue) => (
-                                    <li key={`${issue.group}-${issue.field}`}>
-                                      <button
-                                        type="button"
-                                        className="quality-checklist-action"
-                                        data-quality-issue-field={issue.field}
-                                        onClick={() => startQualityEditing(selectedReference, issue)}
-                                        aria-label={`${copy.completeQualityIssue}: ${labelForQualityIssue(issue)}`}
-                                      >
-                                        <span>{labelForQualityIssue(issue)}</span>
-                                        <span aria-hidden="true">→</span>
-                                      </button>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p>{copy.qualityComplete}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </section>
-
-                <section>
-                  <h3 className="detail-section-title">{copy.tagAxes}</h3>
-                  <div className="tag-groups">
-                    <p><strong>{copy.styleTags}</strong> {selectedReference.style_tags.join(", ") || "-"}</p>
-                    <p><strong>{copy.useTags}</strong> {selectedReference.use_tags.join(", ") || "-"}</p>
-                    <p><strong>{copy.mechanicTags}</strong> {selectedReference.mechanic_tags.join(", ") || "-"}</p>
-                    <p><strong>{copy.moodTags}</strong> {selectedReference.mood_tags.join(", ") || "-"}</p>
-                    <p><strong>{copy.visualLanguageTags}</strong> {selectedReference.visual_language_tags.join(", ") || "-"}</p>
-                  </div>
-                </section>
-
-                <section>
-                  <h3 className="detail-section-title">{copy.inspirationWorkbench}</h3>
-                  <ul>
-                    {selectedReference.inspiration_points.length > 0 ? (
-                      selectedReference.inspiration_points.map((point) => <li key={point}>{point}</li>)
-                    ) : (
-                      <li>{copy.defaultInspiration}</li>
-                    )}
-                  </ul>
-                  <div className="structured-inspiration-list">
-                    <h3>{copy.structuredInspiration}</h3>
-                    {selectedReference.inspiration_entries.length > 0 ? (
-                      selectedReference.inspiration_entries.map((entry) => (
-                        <div className="structured-inspiration-item" key={entry.id}>
-                          <p><strong>{copy.inspirationObservation}</strong> {entry.observation}</p>
-                          <p><strong>{copy.inspirationPrinciple}</strong> {entry.principle}</p>
-                          <p><strong>{copy.inspirationTransferableIdea}</strong> {entry.transferable_idea}</p>
-                          <p><strong>{copy.inspirationOriginalApplication}</strong> {entry.original_application}</p>
-                          <p><strong>{copy.inspirationAvoidCopying}</strong> {entry.avoid_copying}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p>{copy.emptyInspirationEntries}</p>
-                    )}
-                  </div>
-                  <p>{selectedReference.deconstruction_notes}</p>
-                  <p>{selectedReference.transformation_ideas}</p>
-                </section>
-
-                <button className="danger-button" type="button" onClick={() => requestDelete(selectedReference)}>
-                  {copy.deleteReference}
-                </button>
-                {pendingDeleteId === selectedReference.id ? (
-                  <div className="delete-confirmation" role="alertdialog" aria-labelledby="delete-confirmation-title">
-                    <h3 id="delete-confirmation-title">{deleteConfirmationCopy(selectedReference.title, language).title}</h3>
-                    <p>{deleteConfirmationCopy(selectedReference.title, language).body}</p>
-                    <div className="confirmation-actions">
-                      <button type="button" className="ghost-button" onClick={cancelDelete} disabled={isDeleting}>
-                        {deleteConfirmationCopy(selectedReference.title, language).cancel}
-                      </button>
-                      <button
-                        type="button"
-                        className="danger-button"
-                        onClick={() => confirmDelete(selectedReference)}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? copy.deleting : deleteConfirmationCopy(selectedReference.title, language).confirm}
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </>
+              <ReferenceDetail
+                copy={copy}
+                deleteCopy={deleteConfirmationCopy(selectedReference.title, language)}
+                isDeleting={isDeleting}
+                language={language}
+                onCancelDelete={cancelDelete}
+                onConfirmDelete={() => confirmDelete(selectedReference)}
+                onRequestDelete={() => requestDelete(selectedReference)}
+                onStartQualityEditing={(issue) => startQualityEditing(selectedReference, issue)}
+                pendingDelete={pendingDeleteId === selectedReference.id}
+                reference={selectedReference}
+              />
             )}
           </>
         ) : (
