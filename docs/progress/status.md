@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-07-27
+Updated: 2026-07-30
 
 ## Current Stage
 
-`Round 13 complete; Round 14 design-ready`
+`Round 14 design confirmed; written spec review pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -40,6 +40,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 13 adds `lucide-react` and three backup API routes. It does not add or apply a D1 migration.
 - Round 13 runtime source `25e0b7fcba57ec9fbf0025cfd62047668003f9f8` is merged to `main`, synchronized with GitHub and deployed as Sites version 15 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_236fd0b268648191b5c344014caa57cf`) through deployment `appgdep_6a677241fa788191b411bcef3338fc90`.
 - Authenticated production batch `QA-R13-20260727-2326` passed real UI creation of 2 references and 1 synthesis, ordered relations, preference-bearing Backup v1 export, post-backup mutation, UI deletion, zero-residue export, 1280/390px no-overflow checks and console error 0. The baseline production D1 was empty, so non-QA record preservation was proved by unchanged zero non-QA records.
+- Round 14 high-fidelity visual direction was approved on 2026-07-30. The target uses concept 3's inspiration workflow, concept 2's density and field order, and concept 1's restrained graphite material language.
+- The project-bound visual target is `docs/product/assets/round-14-visual-target.png`; the binding written specification is `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md`.
+- Round 14 is limited to visual assets and focused frontend interactions. It does not change reference/synthesis data, API routes, D1, migrations, or Backup v1.
 - Chrome automation could not inject the exported file into the authenticated production file input (`fileChooser.setFiles: Not allowed`); the same gateway returned 403 to out-of-browser API requests. Exact restore and preference application remain covered by local browser/API/SQLite evidence and automated tests. This is a documented non-blocking production evidence boundary, not a confirmed product failure.
 - Sites project has been provisioned:
   - project id: `appgprj_6a246b271d848191b88b60d1633030c7`
@@ -241,4 +244,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Start Round 14 only after brainstorming, written specification and implementation-plan approval. Keep Sites version 15 as the stable production baseline until a reviewed Round 14 runtime change is ready.
+Review and approve the Round 14 written specification, then write and approve the TDD implementation plan. Keep Sites version 15 as the stable production baseline until a reviewed Round 14 runtime change is ready.

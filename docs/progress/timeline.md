@@ -1519,3 +1519,12 @@
 - 生产清理通过 UI 依次删除 synthesis 和两条 references；清理后 Backup v1 导出为 200 字节，references/syntheses/relations 均为 0，SHA-256 `CF2B0DB183ACA9F8DF28C7B6068B3A32865E4A77A54D275506466147345A9935`。页面 QA 前缀为 0，seed 示例恢复显示。
 - 生产 1280x900 与 390x844 的 document/body 横向溢出均为 0；390px 数据管理 dialog 为 317.33px 宽且左右溢出为 0；console error 0。浏览器视口已复位并保留生产交付页。
 - Round 13 worktree 和本地功能分支已删除，远程不存在对应功能分支；阶段更新为 `Round 13 complete; Round 14 design-ready`。Sites version 15 保持运行时代码基线，后续仅文档证据提交不要求重新部署。
+
+## 2026-07-30
+
+- Round 14 完成三张独立高保真方向探索和产品定位比较。
+- 用户批准融合方向：以第三张的灵感提炼研究流程为主，吸收第二张的卡片密度与字段秩序，以及第一张的克制石墨材质。
+- 最终视觉目标保存为 `docs/product/assets/round-14-visual-target.png`。
+- 新增 `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md`，并同步 `docs/product/frontend-design.md`。
+- Round 14 范围限定为视觉资产、参考工作区表现和聚焦交互；不修改 API、D1、migration、Backup v1 或领域模型。
+- 阶段更新为 `Round 14 design confirmed; written spec review pending`；Sites version 15 继续作为稳定生产基线。

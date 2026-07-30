@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document defines the first-version frontend design for RefForge / `灵感锻造台`.
+This document defines the evolving frontend design baseline for RefForge / `灵感锻造台`.
 
-It should guide the Sites implementation before any UI code is scaffolded. It is intentionally lightweight: it defines layout, workflows, components, states, visual language, and responsive rules without becoming a full visual design system.
+It guides the existing Sites implementation and later visual rounds. It defines layout, workflows, components, states, visual language, and responsive rules without replacing the round-specific approved specifications.
 
 ## Design Brief
 
@@ -43,6 +43,29 @@ As of 2026-06-19, the next main workspace upgrade should use the third generated
 This direction is documented in `docs/superpowers/specs/2026-06-19-main-workspace-ui-upgrade-design.md`.
 
 The key product implication is that the right detail panel should evolve from a generic record inspector into a structured `灵感提炼` workspace, while the center gallery keeps dense, stable reference cards.
+
+### Round 14 refinement
+
+As of 2026-07-30, the approved high-fidelity target is:
+
+- `docs/product/assets/round-14-visual-target.png`
+
+Round 14 keeps the existing product architecture and combines:
+
+- Concept 3's research progression and inspiration-extraction emphasis.
+- Concept 2's card density, field order, and compact comparison treatment.
+- Concept 1's restrained graphite material language and quiet boundaries.
+
+The visual target does not authorize new domain fields or simulated product capabilities. `docs/superpowers/specs/2026-07-30-visual-workstation-polish-design.md` defines the binding interaction, responsive, asset, and scope rules. Where the image and written specification differ, the written specification wins.
+
+The Round 14 product feel is a continuous research workstation:
+
+- Matte near-black and graphite surfaces with a low-contrast generated texture only at the workspace background layer.
+- A compact toolbar ordered around search, sort, density, comparison/export, and one primary add action.
+- Dense reference cards with stable image regions and explicit source, safety, quality, score, and tag hierarchy.
+- A transient 2-4 item comparison dock that hands off to the existing synthesis workflow.
+- A right inspection panel ordered as source and safety, scores, quality, tag axes, and inspiration extraction.
+- Advanced interactions limited to density preference, search focus shortcut, progressive detail disclosure, existing splitter feedback, and restrained motion.
 
 ## First Screen Layout
 
