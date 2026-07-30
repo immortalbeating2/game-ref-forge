@@ -2,19 +2,19 @@
 
 :root {
   --app-sans: "Aptos", "Microsoft YaHei UI", "Noto Sans CJK SC", system-ui, sans-serif;
-  --background: #101214;
-  --foreground: #f2f0e8;
-  --muted: #aab1ad;
-  --muted-strong: #c9d0ca;
-  --panel: #171a1d;
-  --panel-soft: #1e2326;
-  --panel-strong: #242a2e;
-  --field: #101416;
-  --border: #30383d;
-  --border-strong: #4a565c;
-  --accent: #75d8bd;
-  --accent-strong: #9be8d2;
-  --accent-soft: #142b25;
+  --background: #090d0f;
+  --foreground: #edf2ef;
+  --muted: #8f9b97;
+  --muted-strong: #c3cec9;
+  --panel: #13181a;
+  --panel-soft: #181e20;
+  --panel-strong: #20272a;
+  --field: #0d1214;
+  --border: #283235;
+  --border-strong: #405056;
+  --accent: #63d4b1;
+  --accent-strong: #8ae4c7;
+  --accent-soft: #102b23;
   --danger: #ff8585;
   --danger-soft: #2a1718;
   --warning: #e8c36e;
@@ -39,7 +39,12 @@ html {
 body {
   min-width: 320px;
   margin: 0;
-  background: linear-gradient(180deg, #121518, #0f1113 40rem);
+  background-color: var(--background);
+  background-image: url("/art/workbench-graphite.webp");
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  background-blend-mode: soft-light;
   color: var(--foreground);
   font-family: var(--app-sans);
 }
@@ -96,6 +101,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--field);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   color: var(--foreground);
   padding: 10px 12px;
 }
@@ -122,12 +128,13 @@ label {
   display: grid;
   grid-template-columns: minmax(230px, 270px) minmax(420px, 1fr) minmax(330px, 420px);
   min-height: 100vh;
+  background: rgba(8, 12, 14, 0.72);
 }
 
 .sidebar,
 .detail-panel {
   border-color: var(--border);
-  background: rgba(20, 23, 25, 0.96);
+  background: rgba(13, 18, 20, 0.97);
   padding: 20px;
 }
 
@@ -140,6 +147,31 @@ label {
   gap: 16px;
   overflow-y: auto;
   border-right: 1px solid var(--border);
+}
+
+.sidebar,
+.gallery-pane,
+.detail-panel,
+.synthesis-workspace {
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.sidebar::-webkit-scrollbar,
+.gallery-pane::-webkit-scrollbar,
+.detail-panel::-webkit-scrollbar,
+.synthesis-workspace::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.gallery-pane::-webkit-scrollbar-thumb,
+.detail-panel::-webkit-scrollbar-thumb,
+.synthesis-workspace::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--border-strong);
+  background-clip: padding-box;
 }
 
 .brand-block {
@@ -241,6 +273,7 @@ label {
   min-width: 0;
   flex-direction: column;
   gap: 16px;
+  background: rgba(8, 12, 14, 0.76);
   padding: 20px;
 }
 
@@ -251,7 +284,8 @@ label {
   align-items: end;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(23, 26, 29, 0.86);
+  background: rgba(18, 24, 26, 0.94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
   padding: 14px;
 }
 
@@ -547,8 +581,9 @@ label {
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--panel);
+  background: rgba(17, 22, 24, 0.97);
   color: var(--foreground);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .reference-card--compact {
@@ -576,7 +611,7 @@ label {
 }
 
 .reference-card:hover {
-  border-color: var(--border-strong);
+  border-color: #58686d;
   transform: translateY(-1px);
 }
 
@@ -596,7 +631,9 @@ label {
 
 .reference-card.selected {
   border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    0 0 0 1px rgba(99, 212, 177, 0.08);
 }
 
 .thumbnail {
@@ -605,7 +642,8 @@ label {
   min-height: 118px;
   aspect-ratio: 16 / 9;
   place-items: center;
-  background: #263033;
+  border-bottom: 1px solid var(--border);
+  background: #252e31;
   color: #f2f7f4;
   font-weight: 900;
 }
@@ -777,7 +815,8 @@ label {
   gap: 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--panel-soft);
+  background: rgba(24, 30, 32, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
   padding: 14px;
 }
 
@@ -851,7 +890,7 @@ label {
   gap: 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(23, 26, 29, 0.72);
+  background: rgba(19, 24, 26, 0.9);
   padding: 14px;
 }
 
@@ -894,7 +933,7 @@ label {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: rgba(22, 26, 28, 0.94);
+  background: rgba(18, 24, 26, 0.96);
 }
 
 .detail-section--fixed {
@@ -2118,7 +2157,10 @@ label {
 
 @media (max-width: 820px) {
   body {
-    background: var(--background);
+    background-color: var(--background);
+    background-image: url("/art/workbench-graphite.webp");
+    background-position: center top;
+    background-size: auto 100vh;
   }
 
   .workspace,
@@ -2310,8 +2352,8 @@ label {
   border: 1px solid var(--border-strong);
   border-bottom: 0;
   border-radius: 8px 8px 0 0;
-  background: rgba(13, 16, 17, 0.98);
-  box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.28);
+  background: rgba(10, 14, 16, 0.985);
+  box-shadow: 0 -14px 32px rgba(0, 0, 0, 0.38);
   padding: 12px;
 }
 
@@ -2379,7 +2421,7 @@ label {
   align-items: center;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--panel);
+  background: rgba(19, 24, 26, 0.98);
   padding: 8px;
 }
 

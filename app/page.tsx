@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft, ArrowRight, PanelLeftClose, PanelRightClose } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BackupDevicePreferences } from "../lib/backup";
 import {
@@ -1117,7 +1118,7 @@ export default function Home() {
               title={copy.collapseFiltersPanel}
               onClick={() => togglePanel("left")}
             >
-              <span aria-hidden="true">&#8249;</span>
+              <PanelLeftClose aria-hidden="true" size={17} />
             </button>
           </div>
           <h1>灵感锻造台</h1>
@@ -1727,8 +1728,8 @@ export default function Home() {
           aria-label={copy.collapseDetailsPanel}
           title={copy.collapseDetailsPanel}
           onClick={() => togglePanel("right")}
-        >
-          <span aria-hidden="true">&#8250;</span>
+          >
+            <PanelRightClose aria-hidden="true" size={17} />
         </button>
         {selectedReference ? (
           <>
@@ -1776,7 +1777,7 @@ export default function Home() {
                         disabled={isSavingEdit || qualityEditSession.activeIndex === 0}
                         onClick={() => moveQualityIssue("previous")}
                       >
-                        <span aria-hidden="true">←</span>
+                        <ArrowLeft aria-hidden="true" size={17} />
                       </button>
                       <button
                         type="button"
@@ -1789,7 +1790,7 @@ export default function Home() {
                         }
                         onClick={() => moveQualityIssue("next")}
                       >
-                        <span aria-hidden="true">→</span>
+                        <ArrowRight aria-hidden="true" size={17} />
                       </button>
                     </div>
                   </section>

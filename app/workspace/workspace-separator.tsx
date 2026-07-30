@@ -1,5 +1,6 @@
 "use client";
 
+import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
 import type { WorkspacePanelSide } from "../../lib/workspace-layout";
 import type { WorkspaceSeparatorHandlers } from "./use-workspace-layout";
 
@@ -36,7 +37,11 @@ export function WorkspaceSeparator({
       title={expandLabel}
       onClick={onRestore}
     >
-      <span aria-hidden="true">{side === "left" ? "\u203A" : "\u2039"}</span>
+      {side === "left" ? (
+        <PanelLeftOpen aria-hidden="true" size={18} />
+      ) : (
+        <PanelRightOpen aria-hidden="true" size={18} />
+      )}
     </button>;
   }
 
