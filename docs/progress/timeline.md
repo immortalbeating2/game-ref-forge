@@ -1571,3 +1571,5 @@
 - Task 1 独立审查对 `21fcabc..c41be49` 给出规格与质量双 `Approved`，Critical/Important/Minor 均为 0；进入原创分类纹理与共享预览 Task 2。
 - Round 15 Task 2 提交 `57e356c`：新增 8 类与 generic 原创 SVG（总计 15,660 bytes）、共享远程优先/失败回退/URL 变化重试的 ReferencePreview，并接入参考卡和对比坞；完整 41 文件 / 434 项测试与 typecheck 通过。
 - Task 2 独立审查规格 `PASS`、质量 `APPROVED WITH MINOR`，Critical/Important 为 0；唯一 Minor 为报告总字节数少写 1 byte，不影响预算或实现。进入视觉基底与三栏外壳 Task 3。
+- Round 15 Task 3 提交 `997b2e1`：建立 protected-A 材质 token、可见石墨合成、三栏展示类、连续 rail/inspector 与响应式恢复覆盖；完整 42 文件 / 439 项、typecheck、lint、diff check 和 detector 通过。
+- Task 3 独立审查规格 `PASS`、质量 `APPROVED WITH MINOR`，Critical/Important 为 0；画布 token 单源与合同正则 Minor 交由下一项 CSS/测试工作收口，live 同视口比较留待集成 QA。进入命令轨道与参考卡 Task 4。
