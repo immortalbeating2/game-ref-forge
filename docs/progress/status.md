@@ -4,7 +4,7 @@ Updated: 2026-08-01
 
 ## Current Stage
 
-`Round 15 implementation in progress; Task 1 pending`
+`Round 15 implementation in progress; Task 1 complete, Task 2 pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -20,7 +20,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - The written design is `docs/superpowers/specs/2026-08-01-protected-high-fidelity-workstation-design.md`; it explicitly preserves API, D1, migrations, domain models, Backup v1, single-select filters, ordered 2-4 reference comparison and existing accessibility/responsive contracts.
 - The approved TDD implementation plan is `docs/superpowers/plans/2026-08-01-protected-high-fidelity-workstation.md`; it contains ten independently verifiable tasks from layout migration and original category art through measured visual QA, independent review, merge and deployment.
 - The user selected Subagent-Driven execution. Implementation is isolated at `.worktrees/round-15-protected-a` on `codex/round-15-protected-a`; the clean baseline passes 39 test files / 422 tests.
-- No Round 15 runtime code has changed yet; Sites version 18 / `4ec8659` remains the stable production baseline.
+- Round 15 runtime work has begun on the isolated branch; Sites version 18 / `4ec8659` remains the stable production baseline.
+- Task 1 is complete and independently approved: protected-A layout defaults/bounds, current/legacy preference migration, shared splitter bounds and Backup v1 compatibility pass 3 focused files / 99 tests plus typecheck; review found no Critical, Important or Minor issues.
 
 - Git repository initialized on `main`.
 - Remote configured as `https://github.com/immortalbeating2/game-ref-forge.git`.
