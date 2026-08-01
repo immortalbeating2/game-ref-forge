@@ -1562,3 +1562,6 @@
 - 从同步且干净的 `main` 创建 `codex/round-15-protected-a`，用于承载 Round 15 设计、计划和后续实现。
 - 写入 `docs/superpowers/specs/2026-08-01-protected-high-fidelity-workstation-design.md`，增加中心画布至少 60%、大桌面紧凑四列、原创分类纹理回退、连续检查器、小型评分雷达图和同视口人工视觉评审等可量化约束。
 - 设计阶段未修改运行时代码；Sites version 18 / `4ec8659` 继续作为稳定生产基线。当前阶段为 `Round 15 design confirmed; written spec review pending`。
+- 用户批准 Round 15 书面规格；计划自检将默认栏宽从设计目标 `224/360` 校正为 `220/352`，保证 1480px 中心轨道为 892px、占比 60.27%，仍位于用户批准的宽度范围。
+- 使用 `superpowers:writing-plans` 写入十任务 TDD 实施计划 `docs/superpowers/plans/2026-08-01-protected-high-fidelity-workstation.md`，覆盖布局兼容、原创分类纹理、视觉基底、核心组件、次级流程、多视口视觉 QA、独立复审、合并部署和生产收口。
+- 当前阶段为 `Round 15 implementation planned; execution authorization pending`；应用源码仍未修改，Sites version 18 保持稳定。
