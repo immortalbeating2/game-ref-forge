@@ -4,7 +4,7 @@ Updated: 2026-08-01
 
 ## Current Stage
 
-`Round 15 implementation in progress; Tasks 1-3 complete, Task 4 pending`
+`Round 15 implementation in progress; Tasks 1-4 complete, Task 5 pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -24,6 +24,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task 1 is complete and independently approved: protected-A layout defaults/bounds, current/legacy preference migration, shared splitter bounds and Backup v1 compatibility pass 3 focused files / 99 tests plus typecheck; review found no Critical, Important or Minor issues.
 - Task 2 is complete and independently approved: all eight categories plus generic fallback have original SVG art, cards/dock share remote-first preview fallback, changed URLs retry, and 41 test files / 434 tests plus typecheck pass. Review found no Critical/Important issue and one non-blocking report byte-count Minor.
 - Task 3 is complete and independently approved: protected-A material tokens, visible graphite composition, presentational three-pane classes and flatter inspector surfaces pass 42 test files / 439 tests, typecheck, lint and detector. Review found no Critical/Important issue; one token/test maintainability Minor is carried into Task 4 CSS work.
+- Task 4 is complete after one reviewed fix round: one command rail, image-led cards, `214px/282px` auto-fit grid tracks, gallery token consumption, rule-scoped CSS contracts, and 44px mobile command controls pass 42 test files / 440 tests plus typecheck/lint. The only Important finding was addressed and re-review approved.
 
 - Git repository initialized on `main`.
 - Remote configured as `https://github.com/immortalbeating2/game-ref-forge.git`.
