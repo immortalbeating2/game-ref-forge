@@ -32,6 +32,12 @@ describe("Round 14-15 visual assets", () => {
     expect(mobileRules).toMatch(
       /\.reference-card__pin\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/,
     );
+
+    const commandRailControlRule =
+      mobileRules.match(
+        /\.reference-command-rail button,\s*\.reference-command-rail input,\s*\.reference-command-rail select\s*\{[^}]*\}/,
+      )?.[0] ?? "";
+    expect(commandRailControlRule).toMatch(/min-height:\s*44px/);
   });
 
   it("keeps card preview tracks aligned when body content has different heights", () => {

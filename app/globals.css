@@ -2290,6 +2290,12 @@ label {
     flex-direction: column;
   }
 
+  .reference-command-rail button,
+  .reference-command-rail input,
+  .reference-command-rail select {
+    min-height: 44px;
+  }
+
   .toolbar-secondary-cluster {
     width: 100%;
     flex-basis: auto;
