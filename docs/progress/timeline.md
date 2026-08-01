@@ -1575,3 +1575,5 @@
 - Task 3 独立审查规格 `PASS`、质量 `APPROVED WITH MINOR`，Critical/Important 为 0；画布 token 单源与合同正则 Minor 交由下一项 CSS/测试工作收口，live 同视口比较留待集成 QA。进入命令轨道与参考卡 Task 4。
 - Round 15 Task 4 提交 `a9d79d9`：完成单一命令轨道、图像型参考卡、`214/282px` auto-fit 网格，并收口 gallery token 与 rule-scoped CSS 合同；完整 42 文件 / 440 项、typecheck、lint 通过。
 - Task 4 首轮审查发现移动 command rail button/input/select 仍为 40px 的 Important；fix round 1 提交 `21f8994` 补 44px 精确合同和实现，3 文件 / 13 项覆盖测试通过，scoped re-review 确认 `ADDRESSED` 且无新 breakage。进入评分雷达与连续检查器 Task 5。
+- Round 15 Task 5 提交 `12c787f`：新增五轴评分画像与无依赖 SVG 雷达图，安全性严格派生为 `6 - copyright risk`，不完整数据只显示本地化回退且不绘制数据多边形；权威数字矩阵与详情交互合同保持。
+- Task 5 首轮审查发现旧 `.detail-panel section` 选择器压过连续检查器重置规则；fix round 1 提交 `e4b1a59` 以定向选择器显式清零独立卡片外观并保留唯一相邻分隔线，2 文件 / 14 项覆盖测试、typecheck、lint 通过，scoped re-review 确认 `ADDRESSED` 且无新 Critical/Important。进入有序对比反馈 Task 6。
