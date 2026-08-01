@@ -1015,30 +1015,29 @@ label {
 
 .reference-detail {
   display: grid;
-  gap: 10px;
+  overflow: hidden;
+  gap: 0;
+  border: 1px solid var(--line-subtle);
+  border-radius: 8px;
+  background: rgba(9, 13, 15, 0.2);
 }
 
 .detail-section {
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: rgba(18, 24, 26, 0.96);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
-.reference-inspector .detail-section {
-  border-right: 0;
-  border-left: 0;
-  border-radius: 0;
-  background: rgba(9, 13, 15, 0.2);
+.detail-section + .detail-section {
+  border-top: 1px solid var(--line-subtle);
 }
 
 .reference-inspector .detail-section--fixed {
-  border-color: var(--line-strong);
   background: var(--signal-soft);
 }
 
 .detail-section--fixed {
-  border-color: rgba(117, 216, 189, 0.44);
   background: rgba(20, 43, 37, 0.52);
 }
 
@@ -1117,6 +1116,55 @@ label {
   border-top-color: rgba(117, 216, 189, 0.22);
 }
 
+.score-inspector-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.9fr) minmax(0, 1.1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.score-radar {
+  display: block;
+  width: min(100%, 240px);
+  height: auto;
+  margin-inline: auto;
+  font-family: var(--app-sans);
+}
+
+.score-radar__grid polygon,
+.score-radar__grid line {
+  fill: none;
+  stroke: var(--line-subtle);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.score-radar__grid polygon:last-child {
+  stroke: var(--line-strong);
+}
+
+.score-radar__data {
+  fill: rgba(99, 212, 177, 0.18);
+  stroke: var(--signal);
+  stroke-linejoin: round;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.score-radar__labels {
+  fill: var(--muted-strong);
+  font-size: 7.5px;
+  font-weight: 700;
+}
+
+.score-radar__incomplete {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
 .source-safety-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1169,7 +1217,8 @@ label {
 .reference-detail__danger-zone {
   display: grid;
   gap: 10px;
-  padding-top: 4px;
+  border-top: 1px solid var(--line-subtle);
+  padding: 14px 12px;
 }
 
 .reference-detail__danger-zone > .danger-button {
@@ -2275,6 +2324,7 @@ label {
   .workspace,
   .form-grid,
   .score-grid,
+  .score-inspector-grid,
   .score-summary,
   .quality-checklist-grid {
     grid-template-columns: 1fr;

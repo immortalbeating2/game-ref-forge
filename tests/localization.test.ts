@@ -121,6 +121,12 @@ const round14CopyKeys = [
   "transformationDirection",
 ] as const;
 
+const round15ScoreCopyKeys = [
+  "scoreProfile",
+  "safetyScore",
+  "scoreProfileIncomplete",
+] as const;
+
 describe("localized enum labels", () => {
   it("uses Chinese labels by default", () => {
     expect(labelForAssetCategory("ui_hud")).toBe("界面/HUD");
@@ -149,6 +155,13 @@ describe("uiCopy", () => {
 
   it.each(["zh", "en"] as const)("provides complete Round 14 copy in %s", (language) => {
     for (const key of round14CopyKeys) {
+      expect(uiCopy(language)[key], `${language}.${key}`).toBeTypeOf("string");
+      expect(uiCopy(language)[key].trim(), `${language}.${key}`).not.toBe("");
+    }
+  });
+
+  it.each(["zh", "en"] as const)("provides complete score radar copy in %s", (language) => {
+    for (const key of round15ScoreCopyKeys) {
       expect(uiCopy(language)[key], `${language}.${key}`).toBeTypeOf("string");
       expect(uiCopy(language)[key].trim(), `${language}.${key}`).not.toBe("");
     }
@@ -191,6 +204,9 @@ describe("uiCopy", () => {
     expect(uiCopy().workspaceMode).toBe("灵感提炼工作台");
     expect(uiCopy().sourceAndSafety).toBe("来源与安全");
     expect(uiCopy().scoreMatrix).toBe("评分矩阵");
+    expect(uiCopy().scoreProfile).toBe("评分画像");
+    expect(uiCopy().safetyScore).toBe("安全性");
+    expect(uiCopy().scoreProfileIncomplete).toBe("补全五项评分后可查看画像。");
     expect(uiCopy().tagAxes).toBe("标签轴");
     expect(uiCopy().researchControls).toBe("研究控制");
     expect(uiCopy().sortBy).toBe("排序");
@@ -235,6 +251,11 @@ describe("uiCopy", () => {
     expect(uiCopy("en").workspaceMode).toBe("Inspiration workbench");
     expect(uiCopy("en").sourceAndSafety).toBe("Source and safety");
     expect(uiCopy("en").scoreMatrix).toBe("Score matrix");
+    expect(uiCopy("en").scoreProfile).toBe("Score profile");
+    expect(uiCopy("en").safetyScore).toBe("Safety");
+    expect(uiCopy("en").scoreProfileIncomplete).toBe(
+      "Complete all five scores to view the profile.",
+    );
     expect(uiCopy("en").tagAxes).toBe("Tag axes");
     expect(uiCopy("en").researchControls).toBe("Research controls");
     expect(uiCopy("en").sortBy).toBe("Sort by");

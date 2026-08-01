@@ -15,7 +15,9 @@ import {
   ReferenceQualityBadgeKind,
   ReferenceQualityIssue,
 } from "../../lib/reference-quality";
+import { buildReferenceScoreProfile } from "../../lib/reference-score-profile";
 import { DetailSection } from "./detail-section";
+import { ScoreRadar } from "./score-radar";
 
 function isPresent(value: string | null | undefined): value is string {
   return Boolean(value);
@@ -63,6 +65,13 @@ export function ReferenceDetail({
 }: ReferenceDetailProps) {
   const quality = evaluateReferenceQuality(reference);
   const groupedIssues = groupQualityIssues(quality.issues);
+  const scoreProfile = buildReferenceScoreProfile(reference, {
+    rating: copy.rating,
+    referenceValue: copy.referenceValueScore,
+    transformability: copy.transformabilityScore,
+    productionReadiness: copy.productionReadinessScore,
+    safety: copy.safetyScore,
+  });
 
   function labelForQualityBadge(kind: ReferenceQualityBadgeKind) {
     switch (kind) {
@@ -161,12 +170,19 @@ export function ReferenceDetail({
       </DetailSection>
 
       <DetailSection title={copy.scoreMatrix}>
-        <div className="score-summary">
-          <span>{copy.rating}: {reference.rating ?? "-"}</span>
-          <span>{copy.referenceValueScore}: {reference.reference_value_score ?? "-"}</span>
-          <span>{copy.transformabilityScore}: {reference.transformability_score ?? "-"}</span>
-          <span>{copy.copyrightRiskScore}: {reference.copyright_risk_score ?? "-"}</span>
-          <span>{copy.productionReadinessScore}: {reference.production_readiness_score ?? "-"}</span>
+        <div className="score-inspector-grid">
+          <ScoreRadar
+            profile={scoreProfile}
+            title={copy.scoreProfile}
+            incompleteLabel={copy.scoreProfileIncomplete}
+          />
+          <div className="score-summary">
+            <span>{copy.rating}: {reference.rating ?? "-"}</span>
+            <span>{copy.referenceValueScore}: {reference.reference_value_score ?? "-"}</span>
+            <span>{copy.transformabilityScore}: {reference.transformability_score ?? "-"}</span>
+            <span>{copy.copyrightRiskScore}: {reference.copyright_risk_score ?? "-"}</span>
+            <span>{copy.productionReadinessScore}: {reference.production_readiness_score ?? "-"}</span>
+          </div>
         </div>
       </DetailSection>
 

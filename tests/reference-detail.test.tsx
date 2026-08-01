@@ -54,18 +54,78 @@ describe("ReferenceDetail", () => {
     ).toBeNull();
   });
 
+  it("keeps exact score values alongside an accessible derived profile", () => {
+    render(
+      <ReferenceDetail
+        {...makeProps()}
+        reference={makeReference({
+          rating: 4,
+          reference_value_score: 5,
+          transformability_score: 3,
+          production_readiness_score: 2,
+          copyright_risk_score: 1,
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByRole("img", {
+        name: /Score profile.*Rating 4.*Safety 5/,
+      }),
+    ).toBeTruthy();
+    expect(screen.getByText("Copyright risk: 1")).toBeTruthy();
+    expect(screen.getByText("Production readiness: 2")).toBeTruthy();
+  });
+
+  it("keeps the numeric matrix and shows a localized incomplete radar fallback", () => {
+    const { container } = render(
+      <ReferenceDetail
+        {...makeProps()}
+        reference={makeReference({ rating: null })}
+      />,
+    );
+
+    expect(screen.getByText("Rating: -")).toBeTruthy();
+    expect(screen.getByText("Complete all five scores to view the profile.")).toBeTruthy();
+    expect(container.querySelector("polygon[data-score-polygon]")).toBeNull();
+  });
+
   it("collapses a long section with aria state", async () => {
     const user = userEvent.setup();
     render(<ReferenceDetail {...makeProps()} />);
 
     const scores = screen.getByRole("button", { name: "Score matrix" });
     expect(scores.getAttribute("aria-expanded")).toBe("true");
+    const scoreContentId = scores.getAttribute("aria-controls");
+    expect(scoreContentId).toBeTruthy();
+    expect(document.getElementById(scoreContentId ?? "")).toBeTruthy();
     expect(screen.getByText("Rating: 4")).toBeTruthy();
 
     await user.click(scores);
 
     expect(scores.getAttribute("aria-expanded")).toBe("false");
+    expect(document.getElementById(scoreContentId ?? "")).toBeNull();
     expect(screen.queryByText("Rating: 4")).toBeNull();
+  });
+
+  it("preserves quality navigation and delete events", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(
+      <ReferenceDetail
+        {...props}
+        reference={makeReference({ author: null })}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Complete: Add author" }));
+    expect(props.onStartQualityEditing).toHaveBeenCalledWith({
+      field: "author",
+      group: "source",
+    });
+
+    await user.click(screen.getByRole("button", { name: "Delete reference" }));
+    expect(props.onRequestDelete).toHaveBeenCalledOnce();
   });
 
   it("keeps the quality issue count visible while details are collapsed", async () => {

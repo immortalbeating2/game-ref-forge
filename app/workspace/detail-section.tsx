@@ -34,7 +34,7 @@ export function DetailSection({
   }
 
   return (
-    <section className="detail-section">
+    <section className="detail-section detail-section--collapsible">
       <header className="detail-section__header">
         <button
           type="button"
