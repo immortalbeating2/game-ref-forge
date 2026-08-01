@@ -1569,3 +1569,5 @@
 - 隔离 worktree 安装锁定依赖并通过 39 个测试文件 / 422 项测试基线；进入逐任务 implementer + task reviewer 执行循环，Sites version 18 继续作为稳定生产基线。
 - Round 15 Task 1 提交 `c41be49`：完成 `220/352` 中心优先默认布局、`208-320/336-520` 边界、`640` 中心下限、R15/legacy localStorage 双 key 迁移和 Backup v1 布局版本兼容；focused 99 项测试及 typecheck 通过。
 - Task 1 独立审查对 `21fcabc..c41be49` 给出规格与质量双 `Approved`，Critical/Important/Minor 均为 0；进入原创分类纹理与共享预览 Task 2。
+- Round 15 Task 2 提交 `57e356c`：新增 8 类与 generic 原创 SVG（总计 15,660 bytes）、共享远程优先/失败回退/URL 变化重试的 ReferencePreview，并接入参考卡和对比坞；完整 41 文件 / 434 项测试与 typecheck 通过。
+- Task 2 独立审查规格 `PASS`、质量 `APPROVED WITH MINOR`，Critical/Important 为 0；唯一 Minor 为报告总字节数少写 1 byte，不影响预算或实现。进入视觉基底与三栏外壳 Task 3。
