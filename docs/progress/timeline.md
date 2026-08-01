@@ -1579,3 +1579,5 @@
 - Task 5 首轮审查发现旧 `.detail-panel section` 选择器压过连续检查器重置规则；fix round 1 提交 `e4b1a59` 以定向选择器显式清零独立卡片外观并保留唯一相邻分隔线，2 文件 / 14 项覆盖测试、typecheck、lint 通过，scoped re-review 确认 `ADDRESSED` 且无新 Critical/Important。进入有序对比反馈 Task 6。
 - Round 15 Task 6 提交 `66c0b3b`：从既有有序 ID 数组派生 1-based 卡片编号，对比坞持续显示容量、添加顺序和最低数量提示，并以形状加颜色区分详情选中、对比选中、置顶与上限状态；完整 44 文件 / 450 项、typecheck、lint 通过。
 - Task 6 独立审查 `PASS`，Critical/Important 为 0；页面级 ordered IDs 到卡片编号的自动化联动为唯一非阻塞 Minor，带入 Task 8 浏览器 QA。进入次级流程与响应式 Task 7。
+- Round 15 Task 7 提交 `eddd43c`：在不改 JSX/行为的前提下统一添加、编辑、质量引导、删除、数据管理、综合稿与空状态材质，收敛四段响应式、长文本、focus 与 reduced-motion 合同；完整 44 文件 / 452 项、typecheck、lint、build 通过。
+- Task 7 首轮审查发现 721–820px 视图按钮仍为 40px、对比坞开关/移除为 32px、操作按钮为 40px；fix round 1 提交 `a64388f` 补精确红测与最终 820px 触控块，5 文件 / 27 项覆盖测试、typecheck、lint 通过，scoped re-review 在 800/700px 均确认 44px 且无新 Critical/Important。进入完整本地视觉与交互 QA Task 8。
