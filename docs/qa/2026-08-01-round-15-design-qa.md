@@ -144,6 +144,27 @@ Task 8 初次提交后的独立复审指出：卡片虽然已接入原创分类�
 - 视口已 reset，Chrome tabs 已 finalized；57356 的 `workerd 9412 / node 33916 / node 45012` 精确进程树已停止，`RemainingProcesses = 0`、`ListenerCount = 0`。
 - detector 实际命令为 `node D:\Desktop\Project\Game\game-ref-forge\.agents\skills\impeccable\scripts\detect.mjs --json app`；cwd 为 `D:\Desktop\Project\Game\game-ref-forge\.worktrees\round-15-protected-a`，exit code `0`，stdout `[]`。detector 只证明规则扫描为空，不代表人工视觉批准；视觉结论来自上述同视口三联图和真实浏览器测量。
 
+## Fix round 2：seed 最终态原始审计值
+
+本轮只在新的空 D1 上启动既有 `dist/server` Worker，并审阅应用完成异步回退后的两条入口示例；没有重建 12 条 fixture，没有修改实现、样式、测试、设计规格、API、D1、migration、Backup v1、领域模型、依赖或来源策略。临时 Worker 为 `http://127.0.0.1:57358/`，浏览器实际视口为 `1707 x 898`、DPR `1.5`，document `scrollWidth/clientWidth = 1707/1707`。
+
+### 两张 seed 卡片的逐项原始值
+
+| 卡片 | 分类 | 实际分类图源 | 远程图 | 预览 rect `width x height` | 标题 | 三个状态 | broken image |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `Kenney UI Pack` | `界面/HUD` | `src=/art/reference-ui-hud.svg`；`currentSrc=http://127.0.0.1:57358/art/reference-ui-hud.svg`；natural `267 x 150`；display `block`；opacity `1` | `[]` | `262.66668701171875 x 204.4791717529297` | `Kenney UI Pack`；`readable=true` | `CC0 或公有领域` / `待复核` / `已分析`；三项均 `readable=true` | `0` |
+| `Poly Haven Material Reference` | `材质` | `src=/art/reference-material-texture.svg`；`currentSrc=http://127.0.0.1:57358/art/reference-material-texture.svg`；natural `267 x 150`；display `block`；opacity `1` | `[]` | `262.66668701171875 x 204.4791717529297` | `Poly Haven Material Reference`；`readable=true` | `CC0 或公有领域` / `待复核` / `已分析`；三项均 `readable=true` | `0` |
+
+两张卡片的预览宽、高原始值完全相同；分类分别为 `界面/HUD` 与 `材质`，实际加载的本地 SVG 路径也不同，因此不是远程图，也不是两卡复用同一图。页面全部 `<img>` 的 broken-image 总数为 `0`。
+
+### seed 对比边界原始值
+
+- 完成 seed 回退后，`开始对比`：`disabled=false`、`aria-disabled=null`、rect `118 x 40`，证明默认两条示例可以直接进入对比探索。
+- 依次选择 `Kenney UI Pack` 与 `Poly Haven Material Reference` 后，对比坞精确显示 `已选择 2 / 4`，序号为 `1`、`2`。
+- 同一 `2 / 4` 状态下，`进入综合稿`：`disabled=true`、`aria-disabled=null`、rect `103.33333587646484 x 40`，证明综合稿交接仍只接受已持久化 reference，seed 不会越过 persisted-only 边界。
+- 取消对比后入口恢复；`tab.dev.logs()` 原始返回为 `[]`。最终只读 D1 回读为 references `0`、syntheses `0`、synthesis_references `0`，证明本轮没有业务写入。
+- 浏览器 tabs 已 finalized；57358 的已验证进程树 `workerd 2480 / node 9276 / node 37080` 已精确停止，`RemainingProcesses=0`、`ListenerCount=0`。
+
 ## 风险与下一步
 
 - Statsig 遥测网络偶发超时只发生在 browser-client 控制通道，应用 console error 仍为 0，且每次动作均以页面状态重新确认；不判为产品缺陷。
