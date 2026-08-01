@@ -67,4 +67,23 @@ describe("protected-A workstation shell", () => {
     expect(page).toContain('<aside className="detail-panel reference-inspector"');
     expect(page.match(/<WorkspaceSeparator/g)).toHaveLength(2);
   });
+
+  it("overrides legacy detail cards with one continuous inspector surface", () => {
+    const continuousRow = cssRule(
+      ".detail-panel .reference-detail > :where(.detail-section)",
+    );
+
+    expect(continuousRow).toMatch(/border:\s*0/);
+    expect(continuousRow).toMatch(/border-radius:\s*0/);
+    expect(continuousRow).toMatch(/background:\s*transparent/);
+    expect(continuousRow).toMatch(/padding:\s*0/);
+    expect(continuousRow).toMatch(/gap:\s*0/);
+    expect(cssRule(".detail-section + .detail-section")).toMatch(
+      /border-top:\s*1px solid var\(--line-subtle\)/,
+    );
+    expect(cssRule(".reference-inspector .detail-section--fixed")).not.toMatch(
+      /background:/,
+    );
+    expect(cssRule(".detail-section--fixed")).not.toMatch(/background:/);
+  });
 });
