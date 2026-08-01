@@ -23,7 +23,7 @@ export function getComparisonAvailability(
   const hasPersistedReferences = source === "persisted";
 
   return {
-    canStartComparison: hasPersistedReferences,
+    canStartComparison: source !== "loading",
     canHandoff:
       hasPersistedReferences && canEnterSynthesisComparison(referenceIds),
   };

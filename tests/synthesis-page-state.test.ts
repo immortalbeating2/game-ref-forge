@@ -15,7 +15,7 @@ import {
 import { createEmptySynthesisDraft } from "../lib/synthesis-draft";
 
 describe("synthesis page comparison selection state", () => {
-  it("allows comparison only after persisted references are ready", () => {
+  it("allows seed comparison exploration but keeps synthesis handoff persisted-only", () => {
     const selected = ["reference-a", "reference-b"];
 
     expect(getComparisonAvailability("loading", selected)).toEqual({
@@ -23,7 +23,7 @@ describe("synthesis page comparison selection state", () => {
       canHandoff: false,
     });
     expect(getComparisonAvailability("seed", selected)).toEqual({
-      canStartComparison: false,
+      canStartComparison: true,
       canHandoff: false,
     });
     expect(getComparisonAvailability("persisted", selected)).toEqual({

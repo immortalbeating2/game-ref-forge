@@ -603,12 +603,12 @@ label {
 }
 
 .workspace--density-compact .reference-grid {
-  grid-template-columns: repeat(auto-fit, minmax(214px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(204px, 1fr));
   gap: 10px;
 }
 
 .workspace--density-comfortable .reference-grid {
-  grid-template-columns: repeat(auto-fit, minmax(282px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
   gap: 14px;
 }
 
@@ -2398,6 +2398,7 @@ label {
   .toolbar-actions {
     align-items: stretch;
     flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .reference-command-rail button,
@@ -2871,6 +2872,24 @@ label {
 }
 
 @media (max-width: 820px) {
+  .toolbar-actions {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  .search-label,
+  .sort-label {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .language-switcher select,
+  .sidebar select,
+  .sidebar .ghost-button {
+    min-height: 44px;
+  }
+
   .reference-form button, .detail-edit-form button, .data-management-dialog button, .data-management-file-picker {
     min-width: 44px;
     min-height: 44px;

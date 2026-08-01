@@ -49,10 +49,10 @@ describe("protected-A workstation shell", () => {
 
   it("uses the image-wall grid targets for both density modes", () => {
     expect(cssRule(".workspace--density-compact .reference-grid")).toMatch(
-      /grid-template-columns:\s*repeat\(auto-fit, minmax\(214px, 1fr\)\)/,
+      /grid-template-columns:\s*repeat\(auto-fit, minmax\(204px, 1fr\)\)/,
     );
     expect(cssRule(".workspace--density-comfortable .reference-grid")).toMatch(
-      /grid-template-columns:\s*repeat\(auto-fit, minmax\(282px, 1fr\)\)/,
+      /grid-template-columns:\s*repeat\(auto-fit, minmax\(272px, 1fr\)\)/,
     );
   });
 
@@ -143,6 +143,35 @@ describe("protected-A workstation shell", () => {
     ].join("\n");
 
     expect(effectiveMobileRules).toMatch(/min-height:\s*44px/);
+  });
+
+  it("keeps the mobile research rail controls at the 44px touch target", () => {
+    const mobileRules = lastMediaBlock("max-width: 820px");
+    const railControls = cssGroupedRuleFrom(mobileRules, [
+      ".language-switcher select",
+      ".sidebar select",
+      ".sidebar .ghost-button",
+    ]);
+
+    expect(railControls).toMatch(/min-height:\s*44px/);
+  });
+
+  it("stacks the mobile command rail without a clipped flex-wrap column", () => {
+    const mobileRules = css.slice(css.indexOf("@media (max-width: 820px)"));
+    const finalMobileRules = lastMediaBlock("max-width: 820px");
+    const commandRail = cssGroupedRuleFrom(mobileRules, [
+      ".reference-command-rail",
+      ".toolbar-actions",
+    ]);
+
+    expect(commandRail).toMatch(/flex-direction:\s*column/);
+    expect(commandRail).toMatch(/flex-wrap:\s*nowrap/);
+    expect(cssRuleFrom(finalMobileRules, ".toolbar-actions")).toMatch(
+      /flex:\s*0 0 auto/,
+    );
+    expect(
+      cssGroupedRuleFrom(finalMobileRules, [".search-label", ".sort-label"]),
+    ).toMatch(/flex:\s*0 0 auto/);
   });
 
   it("raises comparison dock icon controls above their 32px base size on mobile", () => {

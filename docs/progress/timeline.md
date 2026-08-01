@@ -1581,3 +1581,13 @@
 - Task 6 独立审查 `PASS`，Critical/Important 为 0；页面级 ordered IDs 到卡片编号的自动化联动为唯一非阻塞 Minor，带入 Task 8 浏览器 QA。进入次级流程与响应式 Task 7。
 - Round 15 Task 7 提交 `eddd43c`：在不改 JSX/行为的前提下统一添加、编辑、质量引导、删除、数据管理、综合稿与空状态材质，收敛四段响应式、长文本、focus 与 reduced-motion 合同；完整 44 文件 / 452 项、typecheck、lint、build 通过。
 - Task 7 首轮审查发现 721–820px 视图按钮仍为 40px、对比坞开关/移除为 32px、操作按钮为 40px；fix round 1 提交 `a64388f` 补精确红测与最终 820px 触控块，5 文件 / 27 项覆盖测试、typecheck、lint 通过，scoped re-review 在 800/700px 均确认 44px 且无新 Critical/Important。进入完整本地视觉与交互 QA Task 8。
+
+## 2026-08-02
+
+- Round 15 Task 8 使用真实构建 Worker、临时 D1、内置浏览器与 Chrome 完成 12 条多类别 reference 和 1 份 4-reference synthesis 的完整本地验收；所有夹具均经真实 UI 创建与清理。
+- 同视口三联证据 `docs/qa/2026-08-01-round-15-target-comparison.png` 证明 Round 15 相比 Round 14 实质恢复了图像主导、石墨材质、四列密度、连续检查器和有序对比反馈，同时保留受保护的产品与交互合同。
+- Task 8 先后发现并以红绿测试修复 seed 示例对比误禁用、1480px 网格列数不足、390px 研究栏控件低于 44px、移动搜索命令栏 flex-wrap 裁切/拉伸四项 must-pass 偏差。
+- 浏览器实测通过 1600/1480/1280/1024/390px；1480 中心占比 60.27%，紧凑 4 列/舒适 3 列；390px 修复后研究栏与命令栏主控均为 44px，所有视口无横向溢出。
+- 完整交互覆盖搜索、排序、五筛选、密度、置顶、添加/编辑/质量引导、数据管理、雷达、预览回退、分栏、有序对比、综合稿交接/脏草稿保护和双语；Chrome 与内置浏览器 console error 均为 0。
+- 验收夹具 UI 搜索残留为 0；临时 SQLite 只读回读 references、syntheses、relations 均为 0。最终门禁通过 44 个测试文件 / 457 项测试、typecheck、lint、build、diff check 和空 detector 结果。
+- 阶段更新为 `Round 15 implemented and locally verified; Task 9 independent review pending`；Sites version 18 仍是稳定生产基线，尚未合并或部署 Round 15。
