@@ -1624,6 +1624,9 @@ export default function Home() {
         <div className="reference-grid" aria-live="polite">
           {sortedReferences.map((reference) => {
             const isSelectedForComparison = comparisonReferenceIds.includes(reference.id);
+            const comparisonPosition = isSelectedForComparison
+              ? comparisonReferenceIds.indexOf(reference.id) + 1
+              : null;
             const isComparisonSelectionAtLimit =
               isComparisonSelectionMode &&
               comparisonReferenceIds.length >= 4 &&
@@ -1635,6 +1638,7 @@ export default function Home() {
                 copy={copy}
                 density={workspaceViewPreferences.density}
                 disabled={isCardDisabled}
+                comparisonPosition={comparisonPosition}
                 isComparisonMode={isComparisonSelectionMode}
                 isComparisonSelected={isSelectedForComparison}
                 isPinned={pinnedReferenceIds.includes(reference.id)}

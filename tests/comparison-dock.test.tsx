@@ -29,6 +29,9 @@ describe("ComparisonDock", () => {
   it("shows ordered references and enables synthesis at two items", () => {
     render(<ComparisonDock {...makeProps(2)} />);
 
+    expect(
+      screen.getByText("Click cards to add them in comparison order"),
+    ).toBeTruthy();
     expect(screen.getByText("1")).toBeTruthy();
     expect(screen.getByText("2")).toBeTruthy();
     expect(screen.getByText("Reference 1")).toBeTruthy();

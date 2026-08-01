@@ -60,6 +60,9 @@ export function ComparisonDock({
           <strong>
             {copy.comparisonCount.replace("{count}", String(references.length))}
           </strong>
+          <span className="comparison-dock__hint">
+            {copy.comparisonSelectionHint}
+          </span>
           {missingCount > 0 ? (
             <span>
               {copy.comparisonNeedsMore.replace(

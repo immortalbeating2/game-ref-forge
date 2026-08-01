@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Pin, PinOff, Plus } from "lucide-react";
+import { Pin, PinOff, Plus } from "lucide-react";
 import {
   labelForLicenseStatus,
   labelForPublicStatus,
@@ -19,6 +19,7 @@ import { ReferencePreview } from "./reference-preview";
 type CardCopy = ReturnType<typeof uiCopy>;
 
 export type ReferenceCardProps = {
+  comparisonPosition: number | null;
   copy: CardCopy;
   density: WorkspaceDensity;
   disabled: boolean;
@@ -50,6 +51,7 @@ function qualityBadgeLabel(kind: ReferenceQualityBadgeKind, copy: CardCopy) {
 }
 
 export function ReferenceCard({
+  comparisonPosition,
   copy,
   density,
   disabled,
@@ -101,7 +103,13 @@ export function ReferenceCard({
                   className="reference-card__comparison-marker"
                   aria-hidden="true"
                 >
-                  {isComparisonSelected ? <Check size={15} /> : <Plus size={15} />}
+                  {isComparisonSelected && comparisonPosition !== null ? (
+                    <span className="reference-card__comparison-position">
+                      {comparisonPosition}
+                    </span>
+                  ) : (
+                    <Plus size={15} />
+                  )}
                 </span>
               ) : null
             }

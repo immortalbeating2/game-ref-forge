@@ -115,6 +115,7 @@ const round14CopyKeys = [
   "collapseComparisonDock",
   "expandComparisonDock",
   "removeFromComparison",
+  "comparisonSelectionHint",
   "comparisonNeedsMore",
   "inspirationExtraction",
   "reusablePrinciples",
@@ -231,6 +232,7 @@ describe("uiCopy", () => {
     expect(uiCopy().expandDetailsPanel).toBe("展开详情面板");
     expect(uiCopy().resetPanelWidth).toBe("双击恢复默认宽度");
     expect(uiCopy().compactDensity).toBe("紧凑");
+    expect(uiCopy().comparisonSelectionHint).toBe("按对比顺序点击参考卡加入");
     expect(uiCopy().comfortableDensity).toBe("舒适");
     expect(uiCopy().dataManagement).toBe("数据管理");
     expect(uiCopy().backupIssues).toBe("校验问题");
@@ -282,6 +284,9 @@ describe("uiCopy", () => {
     expect(uiCopy("en").expandDetailsPanel).toBe("Expand details panel");
     expect(uiCopy("en").resetPanelWidth).toBe("Double-click to reset width");
     expect(uiCopy("en").compactDensity).toBe("Compact");
+    expect(uiCopy("en").comparisonSelectionHint).toBe(
+      "Click cards to add them in comparison order",
+    );
     expect(uiCopy("en").comfortableDensity).toBe("Comfortable");
     expect(uiCopy("en").dataManagement).toBe("Data management");
     expect(uiCopy("en").backupIssues).toBe("Validation issues");

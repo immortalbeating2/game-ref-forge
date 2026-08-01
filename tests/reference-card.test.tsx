@@ -16,6 +16,7 @@ function makeProps() {
     disabled: false,
     isComparisonMode: false,
     isComparisonSelected: false,
+    comparisonPosition: null,
     isPinned: false,
     isSelected: false,
     language: "en" as const,
@@ -56,12 +57,16 @@ describe("ReferenceCard", () => {
         {...makeProps()}
         isComparisonMode
         isComparisonSelected
+        comparisonPosition={2}
       />,
     );
 
     expect(
       screen.getByRole("checkbox", { name: "Kenney UI Pack" }).getAttribute("aria-checked"),
     ).toBe("true");
+    expect(
+      screen.getByText("2", { selector: ".reference-card__comparison-position" }),
+    ).toBeTruthy();
     expect(screen.getByText("Selected")).toBeTruthy();
   });
 
