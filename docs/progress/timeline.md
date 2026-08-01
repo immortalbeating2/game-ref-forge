@@ -1565,3 +1565,5 @@
 - 用户批准 Round 15 书面规格；计划自检将默认栏宽从设计目标 `224/360` 校正为 `220/352`，保证 1480px 中心轨道为 892px、占比 60.27%，仍位于用户批准的宽度范围。
 - 使用 `superpowers:writing-plans` 写入十任务 TDD 实施计划 `docs/superpowers/plans/2026-08-01-protected-high-fidelity-workstation.md`，覆盖布局兼容、原创分类纹理、视觉基底、核心组件、次级流程、多视口视觉 QA、独立复审、合并部署和生产收口。
 - 当前阶段为 `Round 15 implementation planned; execution authorization pending`；应用源码仍未修改，Sites version 18 保持稳定。
+- 用户选择 Subagent-Driven 并批准执行；创建隔离 worktree `.worktrees/round-15-protected-a`，根目录回到同步 `main`，功能分支继续位于 `codex/round-15-protected-a`。
+- 隔离 worktree 安装锁定依赖并通过 39 个测试文件 / 422 项测试基线；进入逐任务 implementer + task reviewer 执行循环，Sites version 18 继续作为稳定生产基线。
