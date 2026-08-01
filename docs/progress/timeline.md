@@ -1591,3 +1591,6 @@
 - 完整交互覆盖搜索、排序、五筛选、密度、置顶、添加/编辑/质量引导、数据管理、雷达、预览回退、分栏、有序对比、综合稿交接/脏草稿保护和双语；Chrome 与内置浏览器 console error 均为 0。
 - 验收夹具 UI 搜索残留为 0；临时 SQLite 只读回读 references、syntheses、relations 均为 0。最终门禁通过 44 个测试文件 / 457 项测试、typecheck、lint、build、diff check 和空 detector 结果。
 - 阶段更新为 `Round 15 implemented and locally verified; Task 9 independent review pending`；Sites version 18 仍是稳定生产基线，尚未合并或部署 Round 15。
+- Task 8 独立复审 fix round 1 以红绿测试将紧凑/舒适参考卡预览固定为约 54%；1480/1600px 四组真实浏览器测量均超过 50%，标题、3 状态和 3 评分保持可见。
+- 使用 `QA-R15-FIX-20260802-0318-` 经真实 UI 建立并清理 12 references 与 synthesis `09d33e25-9c6f-4344-ad33-bda14532b9d5`；逐 ID、URL retry、完整/不完整雷达、1280/1024/390px、console `[]`、seed 恢复和三表零残留证据写入 QA 文档。
+- 更新 `4461 x 1120` 三联图后人工确认图像主体层级明显增强；57356 Worker 进程树停止、Chrome 视口/tabs 收口。最终门禁为 44 文件 / 458 测试及 typecheck、lint、build、diff check、detector `[]`。

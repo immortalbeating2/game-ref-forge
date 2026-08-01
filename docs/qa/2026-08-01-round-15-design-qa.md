@@ -2,7 +2,7 @@
 
 日期：2026-08-01 至 2026-08-02
 
-结论：**通过，可以进入 Task 9 独立复审。** 本轮在真实构建产物、临时本地 D1 和浏览器 UI 上完成了高保真视觉、完整交互、多视口和零残留验收。验收期间发现的 4 项 must-pass 偏差均先补失败回归，再完成实现修复与真实浏览器复测。
+结论：**通过，可以进入 Task 9 独立复审。** 本轮在真实构建产物、临时本地 D1 和浏览器 UI 上完成了高保真视觉、完整交互、多视口和零残留验收。验收期间发现的 4 项 must-pass 偏差与独立复审补充的图像主体比例偏差，均先补失败回归，再完成实现修复与真实浏览器复测。
 
 ## 验收范围
 
@@ -22,7 +22,7 @@
 
 ## 自动化门禁
 
-- `npm test`：44 个测试文件 / 457 项测试通过。
+- `npm test`：44 个测试文件 / 458 项测试通过。
 - `npm run typecheck`：通过。
 - `npm run lint`：通过。
 - `npm run build`：通过。
@@ -86,6 +86,63 @@
 - UI 搜索回读：`0 条参考`，前缀文本不存在。
 - 临时 SQLite 只读回读：references `0`、syntheses `0`、synthesis_references `0`。
 - Chrome console error `0`；内置浏览器 console error `0`。
+
+## Fix round 1：图像主体比例与证据补强
+
+Task 8 初次提交后的独立复审指出：卡片虽然已接入原创分类图，但图像可见面积仍不足以证明“图像主体优先”，同时原报告没有留下可逐 ID 复核的 fixture、URL 重试、雷达降级和 detector 命令证据。本修复轮不改变 API、D1、migration、Backup v1、领域模型、筛选或对比状态机，只校正卡片视觉比例、自动化合同和验收留痕。
+
+### 红绿修复
+
+- 红：新增 `tests/workstation-visual-contract.test.ts` 合同，按真实 1480/1600px 紧凑与舒适卡宽计算可见预览比例；旧实现无法给出固定可测轨道，且正文没有裁切边界。
+- 绿：紧凑卡固定 `380px`、舒适卡固定 `440px`，`.reference-card__select` 使用 `54% / 46%` 两轨并裁切正文；标题、授权、公开、质量状态和三项评分继续可见，仅收起重复站点、派生质量 chip 与紧凑次要标签。
+- 兼容合同：将 `tests/visual-assets.test.ts` 的旧 `max-content 1fr` 断言更新为 `54% / 46%` 图像轨道与 `overflow: hidden`，避免旧 Round 14 实现细节阻止新的已批准目标。
+
+### 四组真实浏览器卡片测量
+
+| 视口与密度 | 卡片 / 预览高度 | 可见预览占比 | 列数 / 必需信息 |
+| --- | --- | --- | --- |
+| 1480 紧凑 | `378.667 / 204.479px` | `53.9998%` | 4 列；前 8 卡标题 + 3 状态 + 3 评分均可见 |
+| 1480 舒适 | `438.667 / 236.875px` | `53.9989%` | 3 列；前 8 卡必需信息均可见 |
+| 1600 紧凑 | `378.667 / 204.479px` | `53.9998%` | 4 列；前 8 卡必需信息均可见 |
+| 1600 舒适 | `438.667 / 236.875px` | `53.9989%` | 3 列；前 8 卡必需信息均可见 |
+
+四组均为 `broken image = 0`、document 横向溢出 `0`。更新后的三联图仍为 `4461 x 1120`；人工审阅结论是当前实现已明显形成图像主体、信息从属的卡片层级，比初次 Task 8 更接近批准目标，同时没有移除研究台的来源、安全和评分信息。目标图仍具有更高的纯图库密度，这是受保护产品边界下保留的差异。
+
+### Fix fixture ID 清单
+
+前缀：`QA-R15-FIX-20260802-0318-`。12 条记录均由真实 UI 创建；SQLite 只读查询得到 `count = 12`、`duplicates = []`。
+
+| 序号 | 标题 | Reference ID |
+| --- | --- | --- |
+| 01 | `01-character` | `97a4b983-cb50-4b24-9005-2093e56e5ab8` |
+| 02 | `02-environment` | `080ec803-88b7-4eb4-a954-69afe3d53a25` |
+| 03 | `03-prop` | `40ae8d89-9810-47d3-85ec-e9fe7af8119c` |
+| 04 | `04-ui-hud` | `43c42a30-d8bb-47fa-aa28-6077768b1a6c` |
+| 05 | `05-vfx` | `beb8be90-32fe-4d0d-b161-9f7b5f1f952d` |
+| 06 | `06-material` | `b407f583-c16a-45e9-aaa2-1da53f19bb0c` |
+| 07 | `07-animation` | `6880c51f-341d-4666-9e12-e44ac1cbb20f` |
+| 08 | `08-audio` | `f9bf7355-cf15-4863-8062-3687b5eec3b1` |
+| 09 | `09-character-sparse` | `e9b852d8-fb04-4aeb-a0fc-b4ee84261909` |
+| 10 | `10-environment-dense` | `fd3e9fa3-df33-4ec6-be20-e570f1bf26e1` |
+| 11 | `11-prop` | `c797a6d7-0018-4751-b342-5797434ed8f7` |
+| 12 | `12-ui` | `2550e0c4-0ba2-43a5-a9d5-385c4f409499` |
+
+综合稿 ID 为 `09d33e25-9c6f-4344-ad33-bda14532b9d5`；引用位置 `0..3` 依次为 `04 / 10 / 03 / 06` 的上述 ID，与真实对比坞顺序一致。
+
+### URL、雷达、响应式与 seed 证据
+
+- 变更有效 URL 重试：`04-ui-hud` 的预览从 `https://placehold.co/640x480/244b45/eef5f2.png?text=QA-R15-FIX-BEFORE` 改为 `https://placehold.co/640x480/365f58/f5fbf8.png?text=QA-R15-FIX-AFTER`；两次均为 `remoteCount = 1`、`naturalWidth = 640`、`broken = 0`，变更后 DOM `src` 精确指向 AFTER。
+- 完整雷达 accessible summary：`评分画像, 评分 5, 参考价值 5, 可转化性 5, 制作就绪度 5, 安全性 5`，count `1`。
+- 不完整雷达：`09-character-sparse` 的 `.score-radar__data` count `0`；本地化回退 `补全五项评分后可查看画像。` count `1`。
+- 1280 / 1024 / 390px 紧凑复测分别为 `4 / 3 / 1` 列，预览占比均 `53.9998%`，必需 7 项信息均可见，横向溢出均为 `0`；390px 添加与进入综合稿按钮高度均为 `44px`，4/4 对比坞宽 `342.667px` 且完整位于视口横向范围。
+- persisted fixture 清理后，入口示例恢复为 `2 条参考`：`Kenney UI Pack` 与 `Poly Haven Material Reference`；入口示例对比可选到 `2/4`，但“进入综合稿”继续保持 persisted-only 禁用边界。
+
+### Fix 清理与工具收口
+
+- 综合稿和 12 条 reference 均通过真实 UI 逐条确认删除；随后按 12 个 ID、前缀、syntheses 和 synthesis_references 回读均为 `[]`，UI 前缀搜索结果为 `0`。
+- Chrome 开发日志 `tab.dev.logs()` 返回 `[]`；本修复轮使用 Chrome 是因为重新初始化时内置 Browser 不可用，未把 browser-client 的 Statsig 遥测超时误记为应用 console error。
+- 视口已 reset，Chrome tabs 已 finalized；57356 的 `workerd 9412 / node 33916 / node 45012` 精确进程树已停止，`RemainingProcesses = 0`、`ListenerCount = 0`。
+- detector 实际命令为 `node D:\Desktop\Project\Game\game-ref-forge\.agents\skills\impeccable\scripts\detect.mjs --json app`；cwd 为 `D:\Desktop\Project\Game\game-ref-forge\.worktrees\round-15-protected-a`，exit code `0`，stdout `[]`。detector 只证明规则扫描为空，不代表人工视觉批准；视觉结论来自上述同视口三联图和真实浏览器测量。
 
 ## 风险与下一步
 

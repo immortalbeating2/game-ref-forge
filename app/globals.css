@@ -650,16 +650,18 @@ label {
 }
 
 .reference-card--compact {
-  min-height: 310px;
+  height: 380px;
+  min-height: 380px;
 }
 
 .reference-card--comfortable {
-  min-height: 370px;
+  height: 440px;
+  min-height: 440px;
 }
 
 .reference-card__select {
   display: grid;
-  grid-template-rows: max-content 1fr;
+  grid-template-rows: minmax(0, 54%) minmax(0, 46%);
   width: 100%;
   min-width: 0;
   min-height: 100%;
@@ -704,8 +706,7 @@ label {
   position: relative;
   display: grid;
   overflow: hidden;
-  min-height: 118px;
-  aspect-ratio: 16 / 9;
+  min-height: 0;
   place-items: center;
   border-bottom: 1px solid var(--border);
   background: #252e31;
@@ -720,7 +721,7 @@ label {
 }
 
 .reference-card--comfortable .thumbnail {
-  min-height: 142px;
+  min-height: 0;
 }
 
 .reference-card__category,
@@ -765,14 +766,16 @@ label {
 
 .card-body {
   display: grid;
-  gap: 8px;
+  min-height: 0;
+  gap: 5px;
   align-content: start;
-  padding: 10px 12px 12px;
+  overflow: hidden;
+  padding: 8px 10px 10px;
 }
 
 .reference-card--compact .card-body {
-  gap: 7px;
-  padding: 10px;
+  gap: 5px;
+  padding: 8px;
 }
 
 .card-topline {
@@ -838,7 +841,7 @@ label {
   overflow: hidden;
   margin: 0;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   font-size: 0.98rem;
   letter-spacing: 0;
   line-height: 1.35;
@@ -851,24 +854,31 @@ label {
   font-size: 0.82rem;
 }
 
+.card-meta > span:last-child,
+.reference-card .quality-chip-row {
+  display: none;
+}
+
 .badge-row span {
   border: 1px solid var(--border);
   border-radius: 999px;
   background: #111517;
   color: #dce3dd;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   line-height: 1;
-  padding: 6px 8px;
+  padding: 4px 6px;
 }
 
 .compact-score-row {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .reference-card .compact-score-row span {
-  padding: 6px 7px;
+  overflow-wrap: anywhere;
+  font-size: 0.68rem;
+  padding: 4px 5px;
 }
 
 .tag-preview {

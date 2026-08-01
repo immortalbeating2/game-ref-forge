@@ -56,6 +56,41 @@ describe("protected-A workstation shell", () => {
     );
   });
 
+  it("keeps the visible preview above half of the card at 1480 and 1600", () => {
+    const selectRule = cssRule(".reference-card__select");
+    const previewShare = Number(
+      selectRule.match(
+        /grid-template-rows:\s*minmax\(0,\s*(\d+)%\)\s+minmax\(0,\s*(\d+)%\)/,
+      )?.[1],
+    ) / 100;
+    const cardHeights = {
+      compact: Number(
+        cssRule(".reference-card--compact").match(/height:\s*(\d+)px/)?.[1],
+      ),
+      comfortable: Number(
+        cssRule(".reference-card--comfortable").match(/height:\s*(\d+)px/)?.[1],
+      ),
+    };
+    const desktopCases = [
+      { viewport: 1480, density: "compact" as const, cardWidth: 205 },
+      { viewport: 1600, density: "compact" as const, cardWidth: 235 },
+      { viewport: 1480, density: "comfortable" as const, cardWidth: 274 },
+      { viewport: 1600, density: "comfortable" as const, cardWidth: 314 },
+    ];
+
+    expect(selectRule).toMatch(/overflow:\s*hidden/);
+    expect(cssRule(".card-body")).toMatch(/overflow:\s*hidden/);
+    for (const desktopCase of desktopCases) {
+      const cardHeight = cardHeights[desktopCase.density];
+      const previewVisibleHeight = (cardHeight - 2) * previewShare;
+
+      expect(
+        previewVisibleHeight / cardHeight,
+        `${desktopCase.viewport}px ${desktopCase.density} ${desktopCase.cardWidth}px card`,
+      ).toBeGreaterThan(0.5);
+    }
+  });
+
   it("uses the center-first desktop tracks", () => {
     expect(css).toMatch(
       /grid-template-columns:[^;]*--workspace-left-width[^;]*--workspace-right-width/,

@@ -40,14 +40,14 @@ describe("Round 14-15 visual assets", () => {
     expect(commandRailControlRule).toMatch(/min-height:\s*44px/);
   });
 
-  it("keeps card preview tracks aligned when body content has different heights", () => {
+  it("keeps aligned image-led preview tracks when body content has different heights", () => {
     const css = readFileSync(stylesheet, "utf8");
 
     expect(css).toMatch(
-      /\.reference-card__select\s*\{[^}]*grid-template-rows:\s*max-content 1fr/,
+      /\.reference-card__select\s*\{[^}]*grid-template-rows:\s*minmax\(0,\s*54%\) minmax\(0,\s*46%\)/,
     );
     expect(css).toMatch(
-      /\.thumbnail\s*\{[^}]*aspect-ratio:\s*16 \/ 9/,
+      /\.reference-card__select\s*\{[^}]*overflow:\s*hidden/,
     );
   });
 
