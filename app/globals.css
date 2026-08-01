@@ -2406,11 +2406,6 @@ label {
     min-height: 44px;
   }
 
-  .reference-form button, .detail-edit-form button, .data-management-dialog button, .data-management-file-picker {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
   .reference-form input:not([type="checkbox"]),
   .reference-form select,
   .detail-edit-form input:not([type="checkbox"]),
@@ -2872,5 +2867,28 @@ label {
 
   .comparison-dock__actions button {
     flex: 1 1 0;
+  }
+}
+
+@media (max-width: 820px) {
+  .reference-form button, .detail-edit-form button, .data-management-dialog button, .data-management-file-picker {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .workspace-view-switch button {
+    min-height: 44px;
+  }
+
+  .comparison-dock__actions button {
+    min-height: 44px;
+  }
+
+  .comparison-dock__toggle,
+  .comparison-dock__remove {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
   }
 }

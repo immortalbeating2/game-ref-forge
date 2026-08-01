@@ -13,12 +13,21 @@ const page = readFileSync(
 function cssRuleFrom(source: string, selector: string) {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return source.match(
-    new RegExp(`(?:^|}\\s*)(${escapedSelector}\\s*\\{[^}]*\\})`),
+    new RegExp(`(?:^|[{}]\\s*)(${escapedSelector}\\s*\\{[^}]*\\})`),
   )?.[1] ?? "";
 }
 
 function cssRule(selector: string) {
   return cssRuleFrom(css, selector);
+}
+
+function cssGroupedRuleFrom(source: string, selectors: string[]) {
+  const escapedSelectors = selectors.map((selector) =>
+    selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  );
+  return source.match(
+    new RegExp(`(?:^|[{}]\\s*)(${escapedSelectors.join("\\s*,\\s*")}\\s*\\{[^}]*\\})`),
+  )?.[1] ?? "";
 }
 
 function lastMediaBlock(query: string) {
@@ -124,5 +133,42 @@ describe("protected-A workstation shell", () => {
 
     expect(secondaryControls).toMatch(/min-width:\s*44px/);
     expect(secondaryControls).toMatch(/min-height:\s*44px/);
+  });
+
+  it("raises the workspace view switch above its 40px base size on mobile", () => {
+    const mobileRules = lastMediaBlock("max-width: 820px");
+    const effectiveMobileRules = [
+      cssRule(".workspace-view-switch button"),
+      cssRuleFrom(mobileRules, ".workspace-view-switch button"),
+    ].join("\n");
+
+    expect(effectiveMobileRules).toMatch(/min-height:\s*44px/);
+  });
+
+  it("raises comparison dock icon controls above their 32px base size on mobile", () => {
+    const mobileRules = lastMediaBlock("max-width: 820px");
+    const selectors = [".comparison-dock__toggle", ".comparison-dock__remove"];
+    const effectiveMobileRules = [
+      cssGroupedRuleFrom(css, selectors),
+      cssGroupedRuleFrom(mobileRules, selectors),
+    ].join("\n");
+
+    expect(effectiveMobileRules).toMatch(/(?:^|[\s{;])width:\s*44px/);
+    expect(effectiveMobileRules).toMatch(/min-width:\s*44px/);
+    expect(effectiveMobileRules).toMatch(/(?:^|[\s{;])height:\s*44px/);
+    expect(effectiveMobileRules).toMatch(/min-height:\s*44px/);
+  });
+
+  it("keeps dock action buttons at 44px through the narrow mobile cascade", () => {
+    const mobileRules = lastMediaBlock("max-width: 820px");
+    const effectiveMobileRules = [
+      cssRule(".comparison-dock__actions button"),
+      cssRuleFrom(mobileRules, ".comparison-dock__actions button"),
+    ].join("\n");
+
+    expect(effectiveMobileRules).toMatch(/min-height:\s*44px/);
+    expect(css.lastIndexOf("@media (max-width: 820px)")).toBeGreaterThan(
+      css.lastIndexOf("@media (max-width: 720px)"),
+    );
   });
 });
