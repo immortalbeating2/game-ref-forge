@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  BACKUP_SCHEMA_VERSION,
   MAX_BACKUP_BYTES,
   MAX_BACKUP_REFERENCES,
   MAX_BACKUP_RELATIONS,
@@ -10,6 +11,10 @@ import {
   parseRefForgeBackup,
   withBackupPreferences,
 } from "../lib/backup";
+import {
+  DEFAULT_WORKSPACE_LAYOUT,
+  serializeWorkspaceLayoutPreferences,
+} from "../lib/workspace-layout";
 import { makeBackupFixture, makeReference, makeSynthesis } from "./fixtures/backup";
 
 const INVALID_REQUIRED_ENUM_VALUES = [false, 0, "", null] as const;
@@ -444,12 +449,29 @@ describe("Backup v1 domain contract", () => {
       pinned_reference_ids: ["ref-1", "ref-2"],
       workspace_layout: {
         version: 1,
-        leftWidth: 360,
-        rightWidth: 340,
+        leftWidth: 320,
+        rightWidth: 336,
         leftCollapsed: true,
         rightCollapsed: false,
       },
     });
+  });
+
+  it("round-trips protected-A workspace preferences through Backup v1", () => {
+    const backup = withBackupPreferences(makeBackupFixture(), {
+      pinned_reference_ids: [],
+      workspace_layout: JSON.parse(serializeWorkspaceLayoutPreferences(DEFAULT_WORKSPACE_LAYOUT)),
+    });
+    const parsed = parseRefForgeBackup(JSON.parse(JSON.stringify(backup)));
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.backup.preferences?.workspace_layout).toMatchObject({
+      version: 1,
+      leftWidth: 220,
+      rightWidth: 352,
+    });
+    expect(BACKUP_SCHEMA_VERSION).toBe(1);
   });
 
   it("rejects open device preferences and creates a safe dated filename", () => {

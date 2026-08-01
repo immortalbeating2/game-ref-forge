@@ -11,6 +11,15 @@ describe("workspace layout interaction source", () => {
     expect(source).toContain('window.addEventListener("blur"');
   });
 
+  it("migrates legacy layout storage once and persists only the current key", () => {
+    const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
+
+    expect(source).toMatch(
+      /migrateWorkspaceLayoutPreferences\([\s\S]*window\.localStorage\.getItem\(WORKSPACE_LAYOUT_STORAGE_KEY\)[\s\S]*window\.localStorage\.getItem\(LEGACY_WORKSPACE_LAYOUT_STORAGE_KEY\)/,
+    );
+    expect(source).toContain("LEGACY_WORKSPACE_LAYOUT_STORAGE_KEY");
+  });
+
   it("does not mirror workspace preferences into an event ref", () => {
     const source = readFileSync(new URL("../app/workspace/use-workspace-layout.ts", import.meta.url), "utf8");
     expect(source).not.toContain("preferencesRef");
@@ -64,6 +73,10 @@ describe("workspace layout interaction source", () => {
     expect(page.match(/<WorkspaceSeparator/g)).toHaveLength(2);
     expect(page).toContain("collapseFiltersPanel");
     expect(page).toContain("collapseDetailsPanel");
+    expect(page).toContain("WORKSPACE_LEFT_MIN");
+    expect(page).toContain("WORKSPACE_LEFT_MAX");
+    expect(page).toContain("WORKSPACE_RIGHT_MIN");
+    expect(page).toContain("WORKSPACE_RIGHT_MAX");
     expect(css).toContain("var(--workspace-left-width)");
     expect(css).toContain("var(--workspace-right-width)");
     expect(css).toMatch(/@media \(max-width: 1280px\)[\s\S]*\.workspace-separator[\s\S]*display:\s*none/);

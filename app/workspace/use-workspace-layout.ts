@@ -5,6 +5,7 @@ import type { CSSProperties, KeyboardEvent, PointerEvent, RefObject } from "reac
 
 import {
   DEFAULT_WORKSPACE_LAYOUT,
+  LEGACY_WORKSPACE_LAYOUT_STORAGE_KEY,
   WORKSPACE_LAYOUT_STORAGE_KEY,
   WORKSPACE_LEFT_DEFAULT,
   WORKSPACE_LEFT_MAX,
@@ -13,6 +14,7 @@ import {
   WORKSPACE_RIGHT_MAX,
   WORKSPACE_RIGHT_MIN,
   getKeyboardWorkspaceWidth,
+  migrateWorkspaceLayoutPreferences,
   parseWorkspaceLayoutPreferences,
   resizeWorkspacePanel,
   resolveWorkspaceLayout,
@@ -90,7 +92,10 @@ export function useWorkspaceLayout(view: WorkspaceViewMode) {
       }
 
       try {
-        setPreferences(parseWorkspaceLayoutPreferences(window.localStorage.getItem(WORKSPACE_LAYOUT_STORAGE_KEY)));
+        setPreferences(migrateWorkspaceLayoutPreferences(
+          window.localStorage.getItem(WORKSPACE_LAYOUT_STORAGE_KEY),
+          window.localStorage.getItem(LEGACY_WORKSPACE_LAYOUT_STORAGE_KEY),
+        ));
       } catch {
         setPreferences(DEFAULT_WORKSPACE_LAYOUT);
       } finally {

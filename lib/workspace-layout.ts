@@ -1,16 +1,20 @@
-export const WORKSPACE_LAYOUT_STORAGE_KEY = "ref-forge-workspace-layout-v1";
+export const LEGACY_WORKSPACE_LAYOUT_STORAGE_KEY = "ref-forge-workspace-layout-v1";
+export const WORKSPACE_LAYOUT_STORAGE_KEY = "ref-forge-workspace-layout-r15-v1";
 export const WORKSPACE_LAYOUT_VERSION = 1 as const;
-export const WORKSPACE_LEFT_DEFAULT = 260;
-export const WORKSPACE_LEFT_MIN = 220;
-export const WORKSPACE_LEFT_MAX = 360;
-export const WORKSPACE_RIGHT_DEFAULT = 420;
-export const WORKSPACE_RIGHT_MIN = 340;
-export const WORKSPACE_RIGHT_MAX = 640;
-export const WORKSPACE_CENTER_MIN = 560;
+export const WORKSPACE_LEFT_DEFAULT = 220;
+export const WORKSPACE_LEFT_MIN = 208;
+export const WORKSPACE_LEFT_MAX = 320;
+export const WORKSPACE_RIGHT_DEFAULT = 352;
+export const WORKSPACE_RIGHT_MIN = 336;
+export const WORKSPACE_RIGHT_MAX = 520;
+export const WORKSPACE_CENTER_MIN = 640;
 export const WORKSPACE_SEPARATOR_WIDTH = 8;
 export const WORKSPACE_RECOVERY_RAIL_WIDTH = 44;
 export const WORKSPACE_KEYBOARD_STEP = 16;
 export const WORKSPACE_KEYBOARD_LARGE_STEP = 40;
+
+const LEGACY_LEFT_DEFAULT = 260;
+const LEGACY_RIGHT_DEFAULT = 420;
 
 export type WorkspacePanelSide = "left" | "right";
 export type WorkspaceViewMode = "references" | "syntheses";
@@ -80,9 +84,9 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return prototype === Object.prototype || prototype === null;
 }
 
-export function parseWorkspaceLayoutPreferences(raw: string | null): WorkspaceLayoutPreferences {
+function parseWorkspaceLayoutCandidate(raw: string | null): WorkspaceLayoutPreferences | null {
   if (raw === null) {
-    return createDefaultWorkspaceLayout();
+    return null;
   }
 
   try {
@@ -97,13 +101,39 @@ export function parseWorkspaceLayoutPreferences(raw: string | null): WorkspaceLa
       typeof value.leftCollapsed !== "boolean" ||
       typeof value.rightCollapsed !== "boolean"
     ) {
-      return createDefaultWorkspaceLayout();
+      return null;
     }
 
-    return normalizeWorkspaceLayout(value as WorkspaceLayoutPreferences);
+    return value as WorkspaceLayoutPreferences;
   } catch {
-    return createDefaultWorkspaceLayout();
+    return null;
   }
+}
+
+export function parseWorkspaceLayoutPreferences(raw: string | null): WorkspaceLayoutPreferences {
+  const candidate = parseWorkspaceLayoutCandidate(raw);
+  return candidate ? normalizeWorkspaceLayout(candidate) : createDefaultWorkspaceLayout();
+}
+
+export function migrateWorkspaceLayoutPreferences(
+  currentRaw: string | null,
+  legacyRaw: string | null,
+): WorkspaceLayoutPreferences {
+  const current = parseWorkspaceLayoutCandidate(currentRaw);
+  if (current) return normalizeWorkspaceLayout(current);
+
+  const legacy = parseWorkspaceLayoutCandidate(legacyRaw);
+  if (!legacy) return createDefaultWorkspaceLayout();
+
+  const usedLegacyDefaults =
+    legacy.leftWidth === LEGACY_LEFT_DEFAULT &&
+    legacy.rightWidth === LEGACY_RIGHT_DEFAULT;
+
+  return normalizeWorkspaceLayout({
+    ...legacy,
+    leftWidth: usedLegacyDefaults ? WORKSPACE_LEFT_DEFAULT : legacy.leftWidth,
+    rightWidth: usedLegacyDefaults ? WORKSPACE_RIGHT_DEFAULT : legacy.rightWidth,
+  });
 }
 
 export function serializeWorkspaceLayoutPreferences(value: WorkspaceLayoutPreferences): string {

@@ -82,6 +82,12 @@ import {
   hasBlockingWorkspaceLayer,
   shouldFocusWorkspaceSearch,
 } from "../lib/workspace-shortcuts";
+import {
+  WORKSPACE_LEFT_MAX,
+  WORKSPACE_LEFT_MIN,
+  WORKSPACE_RIGHT_MAX,
+  WORKSPACE_RIGHT_MIN,
+} from "../lib/workspace-layout";
 import type { SynthesisDraft } from "../lib/synthesis-draft";
 import { DataManagementDialog } from "./data-management/data-management-dialog";
 import { SynthesisWorkspace } from "./synthesis/synthesis-workspace";
@@ -1247,8 +1253,8 @@ export default function Home() {
         expandLabel={copy.expandFiltersPanel}
         handlers={separatorHandlers.left}
         label={copy.resizeFiltersPanel}
-        min={220}
-        max={360}
+        min={WORKSPACE_LEFT_MIN}
+        max={WORKSPACE_LEFT_MAX}
         value={workspaceMetrics.leftWidth}
         resetLabel={copy.resetPanelWidth}
         onRestore={() => restorePanel("left")}
@@ -1682,8 +1688,8 @@ export default function Home() {
         expandLabel={copy.expandDetailsPanel}
         handlers={separatorHandlers.right}
         label={copy.resizeDetailsPanel}
-        min={340}
-        max={640}
+        min={WORKSPACE_RIGHT_MIN}
+        max={WORKSPACE_RIGHT_MAX}
         value={workspaceMetrics.rightWidth}
         resetLabel={copy.resetPanelWidth}
         onRestore={() => restorePanel("right")}
