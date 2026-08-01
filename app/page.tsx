@@ -1081,7 +1081,7 @@ export default function Home() {
         draggingSide ? `workspace--dragging-${draggingSide}` : "",
       ].filter(Boolean).join(" ")}
     >
-      <aside className="sidebar" aria-label={copy.filtersLabel}>
+      <aside className="sidebar research-rail" aria-label={copy.filtersLabel}>
         <div className="brand-block">
           <div className="brand-eyebrow-row">
             <p className="eyebrow">REFFORGE</p>
@@ -1262,7 +1262,7 @@ export default function Home() {
 
       {workspaceView === "references" ? (
         <>
-      <section className="gallery-pane">
+      <section className="gallery-pane reference-canvas">
         <ReferenceToolbar
           addDisabled={isComparisonSelectionMode}
           comparisonActive={isComparisonSelectionMode}
@@ -1695,7 +1695,7 @@ export default function Home() {
         onRestore={() => restorePanel("right")}
       />
 
-      <aside className="detail-panel" aria-label={copy.selectedReference}>
+      <aside className="detail-panel reference-inspector" aria-label={copy.selectedReference}>
         <button
           type="button"
           className="workspace-collapse-button workspace-collapse-button--details"

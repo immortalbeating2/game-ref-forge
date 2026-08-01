@@ -8,10 +8,15 @@ import {
 const asset = new URL("../public/art/workbench-graphite.webp", import.meta.url);
 const stylesheet = new URL("../app/globals.css", import.meta.url);
 
-describe("Round 14 visual assets", () => {
-  it("ships an optimized WebP workstation texture", () => {
+describe("Round 14-15 visual assets", () => {
+  it("ships an optimized WebP workstation texture and composes it below the light field", () => {
     expect(readFileSync(asset).subarray(8, 12).toString("ascii")).toBe("WEBP");
     expect(statSync(asset).size).toBeLessThanOrEqual(300 * 1024);
+
+    const css = readFileSync(stylesheet, "utf8");
+    expect(css).toMatch(
+      /body\s*\{[\s\S]*background-image:\s*radial-gradient\([\s\S]*url\("\/art\/workbench-graphite\.webp"\)/,
+    );
   });
 
   it("forces comfortable card spacing and touch targets on mobile", () => {
