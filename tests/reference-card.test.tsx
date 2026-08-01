@@ -81,9 +81,14 @@ describe("ReferenceCard", () => {
     };
 
     const { container, rerender } = render(<ReferenceCard {...props} />);
-    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+    fireEvent.error(
+      container.querySelector("img.reference-preview__remote") as HTMLImageElement,
+    );
 
-    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("img.reference-preview__remote")).toBeNull();
+    expect(
+      container.querySelector("img.reference-preview__local")?.getAttribute("src"),
+    ).toBe("/art/reference-ui-hud.svg");
     expect(screen.getByText("UI/HUD")).toBeTruthy();
 
     props.reference = {
@@ -92,8 +97,10 @@ describe("ReferenceCard", () => {
     };
     rerender(<ReferenceCard {...props} />);
 
-    expect(container.querySelector("img")?.getAttribute("src")).toBe(
-      "https://example.com/repaired.jpg",
-    );
+    expect(
+      container
+        .querySelector("img.reference-preview__remote")
+        ?.getAttribute("src"),
+    ).toBe("https://example.com/repaired.jpg");
   });
 });

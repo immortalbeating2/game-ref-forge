@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="base" cx="72%" cy="26%" r="94%">
+      <stop stop-color="#282633"/><stop offset="0.48" stop-color="#171a20"/><stop offset="1" stop-color="#0b1012"/>
+    </radialGradient>
+    <pattern id="grain" width="27" height="27" patternUnits="userSpaceOnUse">
+      <circle cx="5" cy="6" r="0.8" fill="#dedcec" opacity="0.035"/><circle cx="19" cy="21" r="0.7" fill="#cce8e4" opacity="0.025"/>
+    </pattern>
+    <filter id="soft"><feGaussianBlur stdDeviation="20"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#base)"/>
+  <rect width="1600" height="900" fill="url(#grain)"/>
+  <ellipse cx="1150" cy="260" rx="265" ry="205" fill="#7b68b6" opacity="0.1" filter="url(#soft)"/>
+  <g fill="none" stroke-linecap="round">
+    <ellipse cx="1150" cy="260" rx="215" ry="132" transform="rotate(-12 1150 260)" stroke="#8d76ca" stroke-width="7" opacity="0.32"/>
+    <ellipse cx="1150" cy="260" rx="150" ry="86" transform="rotate(17 1150 260)" stroke="#61b7ab" stroke-width="5" opacity="0.29"/>
+    <path d="M120 682C330 618 420 444 630 402S920 330 1080 264" stroke="#61b7ab" stroke-width="8" opacity="0.26"/>
+    <path d="M176 744C366 624 470 560 684 508S910 374 1112 296" stroke="#8d76ca" stroke-width="4" opacity="0.22"/>
+  </g>
+  <g fill="#78c7bb">
+    <circle cx="206" cy="666" r="6" opacity="0.35"/><circle cx="316" cy="610" r="9" opacity="0.28"/>
+    <circle cx="454" cy="494" r="5" opacity="0.38"/><circle cx="598" cy="432" r="10" opacity="0.26"/>
+    <circle cx="724" cy="402" r="6" opacity="0.34"/><circle cx="882" cy="332" r="4" opacity="0.4"/>
+  </g>
+  <g fill="#a58cdb">
+    <circle cx="252" cy="718" r="4" opacity="0.32"/><circle cx="390" cy="634" r="7" opacity="0.25"/>
+    <circle cx="540" cy="566" r="5" opacity="0.34"/><circle cx="774" cy="452" r="8" opacity="0.22"/>
+  </g>
+</svg>

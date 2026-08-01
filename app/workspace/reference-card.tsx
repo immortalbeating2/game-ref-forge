@@ -1,9 +1,7 @@
 "use client";
 
 import { Check, Pin, PinOff, Plus } from "lucide-react";
-import { useState } from "react";
 import {
-  labelForAssetCategory,
   labelForLicenseStatus,
   labelForPublicStatus,
   labelForQualityStatus,
@@ -16,6 +14,7 @@ import {
   type ReferenceQualityBadgeKind,
 } from "../../lib/reference-quality";
 import type { WorkspaceDensity } from "../../lib/workspace-view-preferences";
+import { ReferencePreview } from "./reference-preview";
 
 type CardCopy = ReturnType<typeof uiCopy>;
 
@@ -64,11 +63,7 @@ export function ReferenceCard({
   onTogglePinned,
   reference,
 }: ReferenceCardProps) {
-  const [failedPreviewUrl, setFailedPreviewUrl] = useState<string | null>(null);
   const quality = evaluateReferenceQuality(reference);
-  const previewVisible =
-    Boolean(reference.preview_url) &&
-    failedPreviewUrl !== reference.preview_url;
   const tags = [
     ...reference.mechanic_tags,
     ...reference.mood_tags,
@@ -96,26 +91,21 @@ export function ReferenceCard({
         onClick={onActivate}
       >
         <span className={`thumbnail accent-${reference.asset_category}`}>
-          {previewVisible ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={reference.preview_url ?? ""}
-              alt=""
-              onError={() => setFailedPreviewUrl(reference.preview_url)}
-            />
-          ) : (
-            <span>{labelForAssetCategory(reference.asset_category, language)}</span>
-          )}
-          {previewVisible ? (
-            <span className="reference-card__category">
-              {labelForAssetCategory(reference.asset_category, language)}
-            </span>
-          ) : null}
-          {isComparisonMode ? (
-            <span className="reference-card__comparison-marker" aria-hidden="true">
-              {isComparisonSelected ? <Check size={15} /> : <Plus size={15} />}
-            </span>
-          ) : null}
+          <ReferencePreview
+            reference={reference}
+            language={language}
+            categoryLabelVisible
+            overlay={
+              isComparisonMode ? (
+                <span
+                  className="reference-card__comparison-marker"
+                  aria-hidden="true"
+                >
+                  {isComparisonSelected ? <Check size={15} /> : <Plus size={15} />}
+                </span>
+              ) : null
+            }
+          />
         </span>
 
         <span className="card-body">

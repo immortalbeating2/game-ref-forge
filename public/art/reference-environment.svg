@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#202a2b"/><stop offset="0.52" stop-color="#141b1d"/><stop offset="1" stop-color="#0b1012"/>
+    </linearGradient>
+    <linearGradient id="fog" x1="0" x2="1">
+      <stop stop-color="#70aaa5" stop-opacity="0"/><stop offset="0.5" stop-color="#70aaa5" stop-opacity="0.18"/><stop offset="1" stop-color="#70aaa5" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="grain" width="31" height="31" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="9" r="1" fill="#d6dfdc" opacity="0.03"/><circle cx="24" cy="23" r="0.7" fill="#d6dfdc" opacity="0.025"/>
+    </pattern>
+    <filter id="soft"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#base)"/>
+  <rect width="1600" height="900" fill="url(#grain)"/>
+  <rect y="250" width="1600" height="170" fill="url(#fog)" filter="url(#soft)"/>
+  <g fill="none" stroke="#67a59f">
+    <path d="M0 356C250 320 420 338 620 302S1040 244 1600 310" opacity="0.31" stroke-width="5"/>
+    <path d="M0 410C300 370 510 402 760 356S1200 318 1600 352" opacity="0.18" stroke-width="3"/>
+    <path d="M0 472H1600" opacity="0.16" stroke-width="2"/>
+  </g>
+  <g fill="none" stroke="#7fb9b3" stroke-width="2" opacity="0.2">
+    <path d="M800 468L70 900"/><path d="M800 468L325 900"/><path d="M800 468L575 900"/><path d="M800 468L1025 900"/><path d="M800 468L1275 900"/><path d="M800 468L1530 900"/>
+    <path d="M620 575H980"/><path d="M458 672H1142"/><path d="M292 770H1308"/><path d="M128 868H1472"/>
+  </g>
+  <g fill="#88bdb8" opacity="0.1">
+    <path d="M0 350L230 276 440 344 630 250 850 340 1070 224 1320 330 1600 238V430H0Z"/>
+    <path d="M0 404L280 342 500 396 750 320 980 398 1240 326 1600 390V480H0Z"/>
+  </g>
+</svg>

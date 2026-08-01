@@ -93,10 +93,14 @@ describe("ComparisonDock", () => {
     });
 
     const { container, rerender } = render(<ComparisonDock {...props} />);
-    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+    fireEvent.error(
+      container.querySelector("img.reference-preview__remote") as HTMLImageElement,
+    );
 
-    expect(container.querySelector("img")).toBeNull();
-    expect(screen.getByText("Material")).toBeTruthy();
+    expect(container.querySelector("img.reference-preview__remote")).toBeNull();
+    expect(
+      container.querySelector("img.reference-preview__local")?.getAttribute("src"),
+    ).toBe("/art/reference-material-texture.svg");
 
     props.references[0] = {
       ...props.references[0],
@@ -104,8 +108,10 @@ describe("ComparisonDock", () => {
     };
     rerender(<ComparisonDock {...props} />);
 
-    expect(container.querySelector("img")?.getAttribute("src")).toBe(
-      "https://example.com/repaired.jpg",
-    );
+    expect(
+      container
+        .querySelector("img.reference-preview__remote")
+        ?.getAttribute("src"),
+    ).toBe("https://example.com/repaired.jpg");
   });
 });

@@ -2,37 +2,11 @@
 
 import { ChevronDown, ChevronUp, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-  labelForAssetCategory,
-  type Language,
-  type uiCopy,
-} from "../../lib/localization";
+import { type Language, type uiCopy } from "../../lib/localization";
 import type { ReferenceRecord } from "../../lib/reference";
+import { ReferencePreview } from "./reference-preview";
 
 type ComparisonCopy = ReturnType<typeof uiCopy>;
-
-function ComparisonPreview({
-  language,
-  reference,
-}: {
-  language: Language;
-  reference: ReferenceRecord;
-}) {
-  const previewUrl = reference.preview_url;
-  const [failedPreviewUrl, setFailedPreviewUrl] = useState<string | null>(null);
-  const previewVisible = Boolean(previewUrl) && failedPreviewUrl !== previewUrl;
-
-  return previewVisible ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={previewUrl ?? ""}
-      alt=""
-      onError={() => setFailedPreviewUrl(previewUrl)}
-    />
-  ) : (
-    <span>{labelForAssetCategory(reference.asset_category, language)}</span>
-  );
-}
 
 export type ComparisonDockProps = {
   canHandoff: boolean;
@@ -119,7 +93,7 @@ export function ComparisonDock({
               <span
                 className={`comparison-dock__thumbnail accent-${reference.asset_category}`}
               >
-                <ComparisonPreview
+                <ReferencePreview
                   language={language}
                   reference={reference}
                 />

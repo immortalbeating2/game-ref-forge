@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1e282b"/><stop offset="0.5" stop-color="#141a1c"/><stop offset="1" stop-color="#0b1012"/>
+    </linearGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M80 0H0V80" fill="none" stroke="#6abac6" stroke-width="1" opacity="0.08"/>
+      <circle cx="4" cy="5" r="0.9" fill="#d8e4e5" opacity="0.03"/>
+    </pattern>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#base)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect x="110" y="108" width="430" height="170" rx="8" fill="#58b6c5" opacity="0.08" filter="url(#soft)"/>
+  <g fill="none" stroke="#69c4d1" stroke-width="3">
+    <rect x="126" y="124" width="414" height="156" rx="6" opacity="0.3"/>
+    <path d="M156 164H360M156 202H470M156 240H305" opacity="0.21"/>
+    <rect x="1080" y="116" width="376" height="224" rx="6" opacity="0.26"/>
+    <path d="M1112 154H1278V212H1112ZM1302 154H1424V292H1302Z" opacity="0.17"/>
+    <path d="M1108 304H1260" opacity="0.25"/>
+    <path d="M180 708H570M1030 708H1420" opacity="0.18"/>
+  </g>
+  <g fill="#69c4d1" opacity="0.2">
+    <rect x="126" y="124" width="44" height="4"/><rect x="496" y="276" width="44" height="4"/>
+    <rect x="1080" y="116" width="4" height="42"/><rect x="1452" y="298" width="4" height="42"/>
+  </g>
+  <rect x="0" y="396" width="1600" height="3" fill="#86d2dc" opacity="0.16"/>
+  <rect x="0" y="400" width="1600" height="28" fill="#69c4d1" opacity="0.025"/>
+</svg>

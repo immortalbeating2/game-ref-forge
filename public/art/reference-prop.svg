@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="base" cx="35%" cy="28%" r="100%">
+      <stop stop-color="#292b29"/><stop offset="0.48" stop-color="#181c1d"/><stop offset="1" stop-color="#0c1113"/>
+    </radialGradient>
+    <pattern id="grain" width="29" height="29" patternUnits="userSpaceOnUse">
+      <rect x="5" y="8" width="1.2" height="1.2" fill="#e4dfcf" opacity="0.035"/><rect x="21" y="22" width="0.8" height="0.8" fill="#e4dfcf" opacity="0.025"/>
+    </pattern>
+    <filter id="soft"><feGaussianBlur stdDeviation="16"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#base)"/>
+  <rect width="1600" height="900" fill="url(#grain)"/>
+  <circle cx="1290" cy="230" r="190" fill="#b69658" opacity="0.08" filter="url(#soft)"/>
+  <g fill="#b69658" stroke="#d4bb80" stroke-width="3">
+    <path d="M182 190L382 130 512 202 310 270Z" opacity="0.28"/>
+    <path d="M182 190V374L310 448V270Z" opacity="0.14"/>
+    <path d="M310 270L512 202V384L310 448Z" opacity="0.21"/>
+    <path d="M1110 150L1300 95 1434 166 1240 224Z" opacity="0.25"/>
+    <path d="M1110 150V320L1240 390V224Z" opacity="0.12"/>
+    <path d="M1240 224L1434 166V336L1240 390Z" opacity="0.19"/>
+  </g>
+  <g fill="none" stroke="#d4bb80" stroke-width="3" opacity="0.24">
+    <path d="M530 318L820 230 1035 346 742 438Z"/>
+    <path d="M742 438V614"/><path d="M530 318V494L742 614 1035 520V346"/>
+    <path d="M620 670H1110"/><path d="M866 690V248"/>
+  </g>
+  <g fill="#d4bb80" opacity="0.3">
+    <path d="M1090 664l42 6-36 23z"/><path d="M856 270l10-40 10 40z"/>
+  </g>
+  <g stroke="#9ba6a1" opacity="0.1"><path d="M130 760H1470"/><path d="M800 86V814"/></g>
+</svg>

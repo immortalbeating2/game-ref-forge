@@ -1,5 +1,9 @@
 import { readFileSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import {
+  REFERENCE_ART_BY_CATEGORY,
+  referenceArtFor,
+} from "../lib/reference-art";
 
 const asset = new URL("../public/art/workbench-graphite.webp", import.meta.url);
 const stylesheet = new URL("../app/globals.css", import.meta.url);
@@ -45,5 +49,29 @@ describe("Round 14 visual assets", () => {
     expect(css).toMatch(
       /@media \(max-width: 820px\)[\s\S]*\.reference-card--compact \.tag-preview\s*\{[^}]*display:\s*block/,
     );
+  });
+});
+
+describe("Round 15 reference category art", () => {
+  it("ships complete, text-free SVG art within the asset budget", () => {
+    const artPaths = [
+      ...Object.values(REFERENCE_ART_BY_CATEGORY),
+      referenceArtFor("unexpected"),
+    ];
+    let totalSize = 0;
+
+    for (const artPath of artPaths) {
+      const art = new URL(`../public${artPath}`, import.meta.url);
+      const source = readFileSync(art, "utf8");
+      const size = statSync(art).size;
+
+      expect(source).toContain("<svg");
+      expect(source).toContain('viewBox="0 0 1600 900"');
+      expect(source).not.toMatch(/<text\b/i);
+      expect(size).toBeLessThanOrEqual(120 * 1024);
+      totalSize += size;
+    }
+
+    expect(totalSize).toBeLessThanOrEqual(700 * 1024);
   });
 });
