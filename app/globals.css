@@ -462,15 +462,19 @@ label {
 
 .seed-fallback-message {
   margin: 0;
+  border-top: 1px solid var(--line-subtle);
   font-size: 0.9rem;
+  padding-top: 10px;
 }
 
 .reference-form {
   display: grid;
+  min-width: 0;
   gap: 16px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   border-radius: 8px;
-  background: var(--panel);
+  background: var(--surface-command);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
   padding: 16px;
 }
 
@@ -516,7 +520,7 @@ label {
 .structured-inspiration-item {
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #15191c;
+  background: var(--field);
   padding: 12px;
 }
 
@@ -620,10 +624,11 @@ label {
 
 .empty-results {
   display: grid;
+  min-width: 0;
   gap: 10px;
   border: 1px dashed var(--border-strong);
   border-radius: 8px;
-  background: #15191c;
+  background: var(--surface-command);
   padding: 18px;
 }
 
@@ -932,7 +937,10 @@ label {
 
 .detail-edit-form {
   display: grid;
-  gap: 18px;
+  min-width: 0;
+  gap: 0;
+  border-bottom: 1px solid var(--line-subtle);
+  background: var(--surface-inspector);
 }
 
 .detail-edit-form section {
@@ -954,18 +962,19 @@ label {
 
 .sticky-actions {
   position: sticky;
+  z-index: 2;
   bottom: 0;
-  border-top: 1px solid var(--border);
-  background: #14171a;
-  padding-top: 12px;
+  border-top: 1px solid var(--line-subtle);
+  background: var(--surface-inspector);
+  padding: 12px 0;
 }
 
 .delete-confirmation {
   display: grid;
   gap: 10px;
-  border: 1px solid rgba(248, 113, 113, 0.5);
+  border: 1px solid var(--danger);
   border-radius: 8px;
-  background: rgba(127, 29, 29, 0.22);
+  background: var(--danger-soft);
   padding: 12px;
 }
 
@@ -1259,9 +1268,9 @@ label {
 .quality-checklist-group {
   display: grid;
   gap: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   border-radius: 8px;
-  background: #111517;
+  background: var(--surface-command);
   padding: 10px;
 }
 
@@ -1320,8 +1329,8 @@ label {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-color: rgba(117, 216, 189, 0.55) !important;
-  background: #141a1a !important;
+  border-color: var(--line-strong) !important;
+  background: var(--surface-command) !important;
 }
 
 .quality-guided-navigation > div:first-child {
@@ -1379,7 +1388,20 @@ label {
 }
 
 .empty-detail {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
   margin: auto 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-command);
+  padding: 18px;
+}
+
+.empty-detail h2,
+.empty-detail p {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .accent-character { background: #463f60; }
@@ -1396,9 +1418,10 @@ label {
   grid-column: 2 / -1;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   align-content: start;
-  gap: 16px;
+  gap: 0;
   min-width: 0;
-  padding: 20px;
+  background: var(--canvas-graphite);
+  padding: 0;
 }
 
 .synthesis-workspace-header {
@@ -1408,6 +1431,9 @@ label {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  border-bottom: 1px solid var(--line-subtle);
+  background: var(--surface-command);
+  padding: 14px 16px;
 }
 
 .synthesis-workspace-header__actions {
@@ -1438,6 +1464,9 @@ label {
   align-content: start;
   gap: 12px;
   min-width: 0;
+  border-right: 1px solid var(--line-subtle);
+  background: var(--surface-rail);
+  padding: 16px;
 }
 
 .synthesis-list-rows {
@@ -1448,14 +1477,14 @@ label {
 .synthesis-list-row {
   display: grid;
   min-width: 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   border-radius: 8px;
-  background: rgba(23, 26, 29, 0.78);
+  background: var(--surface-command);
 }
 
 .synthesis-list-row.is-active {
   border-color: var(--accent);
-  box-shadow: inset 3px 0 0 var(--accent);
+  background: var(--signal-soft);
 }
 
 .synthesis-list-open {
@@ -1534,6 +1563,8 @@ label {
   display: grid;
   min-width: 0;
   gap: 16px;
+  background: var(--surface-inspector);
+  padding: 16px 18px;
 }
 
 .synthesis-toolbar {
@@ -1542,7 +1573,7 @@ label {
   min-width: 0;
   gap: 14px;
   align-items: end;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line-subtle);
   padding-bottom: 14px;
 }
 
@@ -1614,9 +1645,9 @@ label {
   min-width: 0;
   align-content: start;
   gap: 10px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   border-radius: 8px;
-  background: var(--panel);
+  background: var(--surface-command);
   padding: 12px;
 }
 
@@ -1751,7 +1782,7 @@ label {
   display: grid;
   min-width: 0;
   gap: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line-subtle);
   padding: 18px 0;
 }
 
@@ -1769,8 +1800,8 @@ label {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid var(--border);
-  background: rgba(16, 18, 20, 0.96);
+  border-top: 1px solid var(--line-subtle);
+  background: var(--surface-inspector);
   padding: 10px 0;
 }
 
@@ -1796,10 +1827,11 @@ label {
 .synthesis-confirmation > div {
   display: grid;
   width: min(100%, 460px);
+  min-width: 0;
   gap: 14px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: var(--panel);
+  background: var(--surface-inspector);
   padding: 18px;
 }
 
@@ -1841,9 +1873,9 @@ label {
   max-height: min(760px, calc(100dvh - 40px));
   gap: 16px;
   overflow: auto;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
-  background: var(--panel);
+  background: var(--surface-inspector);
   padding: 20px;
 }
 
@@ -1868,7 +1900,7 @@ label {
   z-index: 1;
   inset: 16px;
   align-content: center;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+  box-shadow: 0 0 0 1px rgba(255, 133, 133, 0.16);
 }
 
 .data-management-dialog__header {
@@ -2005,7 +2037,7 @@ label {
   min-height: 40px;
   border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: transparent;
+  background: var(--field);
   padding: 8px 12px;
   cursor: pointer;
 }
@@ -2271,9 +2303,12 @@ label {
 @media (max-width: 1280px) {
   .workspace {
     grid-template-columns: 230px minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
     height: auto;
     min-height: 100vh;
-    overflow: visible;
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
   .toolbar {
@@ -2283,6 +2318,25 @@ label {
   .toolbar-actions {
     min-width: 100%;
     flex-basis: 100%;
+  }
+
+  .reference-command-rail,
+  .toolbar-secondary-cluster,
+  .detail-actions,
+  .form-actions,
+  .synthesis-workspace-header,
+  .synthesis-workspace-header__actions,
+  .synthesis-toolbar-actions {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .gallery-pane,
+  .detail-panel,
+  .synthesis-workspace,
+  .synthesis-list,
+  .synthesis-editor {
+    max-width: 100%;
   }
 
   .export-actions {
@@ -2352,6 +2406,31 @@ label {
     min-height: 44px;
   }
 
+  .reference-form button, .detail-edit-form button, .data-management-dialog button, .data-management-file-picker {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .reference-form input:not([type="checkbox"]),
+  .reference-form select,
+  .detail-edit-form input:not([type="checkbox"]),
+  .detail-edit-form select,
+  .data-management-check,
+  .synthesis-workspace button,
+  .synthesis-workspace select,
+  .synthesis-secondary-actions summary {
+    min-height: 44px;
+  }
+
+  .reference-form,
+  .detail-edit-form,
+  .data-management-dialog,
+  .synthesis-confirmation > div {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .toolbar-secondary-cluster {
     width: 100%;
     flex-basis: auto;
@@ -2416,6 +2495,19 @@ label {
     gap: 4px;
   }
 
+  .reference-form label,
+  .detail-edit-form label,
+  .empty-results,
+  .empty-detail,
+  .data-management-file-name,
+  .data-management-summary dd,
+  .synthesis-list-open,
+  .synthesis-reference-card,
+  .synthesis-form-section label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   .quality-guided-navigation {
     position: static;
     align-items: stretch;
@@ -2429,14 +2521,26 @@ label {
 
   .synthesis-workspace {
     grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .synthesis-workspace-header,
+  .synthesis-list,
+  .synthesis-editor {
+    grid-column: 1;
+  }
+
+  .synthesis-list {
+    border-right: 0;
+    border-bottom: 1px solid var(--line-subtle);
   }
 }
 
 @media (max-width: 720px) {
   .synthesis-workspace {
     grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-    padding: 16px;
+    gap: 0;
+    padding: 0;
   }
 
   .synthesis-workspace-header,
@@ -2464,14 +2568,13 @@ label {
   }
 
   .synthesis-secondary-actions > div {
-    position: absolute;
-    right: 0;
+    position: static;
     z-index: 3;
     display: grid;
-    width: min(240px, calc(100vw - 32px));
+    width: 100%;
     border: 1px solid var(--border-strong);
     border-radius: 8px;
-    background: var(--panel);
+    background: var(--surface-command);
     padding: 8px;
   }
 
@@ -2482,17 +2585,28 @@ label {
   }
 
   .synthesis-reference-strip {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-color: var(--border-strong) transparent;
-    padding-bottom: 8px;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
   }
 
   .synthesis-reference-card {
-    width: 82%;
-    min-width: 82%;
-    scroll-snap-align: start;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .form-actions,
+  .confirmation-actions,
+  .synthesis-save-bar,
+  .synthesis-confirmation > div > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-actions button,
+  .confirmation-actions button,
+  .synthesis-save-bar button,
+  .synthesis-confirmation > div > div button {
+    width: 100%;
   }
 
   .synthesis-list,

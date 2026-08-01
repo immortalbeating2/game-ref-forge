@@ -10,9 +10,22 @@ const page = readFileSync(
   "utf8",
 );
 
-function cssRule(selector: string) {
+function cssRuleFrom(source: string, selector: string) {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return css.match(new RegExp(`${escapedSelector}\\s*\\{[^}]*\\}`))?.[0] ?? "";
+  return source.match(
+    new RegExp(`(?:^|}\\s*)(${escapedSelector}\\s*\\{[^}]*\\})`),
+  )?.[1] ?? "";
+}
+
+function cssRule(selector: string) {
+  return cssRuleFrom(css, selector);
+}
+
+function lastMediaBlock(query: string) {
+  const start = css.lastIndexOf(`@media (${query})`);
+  if (start < 0) return "";
+  const end = css.indexOf("@media", start + 1);
+  return css.slice(start, end < 0 ? undefined : end);
 }
 
 describe("protected-A workstation shell", () => {
@@ -85,5 +98,31 @@ describe("protected-A workstation shell", () => {
       /background:/,
     );
     expect(cssRule(".detail-section--fixed")).not.toMatch(/background:/);
+  });
+
+  it("unifies secondary workflows with the protected-A material layers", () => {
+    expect(cssRule(".reference-form")).toMatch(
+      /background:\s*var\(--surface-command\)/,
+    );
+    expect(cssRule(".detail-edit-form")).toMatch(
+      /border-bottom:\s*1px solid var\(--line-subtle\)/,
+    );
+    expect(cssRule(".data-management-dialog")).toMatch(
+      /background:\s*var\(--surface-inspector\)/,
+    );
+    expect(cssRule(".synthesis-workspace")).toMatch(
+      /background:\s*var\(--canvas-graphite\)/,
+    );
+  });
+
+  it("keeps secondary workflow controls touch-safe in the mobile fallback", () => {
+    const mobileRules = lastMediaBlock("max-width: 820px");
+    const secondaryControls = cssRuleFrom(
+      mobileRules,
+      ".reference-form button, .detail-edit-form button, .data-management-dialog button, .data-management-file-picker",
+    );
+
+    expect(secondaryControls).toMatch(/min-width:\s*44px/);
+    expect(secondaryControls).toMatch(/min-height:\s*44px/);
   });
 });
