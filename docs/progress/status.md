@@ -4,7 +4,7 @@ Updated: 2026-08-01
 
 ## Current Stage
 
-`Round 15 implementation in progress; Tasks 1-5 complete, Task 6 pending`
+`Round 15 implementation in progress; Tasks 1-6 complete, Task 7 pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -26,6 +26,7 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task 3 is complete and independently approved: protected-A material tokens, visible graphite composition, presentational three-pane classes and flatter inspector surfaces pass 42 test files / 439 tests, typecheck, lint and detector. Review found no Critical/Important issue; one token/test maintainability Minor is carried into Task 4 CSS work.
 - Task 4 is complete after one reviewed fix round: one command rail, image-led cards, `214px/282px` auto-fit grid tracks, gallery token consumption, rule-scoped CSS contracts, and 44px mobile command controls pass 42 test files / 440 tests plus typecheck/lint. The only Important finding was addressed and re-review approved.
 - Task 5 is complete after one reviewed fix round: a five-axis localized score radar derives safety as `6 - copyright risk`, preserves the authoritative numeric matrix, renders an explicit incomplete fallback without a data polygon, and reorganizes details as one continuous inspector surface. The feature head passes 44 test files / 449 tests plus typecheck/lint; the only Important CSS-cascade finding was fixed in `e4b1a59` and scoped re-review approved it.
+- Task 6 is complete and independently approved: comparison positions are derived from the existing ordered ID array, selected cards show 1-based markers, the dock keeps count/order/minimum guidance visible in both languages, and the original 2-4 selection state machine remains unchanged. Full regression passes 44 test files / 450 tests plus typecheck/lint; one non-blocking page-level integration-test Minor is carried into Task 8 browser QA.
 
 - Git repository initialized on `main`.
 - Remote configured as `https://github.com/immortalbeating2/game-ref-forge.git`.
