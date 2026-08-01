@@ -1,10 +1,10 @@
 # Project Status
 
-Updated: 2026-07-31
+Updated: 2026-08-01
 
 ## Current Stage
 
-`Round 14 complete; Round 15 design-ready`
+`Round 15 design confirmed; written spec review pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -15,6 +15,10 @@ RefForge / `灵感锻造台` is a private-first game asset reference research de
 It helps collect source links from game asset and game design sites, normalize them into reference records, classify them by asset type and creative use, and extract reusable inspiration for original game asset creation.
 
 ## Current Implementation Status
+
+- Round 15 adopts the user-approved “protected high-fidelity A”: reconstruct the visual composition, material system, image-led cards, inspector and comparison feedback while freezing product, data and core interaction contracts.
+- The written design is `docs/superpowers/specs/2026-08-01-protected-high-fidelity-workstation-design.md`; it explicitly preserves API, D1, migrations, domain models, Backup v1, single-select filters, ordered 2-4 reference comparison and existing accessibility/responsive contracts.
+- Round 15 design work is isolated on `codex/round-15-protected-a`. No runtime code has changed yet; Sites version 18 / `4ec8659` remains the stable production baseline.
 
 - Git repository initialized on `main`.
 - Remote configured as `https://github.com/immortalbeating2/game-ref-forge.git`.

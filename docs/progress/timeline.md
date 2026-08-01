@@ -1554,3 +1554,11 @@
 - 保存 Sites version 18 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_4feca4628b8481919ea44838b92879a4`，deployment `appgdep_6a6bb53489c081918c25eaacffd17230` 私有发布成功。
 - 认证生产只读 QA 确认小网格/大网格图标、紧凑 `241px` 卡与标签隐藏、舒适 `322px` 卡与标签显示、刷新持久化、横向溢出 `0` 和 console error `0`；最终密度复位紧凑，未写入 reference 或 synthesis。
 - 发布后一次普通刷新短时命中旧静态资源；带 version 18 查询的新导航、再次刷新及正式入口回读均稳定为新资源，记录为非阻塞边缘缓存传播。
+
+## 2026-08-01
+
+- 用户指出 Round 14 虽完成文字、信息顺序与交互，但背景、材质、卡片图像感和整体构图没有充分还原目标图；复盘确认这是视觉保真缺口，不是 API 或数据能力缺口。
+- 比较字面 A、受保护 A 和分阶段 A 后，用户批准“受保护的高保真 A”：尽量还原美术设计，同时冻结私有研究定位、来源安全、API、D1、migration、Backup v1、CRUD、单选筛选、2-4 条有序比较、综合稿、分栏和响应式合同。
+- 从同步且干净的 `main` 创建 `codex/round-15-protected-a`，用于承载 Round 15 设计、计划和后续实现。
+- 写入 `docs/superpowers/specs/2026-08-01-protected-high-fidelity-workstation-design.md`，增加中心画布至少 60%、大桌面紧凑四列、原创分类纹理回退、连续检查器、小型评分雷达图和同视口人工视觉评审等可量化约束。
+- 设计阶段未修改运行时代码；Sites version 18 / `4ec8659` 继续作为稳定生产基线。当前阶段为 `Round 15 design confirmed; written spec review pending`。
