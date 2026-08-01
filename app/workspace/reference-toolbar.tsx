@@ -56,7 +56,10 @@ export function ReferenceToolbar({
   sortOptions,
 }: ReferenceToolbarProps) {
   return (
-    <header className="toolbar" aria-label={copy.referenceDeck}>
+    <header
+      className="toolbar reference-command-rail"
+      aria-label={copy.referenceDeck}
+    >
       <div className="deck-heading">
         <p className="panel-kicker">{copy.referenceDeck}</p>
         <h2>
@@ -81,51 +84,53 @@ export function ReferenceToolbar({
           />
         </label>
 
-        <label className="sort-label">
-          <span>
-            <ArrowUpDown aria-hidden="true" size={15} />
-            {copy.sortBy}
-          </span>
-          <select
-            value={sortMode}
-            onChange={(event) =>
-              onSortChange(event.target.value as ReferenceSortMode)
-            }
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="toolbar-secondary-cluster">
+          <label className="sort-label">
+            <span>
+              <ArrowUpDown aria-hidden="true" size={15} />
+              {copy.sortBy}
+            </span>
+            <select
+              value={sortMode}
+              onChange={(event) =>
+                onSortChange(event.target.value as ReferenceSortMode)
+              }
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <div
-          className="density-control"
-          role="radiogroup"
-          aria-label={copy.densityControl}
-        >
-          <span>{copy.density}</span>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={density === "compact"}
-            title={copy.compactDensity}
-            onClick={() => onDensityChange("compact")}
+          <div
+            className="density-control"
+            role="radiogroup"
+            aria-label={copy.densityControl}
           >
-            <Grid3X3 aria-hidden="true" size={16} />
-            <span>{copy.compactDensity}</span>
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={density === "comfortable"}
-            title={copy.comfortableDensity}
-            onClick={() => onDensityChange("comfortable")}
-          >
-            <Grid2X2 aria-hidden="true" size={16} />
-            <span>{copy.comfortableDensity}</span>
-          </button>
+            <span>{copy.density}</span>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={density === "compact"}
+              title={copy.compactDensity}
+              onClick={() => onDensityChange("compact")}
+            >
+              <Grid3X3 aria-hidden="true" size={16} />
+              <span>{copy.compactDensity}</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={density === "comfortable"}
+              title={copy.comfortableDensity}
+              onClick={() => onDensityChange("comfortable")}
+            >
+              <Grid2X2 aria-hidden="true" size={16} />
+              <span>{copy.comfortableDensity}</span>
+            </button>
+          </div>
         </div>
 
         <div className="export-actions">

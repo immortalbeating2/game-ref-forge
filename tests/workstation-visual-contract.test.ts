@@ -10,13 +10,27 @@ const page = readFileSync(
   "utf8",
 );
 
+function cssRule(selector: string) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return css.match(new RegExp(`${escapedSelector}\\s*\\{[^}]*\\}`))?.[0] ?? "";
+}
+
 describe("protected-A workstation shell", () => {
   it("defines the protected-A material tokens and visible graphite layers", () => {
     expect(css).toContain("--canvas-graphite: #090d0f");
     expect(css).toContain("--surface-rail: rgba(14, 20, 21, 0.9)");
     expect(css).toMatch(/body[\s\S]*workbench-graphite\.webp/);
-    expect(css).toMatch(
-      /\.gallery-pane[\s\S]*background:\s*rgba\(9, 13, 15, 0\.38\)/,
+    expect(cssRule(".gallery-pane")).toMatch(
+      /background:\s*var\(--surface-canvas\)/,
+    );
+  });
+
+  it("uses the image-wall grid targets for both density modes", () => {
+    expect(cssRule(".workspace--density-compact .reference-grid")).toMatch(
+      /grid-template-columns:\s*repeat\(auto-fit, minmax\(214px, 1fr\)\)/,
+    );
+    expect(cssRule(".workspace--density-comfortable .reference-grid")).toMatch(
+      /grid-template-columns:\s*repeat\(auto-fit, minmax\(282px, 1fr\)\)/,
     );
   });
 

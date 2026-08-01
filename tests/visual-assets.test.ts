@@ -40,6 +40,9 @@ describe("Round 14-15 visual assets", () => {
     expect(css).toMatch(
       /\.reference-card__select\s*\{[^}]*grid-template-rows:\s*max-content 1fr/,
     );
+    expect(css).toMatch(
+      /\.thumbnail\s*\{[^}]*aspect-ratio:\s*16 \/ 9/,
+    );
   });
 
   it("uses secondary tag visibility to distinguish compact and comfortable density", () => {

@@ -37,13 +37,14 @@ describe("ReferenceToolbar", () => {
   it("renders the ordered work controls and exposes its search input", () => {
     const searchInputRef = createRef<HTMLInputElement>();
 
-    render(
+    const { container } = render(
       <ReferenceToolbar
         {...makeProps()}
         searchInputRef={searchInputRef}
       />,
     );
 
+    expect(container.querySelector(".reference-command-rail")).toBeTruthy();
     expect(screen.getByRole("searchbox", { name: "Search" })).toBe(
       searchInputRef.current,
     );

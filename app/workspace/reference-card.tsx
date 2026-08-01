@@ -90,7 +90,7 @@ export function ReferenceCard({
         disabled={disabled}
         onClick={onActivate}
       >
-        <span className={`thumbnail accent-${reference.asset_category}`}>
+        <span className="thumbnail reference-card__preview">
           <ReferencePreview
             reference={reference}
             language={language}

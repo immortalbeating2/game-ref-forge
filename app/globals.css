@@ -301,13 +301,13 @@ label {
   min-width: 0;
   flex-direction: column;
   gap: 16px;
-  background: rgba(9, 13, 15, 0.38);
+  background: var(--surface-canvas);
   padding: 18px 16px;
 }
 
 .toolbar {
-  display: grid;
-  grid-template-columns: minmax(180px, 0.55fr) minmax(0, 1.45fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   align-items: end;
   border: 1px solid var(--border);
@@ -318,12 +318,18 @@ label {
 }
 
 .toolbar-actions {
-  display: grid;
-  grid-template-columns:
-    minmax(220px, 1.2fr)
-    minmax(148px, 0.55fr)
-    auto;
+  display: flex;
+  min-width: min(100%, 640px);
+  flex: 1 1 720px;
+  flex-wrap: wrap;
   gap: 12px;
+  align-items: end;
+}
+
+.toolbar-secondary-cluster {
+  display: flex;
+  flex: 0 1 246px;
+  gap: 8px;
   align-items: end;
 }
 
@@ -336,6 +342,14 @@ label {
 .search-label,
 .sort-label {
   min-width: 0;
+}
+
+.search-label {
+  flex: 1 1 280px;
+}
+
+.sort-label {
+  flex: 1 1 154px;
 }
 
 .search-label > span,
@@ -401,8 +415,8 @@ label {
 }
 
 .export-actions {
-  grid-column: 1 / -1;
   display: flex;
+  flex: 0 1 auto;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
@@ -580,18 +594,28 @@ label {
 
 .reference-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(218px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(214px, 1fr));
   gap: 12px;
 }
 
 .workspace--density-compact .reference-grid {
-  grid-template-columns: repeat(auto-fill, minmax(202px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(214px, 1fr));
   gap: 10px;
 }
 
 .workspace--density-comfortable .reference-grid {
-  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(282px, 1fr));
   gap: 14px;
+}
+
+.workspace--density-compact .reference-canvas .reference-card {
+  width: 100%;
+  max-width: 264px;
+}
+
+.workspace--density-comfortable .reference-canvas .reference-card {
+  width: 100%;
+  max-width: 352px;
 }
 
 .empty-results {
@@ -674,6 +698,7 @@ label {
 .thumbnail {
   position: relative;
   display: grid;
+  overflow: hidden;
   min-height: 118px;
   aspect-ratio: 16 / 9;
   place-items: center;
@@ -723,19 +748,19 @@ label {
 
 .card-body {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   align-content: start;
-  padding: 12px;
+  padding: 10px 12px 12px;
 }
 
 .reference-card--compact .card-body {
-  gap: 8px;
+  gap: 7px;
   padding: 10px;
 }
 
 .card-topline {
   display: flex;
-  min-height: 28px;
+  min-height: 20px;
   gap: 8px;
   align-items: center;
 }
@@ -816,13 +841,17 @@ label {
   color: #dce3dd;
   font-size: 0.7rem;
   line-height: 1;
-  padding: 7px 8px;
+  padding: 6px 8px;
 }
 
 .compact-score-row {
   display: grid;
   grid-template-columns: 1fr;
   gap: 6px;
+}
+
+.reference-card .compact-score-row span {
+  padding: 6px 7px;
 }
 
 .tag-preview {
@@ -2193,11 +2222,12 @@ label {
   }
 
   .toolbar {
-    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .toolbar-actions {
-    grid-template-columns: minmax(220px, 1fr) minmax(148px, 0.5fr) auto;
+    min-width: 100%;
+    flex-basis: 100%;
   }
 
   .export-actions {
@@ -2243,8 +2273,6 @@ label {
   }
 
   .workspace,
-  .toolbar,
-  .toolbar-actions,
   .form-grid,
   .score-grid,
   .score-summary,
@@ -2256,8 +2284,23 @@ label {
     display: none;
   }
 
+  .reference-command-rail,
+  .toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-secondary-cluster {
+    width: 100%;
+    flex-basis: auto;
+  }
+
   .export-actions {
-    grid-column: auto;
+    justify-content: flex-start;
+  }
+
+  .export-actions button {
+    flex: 1 1 140px;
   }
 
   .sidebar {
@@ -2292,6 +2335,11 @@ label {
 
   .reference-card--compact .tag-preview {
     display: block;
+  }
+
+  .workspace--density-compact .reference-canvas .reference-card,
+  .workspace--density-comfortable .reference-canvas .reference-card {
+    max-width: none;
   }
 
   .reference-card__pin {

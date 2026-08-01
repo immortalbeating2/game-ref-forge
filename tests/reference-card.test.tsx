@@ -41,6 +41,9 @@ describe("ReferenceCard", () => {
     const card = screen.getByRole("button", { name: "Kenney UI Pack" });
     expect(card.classList.contains("reference-card__select")).toBe(true);
     expect(card.closest("article")?.classList.contains("reference-card--compact")).toBe(true);
+    expect(card.querySelector(".reference-preview")).toBeTruthy();
+    expect(card.querySelector(".reference-card__preview")).toBeTruthy();
+    expect(card.querySelector(".accent-ui_hud")).toBeNull();
     expect(screen.getByText("UI/HUD")).toBeTruthy();
     expect(screen.getByText("cc0 or public domain")).toBeTruthy();
     expect(screen.getByText("review")).toBeTruthy();
