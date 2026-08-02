@@ -1600,4 +1600,4 @@
 - Task 9 repair 以红绿测试恢复 16:9 预览、自然卡高、两行长标题和完整来源/状态/评分可见性，并补自然 grid track 对齐；比较 availability 增加 `needs-more` / `persisted-only` 原因，中英文 seed 下一步持续可见。
 - 真实浏览器重新覆盖 1600/1480/1280/1024/390px：预览比例约 `1.77778`、1480/1600 为紧凑 4 列/舒适 3 列，同排预览对齐，移动相关控件不低于 44px，无遮挡、横向溢出、broken image 或 console error。
 - `QA-R15-T9-20260802-` 的 12 条 reference 均经真实 UI 创建和删除；API、三张临时 SQLite 表、prefix 与 12 IDs 回读均为 0。seed 中英文阻断理由、折叠/展开/取消均通过，浏览器视口/tabs 已收口。
-- 修复后完整门禁为 44 个测试文件 / 463 项、typecheck、lint、build、工作树 diff check 和 detector `[]`；三联图第三栏更新为当前 1487 x 1058 实现。阶段进入 `Round 15 Task 9 findings repaired; scoped independent re-review pending`，Sites version 18 仍为稳定生产基线。
+- 修复提交 `defe475a` 后完整门禁为 44 个测试文件 / 463 项、typecheck、lint、build、detector `[]`；`git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` exit `0` 且无诊断输出。三联图第三栏更新为当前 1487 x 1058 实现；阶段进入 `Round 15 Task 9 findings repaired; scoped independent re-review pending`，Sites version 18 仍为稳定生产基线。

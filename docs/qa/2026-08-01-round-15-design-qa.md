@@ -27,7 +27,7 @@
 - `npm run lint`：通过。
 - `npm run build`：通过。
 - `node .agents/skills/impeccable/scripts/detect.mjs --json app`：`[]`。
-- `git diff --check`：工作树检查通过；提交后还将按复审原基线运行 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` 并记录精确结果。
+- `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD`：在修复提交 `defe475a1c2f2bc848c378c8b5aa14673df6773d` 上 exit `0`，无诊断输出。
 
 ## QA 期间的红绿修复
 
@@ -210,7 +210,7 @@ Task 9 独立复审对 `6033f222..09db202` 判定为 `With fixes`，报告 3 项
 - `npm test`：44 个测试文件 / 463 项通过。
 - `npm run typecheck`、`npm run lint`、`npm run build`：通过。
 - `node D:\Desktop\Project\Game\game-ref-forge\.agents\skills\impeccable\scripts\detect.mjs --json app`：exit `0`，stdout `[]`。
-- `git diff --check`：工作树检查 exit `0`，无输出。原基线到提交后 HEAD 的精确三点 diff gate 将在修复提交形成后执行并写入最终留痕。
+- `git diff --check`：提交前工作树检查 exit `0`，无输出；提交 `defe475a1c2f2bc848c378c8b5aa14673df6773d` 形成后执行 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD`，exit `0`，无诊断输出。
 
 ## 风险与下一步
 
