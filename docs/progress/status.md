@@ -4,7 +4,7 @@ Updated: 2026-08-02
 
 ## Current Stage
 
-`Round 15 Task 9 findings repaired; scoped independent re-review pending`
+`Round 15 locally approved; merge pending`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -32,6 +32,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task 9 repair restores true 16:9 previews, natural card heights, two-line long titles and visible source/three states/three scores without whole-body clipping. Real browser QA passes 1600/1480/1280/1024/390px; compact/comfortable remain 4/3 columns at 1480 and 1600, same-row previews align exactly, all viewports have zero horizontal overflow, and the updated triptych is `docs/qa/2026-08-01-round-15-target-comparison.png`.
 - Seed comparison now exposes an explicit localized persisted-only reason at `2/4` while keeping synthesis handoff disabled; persisted `2/4` remains eligible. The design-spec trailing whitespace was removed, and the repaired branch passes 44 test files / 463 tests, typecheck, lint, build, worktree diff check and an empty Impeccable detector result.
 - Task 9 repair browser fixtures were created and deleted through the real UI. API and temporary SQLite readbacks are references/syntheses/relations `0/0/0`, prefix `0`, all 12 fixture IDs absent, browser console error `0`, broken image `0`, and tabs/viewport are finalized/reset.
+- Task 9 scoped re-review is independently approved at reviewed HEAD `9f9444c2d07898b170a9aeb70d820d9aaf3e90f7`. The reviewer operated read-only and limited scope to the original 3 Important findings, 1 Minor finding and newly introduced Critical/Important risk; all four findings are `ADDRESSED`, visual verdict and round verdict are `PASS`, and new Critical/Important count is `0`.
+- The independent reviewer freshly passed the six affected suites / 58 tests, typecheck and the exact `6033f22233a559656ebbc329b858c049e152be43...HEAD` diff gate, then cross-checked the triptych pixels and zero-residue process/temp probes. The reviewer explicitly did not rerun the full 463-test suite; the full test/lint/build/detector evidence remains the repair commit's audited gate chain.
 - Task 8 fix round 2 adds an auditable empty-D1 seed final-state record without changing runtime code: categories are `界面/HUD` and `材质`, the cards load distinct local `reference-ui-hud.svg` / `reference-material-texture.svg` assets, both preview rects are exactly `262.66668701171875 x 204.4791717529297`, all titles and three statuses are readable, and broken images are `0`.
 - The seed interaction boundary is now explicitly recorded: `开始对比 disabled=false`; after selecting both seeds the dock shows `已选择 2 / 4` while `进入综合稿 disabled=true`, preserving persisted-only synthesis handoff. Browser logs are `[]`, final temporary D1 counts remain `0/0/0`, and the 57358 process tree/listener are stopped at `0/0`.
 
@@ -279,4 +281,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Run scoped independent re-review of the repaired Task 9 findings. Merge only after that review passes; then perform an exact-source Sites deployment and production QA. Keep Sites version 18 as the stable production baseline until then.
+Execute Task 10: merge the independently approved Round 15 branch, rerun the required gates on merged `main`, then perform an exact-source Sites deployment and production QA. Keep Sites version 18 as the stable production baseline until the new deployment is verified.

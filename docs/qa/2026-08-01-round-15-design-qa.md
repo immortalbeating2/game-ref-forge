@@ -212,8 +212,16 @@ Task 9 独立复审对 `6033f222..09db202` 判定为 `With fixes`，报告 3 项
 - `node D:\Desktop\Project\Game\game-ref-forge\.agents\skills\impeccable\scripts\detect.mjs --json app`：exit `0`，stdout `[]`。
 - `git diff --check`：提交前工作树检查 exit `0`，无输出；提交 `defe475a1c2f2bc848c378c8b5aa14673df6773d` 形成后执行 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD`，exit `0`，无诊断输出。
 
+## Task 9 最终独立批准
+
+- reviewer mode：独立、只读、scoped re-review；批准 SHA 为 `9f9444c2d07898b170a9aeb70d820d9aaf3e90f7`。范围只覆盖首轮 3 项 Important、1 项 Minor 与修复引入的新 Critical/Important，不执行 Task 10。
+- verdict：I1 16:9/密度/长文本、I2 diff gate、I3 seed persisted-only 提示和 status 下一步全部 `ADDRESSED`；视觉 verdict `PASS`，round verdict `PASS`，新 Critical/Important 为 `0`。
+- fresh reviewer gates：受影响的 6 个测试文件 / 58 项通过，`npm run typecheck` exit `0`，精确 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` exit `0` 且无输出，设计规格尾随空格扫描为 `NONE`。
+- 只读证据：原始像素核对确认三联图左栏与批准目标、右栏与 `task-9-round15.png` 完全一致，第三栏直接显示 4 列、16:9、两行长标题、来源、三状态与三评分；临时 D1 目录不存在，57360 listener 与匹配 node/workerd 进程均为 `0`。
+- reviewer 没有重复启动 Worker、创建 QA 数据或重跑完整 44 文件 / 463 项，也没有重复 lint、build、detector；完整门禁沿用修复提交中与提交链一致的可审计证据。本次 fresh 58/typecheck/精确 diff gate 与只读像素/清理探针足以独立关闭原 findings。
+
 ## 风险与下一步
 
 - Statsig 遥测网络偶发超时只发生在 browser-client 控制通道，应用 console error 仍为 0，且每次动作均以页面状态重新确认；不判为产品缺陷。
-- 本文包含 Task 8 本地综合 QA 与 Task 9 首轮 findings 的修复者验收，不替代 scoped 独立复审，也不代表已合并、部署或完成生产 QA。
-- 下一步对上述 3 项 Important 与 1 项 Minor 执行 scoped 独立复审；只有复审通过后才合并、执行 Sites 精确源部署并开展生产只读/受控写入验收。
+- 本文包含 Task 8 本地综合 QA、Task 9 修复者验收和最终 scoped 独立批准；仍不代表已合并、部署或完成生产 QA。
+- 下一步执行 Task 10：合并后先在 merged `main` 重跑必要门禁，再执行 Sites 精确源部署并开展生产只读/受控写入验收。

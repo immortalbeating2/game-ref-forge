@@ -1601,3 +1601,6 @@
 - 真实浏览器重新覆盖 1600/1480/1280/1024/390px：预览比例约 `1.77778`、1480/1600 为紧凑 4 列/舒适 3 列，同排预览对齐，移动相关控件不低于 44px，无遮挡、横向溢出、broken image 或 console error。
 - `QA-R15-T9-20260802-` 的 12 条 reference 均经真实 UI 创建和删除；API、三张临时 SQLite 表、prefix 与 12 IDs 回读均为 0。seed 中英文阻断理由、折叠/展开/取消均通过，浏览器视口/tabs 已收口。
 - 修复提交 `defe475a` 后完整门禁为 44 个测试文件 / 463 项、typecheck、lint、build、detector `[]`；`git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` exit `0` 且无诊断输出。三联图第三栏更新为当前 1487 x 1058 实现；阶段进入 `Round 15 Task 9 findings repaired; scoped independent re-review pending`，Sites version 18 仍为稳定生产基线。
+- Task 9 scoped 独立复审以只读模式审查 `9f9444c2d07898b170a9aeb70d820d9aaf3e90f7`，范围严格限定为首轮 3 项 Important、1 项 Minor 与修复新增的 Critical/Important 风险；I1/I2/I3/Minor 全部 `ADDRESSED`，视觉 verdict 与 round verdict 均为 `PASS`，新 Critical/Important 为 0。
+- reviewer fresh 运行 6 个受影响测试文件 / 58 项、typecheck 与精确 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` 均通过，并以只读像素探针确认三联图原始帧一致、以现场探针确认临时目录/57360 进程/监听均为 0。reviewer 明确未重复完整 463 项，完整 test/lint/build/detector 继续引用可审计修复门禁链。
+- 阶段更新为 `Round 15 locally approved; merge pending`。下一步 Task 10 先合并，再在 merged `main` 重跑门禁，随后执行 exact-source Sites 部署和生产 QA；Sites version 18 在新部署验证前继续作为稳定生产基线。
