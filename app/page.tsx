@@ -1667,6 +1667,7 @@ export default function Home() {
           <ComparisonDock
             canHandoff={comparisonAvailability.canHandoff}
             copy={copy}
+            handoffBlockReason={comparisonAvailability.handoffBlockReason}
             language={language}
             onCancel={cancelComparisonSelection}
             onEnter={enterSynthesisWorkspace}

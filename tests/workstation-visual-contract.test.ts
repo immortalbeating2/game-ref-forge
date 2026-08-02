@@ -56,39 +56,34 @@ describe("protected-A workstation shell", () => {
     );
   });
 
-  it("keeps the visible preview above half of the card at 1480 and 1600", () => {
+  it("derives every card preview from its width at a fixed 16:9 ratio", () => {
     const selectRule = cssRule(".reference-card__select");
-    const previewShare = Number(
-      selectRule.match(
-        /grid-template-rows:\s*minmax\(0,\s*(\d+)%\)\s+minmax\(0,\s*(\d+)%\)/,
-      )?.[1],
-    ) / 100;
-    const cardHeights = {
-      compact: Number(
-        cssRule(".reference-card--compact").match(/height:\s*(\d+)px/)?.[1],
-      ),
-      comfortable: Number(
-        cssRule(".reference-card--comfortable").match(/height:\s*(\d+)px/)?.[1],
-      ),
-    };
+    const previewRule = cssRule(".reference-card__preview");
     const desktopCases = [
-      { viewport: 1480, density: "compact" as const, cardWidth: 205 },
-      { viewport: 1600, density: "compact" as const, cardWidth: 235 },
-      { viewport: 1480, density: "comfortable" as const, cardWidth: 274 },
-      { viewport: 1600, density: "comfortable" as const, cardWidth: 314 },
+      { viewport: 1480, density: "compact", cardWidth: 205, previewHeight: 115.3125 },
+      { viewport: 1600, density: "compact", cardWidth: 235, previewHeight: 132.1875 },
+      { viewport: 1480, density: "comfortable", cardWidth: 274, previewHeight: 154.125 },
+      { viewport: 1600, density: "comfortable", cardWidth: 314, previewHeight: 176.625 },
     ];
 
-    expect(selectRule).toMatch(/overflow:\s*hidden/);
-    expect(cssRule(".card-body")).toMatch(/overflow:\s*hidden/);
+    expect(previewRule).toMatch(/aspect-ratio:\s*16\s*\/\s*9/);
+    expect(selectRule).toMatch(/align-content:\s*start/);
+    expect(selectRule).toMatch(
+      /grid-template-rows:\s*auto minmax\(0,\s*1fr\)/,
+    );
+    expect(selectRule).not.toMatch(/overflow:\s*hidden/);
+    expect(cssRule(".card-body")).not.toMatch(/overflow:\s*hidden/);
+    expect(cssRule(".reference-card--compact")).not.toMatch(/(?:^|[;{])\s*height:/);
+    expect(cssRule(".reference-card--comfortable")).not.toMatch(/(?:^|[;{])\s*height:/);
     for (const desktopCase of desktopCases) {
-      const cardHeight = cardHeights[desktopCase.density];
-      const previewVisibleHeight = (cardHeight - 2) * previewShare;
-
-      expect(
-        previewVisibleHeight / cardHeight,
-        `${desktopCase.viewport}px ${desktopCase.density} ${desktopCase.cardWidth}px card`,
-      ).toBeGreaterThan(0.5);
+      expect(desktopCase.cardWidth * 9 / 16).toBe(desktopCase.previewHeight);
     }
+  });
+
+  it("reserves two title lines without clipping the natural card body", () => {
+    expect(cssRule(".reference-card__title")).toMatch(/-webkit-line-clamp:\s*2/);
+    expect(cssRule(".reference-card__title")).toMatch(/overflow-wrap:\s*anywhere/);
+    expect(cssRule(".card-meta > span:last-child")).toMatch(/overflow-wrap:\s*anywhere/);
   });
 
   it("uses the center-first desktop tracks", () => {

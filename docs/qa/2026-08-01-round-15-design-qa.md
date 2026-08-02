@@ -2,7 +2,7 @@
 
 日期：2026-08-01 至 2026-08-02
 
-结论：**通过，可以进入 Task 9 独立复审。** 本轮在真实构建产物、临时本地 D1 和浏览器 UI 上完成了高保真视觉、完整交互、多视口和零残留验收。验收期间发现的 4 项 must-pass 偏差与独立复审补充的图像主体比例偏差，均先补失败回归，再完成实现修复与真实浏览器复测。
+结论：**Task 9 首轮复审的 3 项 Important 与 1 项 Minor 已完成修复，等待 scoped 独立复审。** 本轮重新以 16:9 预览、自然卡高和正文完整可见为准，撤销了被首轮复审否决的固定 `380/440px`、`54%/46%` 与整体裁切方案；同时补齐 seed `2/4` 的 persisted-only 阻断理由、修复真实 diff gate，并更新同视口三联图。本文不把修复者自验写成最终批准。
 
 ## 验收范围
 
@@ -22,12 +22,12 @@
 
 ## 自动化门禁
 
-- `npm test`：44 个测试文件 / 458 项测试通过。
+- `npm test`：44 个测试文件 / 463 项测试通过。
 - `npm run typecheck`：通过。
 - `npm run lint`：通过。
 - `npm run build`：通过。
 - `node .agents/skills/impeccable/scripts/detect.mjs --json app`：`[]`。
-- `git diff --check`：通过。
+- `git diff --check`：工作树检查通过；提交后还将按复审原基线运行 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` 并记录精确结果。
 
 ## QA 期间的红绿修复
 
@@ -87,7 +87,9 @@
 - 临时 SQLite 只读回读：references `0`、syntheses `0`、synthesis_references `0`。
 - Chrome console error `0`；内置浏览器 console error `0`。
 
-## Fix round 1：图像主体比例与证据补强
+## 历史 Fix round 1：已被 Task 9 首轮复审否决
+
+以下固定卡高与 `54% / 46%` 数据仅为历史审计记录，不再代表当前实现或批准结论。Task 9 首轮独立复审确认该方案把 16:9 预览改成近方形/4:3，并以正文裁切换取图像占比；当前修复已完整撤销这些规则，现状与复测值见后文“Task 9 首轮复审修复”。
 
 Task 8 初次提交后的独立复审指出：卡片虽然已接入原创分类图，但图像可见面积仍不足以证明“图像主体优先”，同时原报告没有留下可逐 ID 复核的 fixture、URL 重试、雷达降级和 detector 命令证据。本修复轮不改变 API、D1、migration、Backup v1、领域模型、筛选或对比状态机，只校正卡片视觉比例、自动化合同和验收留痕。
 
@@ -165,8 +167,53 @@ Task 8 初次提交后的独立复审指出：卡片虽然已接入原创分类�
 - 取消对比后入口恢复；`tab.dev.logs()` 原始返回为 `[]`。最终只读 D1 回读为 references `0`、syntheses `0`、synthesis_references `0`，证明本轮没有业务写入。
 - 浏览器 tabs 已 finalized；57358 的已验证进程树 `workerd 2480 / node 9276 / node 37080` 已精确停止，`RemainingProcesses=0`、`ListenerCount=0`。
 
+## Task 9 首轮复审修复（2026-08-02）
+
+Task 9 独立复审对 `6033f222..09db202` 判定为 `With fixes`，报告 3 项 Important 与 1 项 Minor：参考卡违反 16:9/自然内容高度合同、规格文件 7 处尾随空格令 diff gate 实际失败、seed `2/4` 缺少 persisted-only 禁用原因，以及 `status.md` 的下一步仍停留在 Round 15 启动前。本修复只处理这四项，不修改 API、D1、migration、Backup v1、领域模型、来源策略、筛选或比较选择状态机。
+
+### TDD 与实现
+
+- 红：受影响的 6 个测试文件 / 58 项中出现 12 个预期失败，覆盖固定卡高、`54% / 46%` 裁切、一行标题、移动卡高，以及 seed-only 阻断理由的 helper、组件、页面接线和中英文文案。
+- 绿：预览改为 `width: 100%` 与 `aspect-ratio: 16 / 9`；卡片恢复自然高度，正文不再整体裁切，标题最多两行并允许长词换行；`.reference-card__select` 使用 `auto minmax(0, 1fr)` 保持同排预览上下边界一致。来源、三项安全/质量状态和三项评分继续可见，紧凑态只隐藏可派生的次级标签。
+- 额外红绿：真实浏览器首次复测发现短正文会令同排预览上移 `8.53px`，随后增加自然 grid track 对齐合同并以 `align-content: start` 修复；同排预览顶部和底部最终完全一致。
+- 比较 availability 新增 `needs-more` / `persisted-only` 两类本地化阻断原因。seed `2/4` 保持综合稿按钮禁用，但坞内持续解释下一步；persisted `2/4` 仍可正常交接。
+- 设计规格 7 处尾随空格已移除；状态文档的接续建议改为先完成 Task 9 scoped re-review，再合并与部署。
+
+### 当前卡片几何与可见性
+
+| 视口与密度 | 列数 / 卡宽 | 预览尺寸与比例 | 当前卡高 / 内容证据 |
+| --- | --- | --- | --- |
+| 1480 紧凑 | 4 列 / `205px` | `203.667 x 114.563px` / `1.77778` | `312.083px`；12/12 标题两行、来源、3 状态、3 评分可见 |
+| 1480 舒适 | 3 列 / `274px` | `272.667 x 153.375px` / `1.77778` | `315.344..332.406px`；上述信息与标签均可见 |
+| 1600 紧凑 | 4 列 / `235px` | `233.667 x 131.438px` / `1.77778` | `284.75px`；12/12 必需信息可见 |
+| 1600 舒适 | 3 列 / `314px` | `312.667 x 175.875px` / `1.77778` | `337.844..354.906px`；必需信息与标签可见 |
+| 1280 紧凑 | 4 列 / `243.167px` | 16:9，比例 `1.77778` | 同排预览对齐；document/body 溢出 `0/0` |
+| 1024 紧凑 | 3 列 / `242.22px` | 16:9，比例约 `1.77789` | 必需信息可见；document/body 溢出 `0/0` |
+| 390 移动 | 1 列 / `342.667px` | 16:9，比例 `1.77778` | 标题、来源、3 状态、3 评分和标签均可见 |
+
+- 1480px 中心轨道仍为 `892 / 1480 = 60.27%`，1600px 为 `1012 / 1600 = 63.25%`；所有桌面组同排预览上下边界一致。
+- 390px 相关可见控件均不低于 `44 x 44px`，密度控件按既有合同隐藏；2/4 对比坞与最后一张卡相隔 `16px`，添加表单与首卡相隔约 `66px`，均为文档流布局且不遮挡内容。
+- 全部视口 document/body 横向溢出为 `0`，broken image 为 `0`；最终应用 console error 为 `0`。
+
+### seed 阻断理由、fixture 与清理
+
+- 空 D1 回到两条 seed 后可以启动对比；选中两条显示 `已选择 2 / 4`，`进入综合稿` 为 disabled，并持续显示中文 `示例可用于对比探索；保存至少两条参考后才能进入综合稿。`。
+- 切换 English 后持续显示 `Examples can be explored in comparison; save at least two references before entering synthesis.`，`Enter synthesis` 同样 disabled。对比坞折叠、展开、取消后入口复位。
+- 本轮前缀为 `QA-R15-T9-20260802-`；12 个真实 UI 创建的 reference ID 依次为：`93909b6b-342f-4341-a2ab-5f5e31438c1e`、`c69dfc80-23b1-4bf3-8a83-2519c70ee276`、`2759c9db-6991-47e9-a300-86f9a3a30ccb`、`2ea2b126-e61d-442f-9861-bd298aed3588`、`90cc13ff-f065-459e-865a-481ccccdd876`、`94b092c7-2e5f-482b-82ea-a0bb57fb5107`、`639b4ead-b7ff-4787-8363-60814646f56a`、`8bf421e9-6360-4c67-b05c-10f9b986373b`、`dde48542-5794-4f67-8ffb-7188f0d96642`、`3c709917-f732-426a-aced-b1f42472693e`、`c639596d-6615-4cbc-994e-a7b9beab4312`、`fbc5a90d-acf6-4c28-a234-ca3d13493f03`。
+- 12/12 记录均经真实 UI 删除。API 回读 references `0`、prefix `0`；临时 SQLite 只读回读 references/syntheses/synthesis_references 为 `0/0/0`，prefix `0`，上述 12 个 ID 命中 `0`。
+- 浏览器视口已 reset，tabs 已 finalized。更新后的三联图仍为 `4461 x 1120`，前两栏保持不变，第三栏替换为当前 1487 x 1058 实现；它展示了更接近批准目标的 16:9 图像墙密度，而非历史近方形高卡。
+- QA 完成后 57360 的进程与监听均已自然退出并复核为 `0/0`；已验证绝对路径位于用户 Temp 且叶目录精确匹配后，删除临时 D1 根目录 `refforge-r15-t9-20260802-101521`，删除后不存在。
+
+### 修复后门禁
+
+- focused 红绿：6 个测试文件 / 58 项从 12 项预期失败恢复为全绿；对齐补测 2 个文件 / 21 项通过。
+- `npm test`：44 个测试文件 / 463 项通过。
+- `npm run typecheck`、`npm run lint`、`npm run build`：通过。
+- `node D:\Desktop\Project\Game\game-ref-forge\.agents\skills\impeccable\scripts\detect.mjs --json app`：exit `0`，stdout `[]`。
+- `git diff --check`：工作树检查 exit `0`，无输出。原基线到提交后 HEAD 的精确三点 diff gate 将在修复提交形成后执行并写入最终留痕。
+
 ## 风险与下一步
 
 - Statsig 遥测网络偶发超时只发生在 browser-client 控制通道，应用 console error 仍为 0，且每次动作均以页面状态重新确认；不判为产品缺陷。
-- 本文是 Task 8 本地综合 QA，不替代 Task 9 独立复审，也不代表已合并、部署或完成生产 QA。
-- 下一步进入独立规格/代码/视觉复审；通过后才执行合并、Sites 精确源部署和生产只读/受控写入验收。
+- 本文包含 Task 8 本地综合 QA 与 Task 9 首轮 findings 的修复者验收，不替代 scoped 独立复审，也不代表已合并、部署或完成生产 QA。
+- 下一步对上述 3 项 Important 与 1 项 Minor 执行 scoped 独立复审；只有复审通过后才合并、执行 Sites 精确源部署并开展生产只读/受控写入验收。

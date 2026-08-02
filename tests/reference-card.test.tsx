@@ -111,4 +111,28 @@ describe("ReferenceCard", () => {
         ?.getAttribute("src"),
     ).toBe("https://example.com/repaired.jpg");
   });
+
+  it("keeps a long bilingual title, source, three states, and three scores in the card body", () => {
+    const props = makeProps();
+    const source = "A very long source name that must remain judgeable";
+    props.reference = makeReference({
+      ...props.reference,
+      title: "超长中文参考标题用于验证两行层级与 English research source context",
+      site_name: source,
+      reference_value_score: 5,
+      transformability_score: 4,
+      copyright_risk_score: 1,
+    });
+
+    const { container } = render(<ReferenceCard {...props} />);
+
+    expect(container.querySelector(".reference-card__title")?.textContent).toBe(props.reference.title);
+    expect(screen.getAllByText(source)).not.toHaveLength(0);
+    expect(screen.getByText("cc0 or public domain")).toBeTruthy();
+    expect(screen.getByText("review")).toBeTruthy();
+    expect(screen.getByText("analyzed")).toBeTruthy();
+    expect(screen.getByText("Reference value: 5")).toBeTruthy();
+    expect(screen.getByText("Transformability: 4")).toBeTruthy();
+    expect(screen.getByText("Copyright risk: 1")).toBeTruthy();
+  });
 });

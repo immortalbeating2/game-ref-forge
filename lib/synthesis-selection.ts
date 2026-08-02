@@ -7,6 +7,8 @@ export type ComparisonSelectionState = {
   referenceIds: string[];
 };
 
+export type ComparisonHandoffBlockReason = "needs-more" | "persisted-only";
+
 export function getComparisonStartDecision(options: {
   canStartComparison: boolean;
   isSavingReference: boolean;
@@ -21,11 +23,18 @@ export function getComparisonAvailability(
   referenceIds: string[],
 ) {
   const hasPersistedReferences = source === "persisted";
+  const hasEnoughReferences = referenceIds.length >= 2;
+  const canHandoff =
+    hasPersistedReferences && canEnterSynthesisComparison(referenceIds);
 
   return {
     canStartComparison: source !== "loading",
-    canHandoff:
-      hasPersistedReferences && canEnterSynthesisComparison(referenceIds),
+    canHandoff,
+    handoffBlockReason: canHandoff
+      ? null
+      : hasEnoughReferences
+        ? "persisted-only" as const
+        : "needs-more" as const,
   };
 }
 

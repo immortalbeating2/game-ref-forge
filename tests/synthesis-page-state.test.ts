@@ -21,15 +21,29 @@ describe("synthesis page comparison selection state", () => {
     expect(getComparisonAvailability("loading", selected)).toEqual({
       canStartComparison: false,
       canHandoff: false,
+      handoffBlockReason: "persisted-only",
     });
     expect(getComparisonAvailability("seed", selected)).toEqual({
       canStartComparison: true,
       canHandoff: false,
+      handoffBlockReason: "persisted-only",
     });
     expect(getComparisonAvailability("persisted", selected)).toEqual({
       canStartComparison: true,
       canHandoff: true,
+      handoffBlockReason: null,
     });
+  });
+
+  it("distinguishes missing-count and persisted-only handoff blockers", () => {
+    expect(getComparisonAvailability("seed", ["reference-a"]).handoffBlockReason)
+      .toBe("needs-more");
+    expect(getComparisonAvailability("seed", ["reference-a", "reference-b"]).handoffBlockReason)
+      .toBe("persisted-only");
+    expect(getComparisonAvailability("persisted", ["reference-a"]).handoffBlockReason)
+      .toBe("needs-more");
+    expect(getComparisonAvailability("persisted", ["reference-a", "reference-b"]).handoffBlockReason)
+      .toBeNull();
   });
 
   it("enforces the two-to-four handoff boundary for persisted references", () => {
@@ -132,6 +146,7 @@ describe("synthesis page comparison selection state", () => {
     expect(pageSource).toContain('useState<ReferenceDataSource>("loading")');
     expect(pageSource).toContain("reconcileComparisonSelectionSource");
     expect(pageSource).toContain("comparisonAvailability.canHandoff");
+    expect(pageSource).toContain("handoffBlockReason={comparisonAvailability.handoffBlockReason}");
   });
 
   it("routes the segmented back action through the workspace navigation guard", () => {

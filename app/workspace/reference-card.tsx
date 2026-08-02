@@ -117,17 +117,17 @@ export function ReferenceCard({
         </span>
 
         <span className="card-body">
-          <span className="card-topline">
-            {isComparisonSelected ? (
+          {isComparisonSelected || isPinned ? (
+            <span className="card-topline">
+              {isComparisonSelected ? (
               <span className="comparison-selection-indicator">
                 {copy.selectedForComparison}
               </span>
-            ) : isPinned ? (
-              <span>{copy.pinned}</span>
-            ) : (
-              <span>{reference.site_name ?? copy.unknownSource}</span>
-            )}
-          </span>
+              ) : (
+                <span>{copy.pinned}</span>
+              )}
+            </span>
+          ) : null}
 
           <span className="card-meta">
             <span className="reference-card__title">{reference.title}</span>

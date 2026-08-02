@@ -1596,3 +1596,8 @@
 - 更新 `4461 x 1120` 三联图后人工确认图像主体层级明显增强；57356 Worker 进程树停止、Chrome 视口/tabs 收口。最终门禁为 44 文件 / 458 测试及 typecheck、lint、build、diff check、detector `[]`。
 - Task 8 fix round 2 在全新空 D1 与 57358 built Worker 上补齐 seed 最终态原始审计值：两卡分类与本地 SVG 各不相同，预览 rect 同为 `262.66668701171875 x 204.4791717529297`，标题/三状态均可读，broken image 为 0。
 - seed 可直接启动对比；选择 2/2 后坞显示 `已选择 2 / 4`，但 `进入综合稿` 保持禁用，明确证明 persisted-only 边界；浏览器日志 `[]`，三表只读回读 `0/0/0`，57358 进程/监听归零，本轮无实现或业务数据写入。
+- Task 9 首轮独立复审判定 `With fixes`：3 项 Important 分别为固定高卡/54% 裁切违反 16:9 与内容可见性合同、设计规格尾随空格令真实 diff gate 失败、seed `2/4` 缺少 persisted-only 禁用原因；另有 `status.md` 接续建议过时的 Minor。
+- Task 9 repair 以红绿测试恢复 16:9 预览、自然卡高、两行长标题和完整来源/状态/评分可见性，并补自然 grid track 对齐；比较 availability 增加 `needs-more` / `persisted-only` 原因，中英文 seed 下一步持续可见。
+- 真实浏览器重新覆盖 1600/1480/1280/1024/390px：预览比例约 `1.77778`、1480/1600 为紧凑 4 列/舒适 3 列，同排预览对齐，移动相关控件不低于 44px，无遮挡、横向溢出、broken image 或 console error。
+- `QA-R15-T9-20260802-` 的 12 条 reference 均经真实 UI 创建和删除；API、三张临时 SQLite 表、prefix 与 12 IDs 回读均为 0。seed 中英文阻断理由、折叠/展开/取消均通过，浏览器视口/tabs 已收口。
+- 修复后完整门禁为 44 个测试文件 / 463 项、typecheck、lint、build、工作树 diff check 和 detector `[]`；三联图第三栏更新为当前 1487 x 1058 实现。阶段进入 `Round 15 Task 9 findings repaired; scoped independent re-review pending`，Sites version 18 仍为稳定生产基线。

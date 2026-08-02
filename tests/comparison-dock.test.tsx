@@ -12,6 +12,7 @@ afterEach(cleanup);
 function makeProps(count = 2) {
   return {
     canHandoff: count >= 2,
+    handoffBlockReason: count >= 2 ? null : "needs-more" as const,
     copy: uiCopy("en"),
     onCancel: vi.fn(),
     onEnter: vi.fn(),
@@ -116,5 +117,35 @@ describe("ComparisonDock", () => {
         .querySelector("img.reference-preview__remote")
         ?.getAttribute("src"),
     ).toBe("https://example.com/repaired.jpg");
+  });
+
+  it("explains the persisted-only handoff boundary for two seed references", () => {
+    render(
+      <ComparisonDock
+        {...makeProps(2)}
+        canHandoff={false}
+        handoffBlockReason="persisted-only"
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Examples can be explored in comparison; save at least two references before entering synthesis.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Enter synthesis" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+  });
+
+  it("shows no blocking reason when two persisted references can hand off", () => {
+    render(<ComparisonDock {...makeProps(2)} />);
+
+    expect(screen.queryByText(/save at least two references/i)).toBeNull();
+    expect(screen.getByRole("button", { name: "Enter synthesis" })).toHaveProperty(
+      "disabled",
+      false,
+    );
   });
 });

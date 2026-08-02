@@ -23,11 +23,8 @@ describe("Round 14-15 visual assets", () => {
     const css = readFileSync(stylesheet, "utf8");
     const mobileRules = css.slice(css.indexOf("@media (max-width: 820px)"));
 
-    expect(mobileRules).toMatch(
-      /\.reference-card--compact\s*\{[^}]*min-height:\s*370px/,
-    );
-    expect(mobileRules).toMatch(
-      /\.reference-card--compact \.thumbnail\s*\{[^}]*min-height:\s*142px/,
+    expect(mobileRules).not.toMatch(
+      /\.reference-card--compact\s*\{[^}]*(?:height|min-height):\s*\d+px/,
     );
     expect(mobileRules).toMatch(
       /\.reference-card__pin\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/,
@@ -40,14 +37,14 @@ describe("Round 14-15 visual assets", () => {
     expect(commandRailControlRule).toMatch(/min-height:\s*44px/);
   });
 
-  it("keeps aligned image-led preview tracks when body content has different heights", () => {
+  it("keeps aligned image-led 16:9 previews while card bodies grow naturally", () => {
     const css = readFileSync(stylesheet, "utf8");
 
     expect(css).toMatch(
-      /\.reference-card__select\s*\{[^}]*grid-template-rows:\s*minmax\(0,\s*54%\) minmax\(0,\s*46%\)/,
+      /\.reference-card__preview\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/,
     );
-    expect(css).toMatch(
-      /\.reference-card__select\s*\{[^}]*overflow:\s*hidden/,
+    expect(css).not.toMatch(
+      /\.reference-card__select\s*\{[^}]*(?:grid-template-rows:\s*[^;}]*%|overflow:\s*hidden)/,
     );
   });
 

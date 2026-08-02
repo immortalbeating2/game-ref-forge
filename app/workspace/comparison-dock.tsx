@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { type Language, type uiCopy } from "../../lib/localization";
 import type { ReferenceRecord } from "../../lib/reference";
+import type { ComparisonHandoffBlockReason } from "../../lib/synthesis-selection";
 import { ReferencePreview } from "./reference-preview";
 
 type ComparisonCopy = ReturnType<typeof uiCopy>;
@@ -11,6 +12,7 @@ type ComparisonCopy = ReturnType<typeof uiCopy>;
 export type ComparisonDockProps = {
   canHandoff: boolean;
   copy: ComparisonCopy;
+  handoffBlockReason: ComparisonHandoffBlockReason | null;
   language?: Language;
   onCancel: () => void;
   onEnter: () => void;
@@ -21,6 +23,7 @@ export type ComparisonDockProps = {
 export function ComparisonDock({
   canHandoff,
   copy,
+  handoffBlockReason,
   language = "en",
   onCancel,
   onEnter,
@@ -63,12 +66,17 @@ export function ComparisonDock({
           <span className="comparison-dock__hint">
             {copy.comparisonSelectionHint}
           </span>
-          {missingCount > 0 ? (
+          {handoffBlockReason === "needs-more" && missingCount > 0 ? (
             <span>
               {copy.comparisonNeedsMore.replace(
                 "{count}",
                 String(missingCount),
               )}
+            </span>
+          ) : null}
+          {handoffBlockReason === "persisted-only" ? (
+            <span className="comparison-dock__block-reason">
+              {copy.comparisonPersistedOnly}
             </span>
           ) : null}
         </div>
