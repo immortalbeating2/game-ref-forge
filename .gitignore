@@ -19,6 +19,9 @@ tsconfig.tsbuildinfo
 .env.*
 !.env.example
 
+# Private migration backups
+/backups/
+
 # Logs
 *.log
 npm-debug.log*

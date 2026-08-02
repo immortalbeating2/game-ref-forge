@@ -16,6 +16,8 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Current Implementation Status
 
+- 2026-08-02 已从认证生产站导出正式 Backup v1 到本机 `backups/ref-forge-backup-v1-2026-08-02.json`；格式 `ref-forge-backup` / schema `1`、SHA-256 `48ab991c3732001bc44ac7162f60a895aff0d4a153117a67573c742e8b0d5338`，references / syntheses / relations 为 `0 / 0 / 0`，未包含设备偏好。生产界面的两张卡是空 D1 入门示例，不属于备份业务数据。
+- 根目录 `.gitignore` 已增加 `/backups/`，私有备份与同目录迁移清单不会进入公开 GitHub。账号迁移建议见 `docs/engineering/account-migration.md`：优先新账号 Sites + 新 D1 + Backup v1 恢复，普通 VPS 需先改造 D1 与认证层。
 - Round 15 adopts the user-approved “protected high-fidelity A”: reconstruct the visual composition, material system, image-led cards, inspector and comparison feedback while freezing product, data and core interaction contracts.
 - The written design is `docs/superpowers/specs/2026-08-01-protected-high-fidelity-workstation-design.md`; it explicitly preserves API, D1, migrations, domain models, Backup v1, single-select filters, ordered 2-4 reference comparison and existing accessibility/responsive contracts.
 - The approved TDD implementation plan is `docs/superpowers/plans/2026-08-01-protected-high-fidelity-workstation.md`; it contains ten independently verifiable tasks from layout migration and original category art through measured visual QA, independent review, merge and deployment.
