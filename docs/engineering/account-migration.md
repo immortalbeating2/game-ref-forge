@@ -2,6 +2,20 @@
 
 Updated: 2026-08-02
 
+## 迁移执行结果（2026-08-03）
+
+- 新 OpenAI 账号下已创建独立 Sites 项目 `appgprj_6a6f651ceaf08191812f3b7d0ed39cea`；旧账号项目在新账号下不可访问，没有复用或修改。
+- `.openai/hosting.json` 已切换到新项目 ID，并继续使用 D1 binding `DB`、无 R2 binding。
+- 新账号 Sites source `main` 已精确同步到 `be442557c25a8e6482d099b6a47ae7fd5e6fc64f`。
+- Sites version 1 `appgprj_6a6f651ceaf08191812f3b7d0ed39cea~appgver_77a1a83069bc8191bee8392ab4338184` 已通过 owner-only 私有部署发布。
+- 新生产入口：`https://game-ref-forge.ping819376526729888.chatgpt.site`。
+- 三份 migration 已包含在部署包并生效；部署后 `/api/backup` 回读为 Backup v1 schema `1`、references / syntheses / relations `0 / 0 / 0`。
+- `backups/ref-forge-backup-v1-2026-08-02.json` 的恢复预览与正式恢复均成功；备份摘要 `48ab991c3732001bc44ac7162f60a895aff0d4a153117a67573c742e8b0d5338` 与本地 SHA-256 一致，恢复响应为 `restored: true`。
+- 恢复后再次导出仍为 `0 / 0 / 0` 且不含设备偏好，符合源站空业务库基线；最近 30 分钟 Worker error 事件为 `0`。
+- 新项目保持 `custom` owner-only，非所有者用户、外部访客和群组均为 `0`；自定义域名列表为空。
+
+迁移完成后，旧站仍作为短期回滚入口保留。后续若绑定自定义域名，应以新项目实际返回的 DNS 目标为准。
+
 ## 当前迁移基线
 
 - GitHub：`https://github.com/immortalbeating2/game-ref-forge`，公开仓库，默认分支 `main`；本次迁移审计开始时本地与 `origin/main` 同步到 `24a1e494511fe411dae41b115fb9de9bda44bf51`。

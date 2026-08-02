@@ -16,6 +16,9 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Current Implementation Status
 
+- 2026-08-03 新 OpenAI 账号迁移已完成：新 Sites 项目使用独立 project ID、D1 binding `DB` 和三份既有 migration；version 1 已 owner-only 私有部署到 `https://game-ref-forge.ping819376526729888.chatgpt.site`，旧账号站点保留为回滚入口。
+- Backup v1 先预览后恢复成功，服务端返回 `restored: true`；恢复前后正式导出均为 schema `1`、references / syntheses / relations `0 / 0 / 0`，备份摘要与本地 SHA-256 一致，最近 30 分钟 Worker error 为 `0`。
+- 新项目访问策略为 `custom` owner-only，无额外用户、外部访客或群组，自定义域名为空。Sites source `main` 精确同步到 `be442557c25a8e6482d099b6a47ae7fd5e6fc64f`；`.openai/hosting.json` 已切换到新项目。
 - 2026-08-02 已从认证生产站导出正式 Backup v1 到本机 `backups/ref-forge-backup-v1-2026-08-02.json`；格式 `ref-forge-backup` / schema `1`、SHA-256 `48ab991c3732001bc44ac7162f60a895aff0d4a153117a67573c742e8b0d5338`，references / syntheses / relations 为 `0 / 0 / 0`，未包含设备偏好。生产界面的两张卡是空 D1 入门示例，不属于备份业务数据。
 - 根目录 `.gitignore` 已增加 `/backups/`，私有备份与同目录迁移清单不会进入公开 GitHub。账号迁移建议见 `docs/engineering/account-migration.md`：优先新账号 Sites + 新 D1 + Backup v1 恢复，普通 VPS 需先改造 D1 与认证层。
 - Round 15 adopts the user-approved “protected high-fidelity A”: reconstruct the visual composition, material system, image-led cards, inspector and comparison feedback while freezing product, data and core interaction contracts.
