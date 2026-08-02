@@ -4,7 +4,7 @@ Updated: 2026-08-02
 
 ## Current Stage
 
-`Round 15 locally approved; merge pending`
+`Round 15 complete; Round 16 design-ready`
 
 The repository has been initialized as `game-ref-forge`, connected to GitHub, completed the first Sites foundation deployment, merged the second-round live usability validation branch back to `main`, merged the third-round editing-experience branch into `main`, and deployed the fourth-round production interaction hardening build as Sites version 5.
 
@@ -19,8 +19,8 @@ It helps collect source links from game asset and game design sites, normalize t
 - Round 15 adopts the user-approved “protected high-fidelity A”: reconstruct the visual composition, material system, image-led cards, inspector and comparison feedback while freezing product, data and core interaction contracts.
 - The written design is `docs/superpowers/specs/2026-08-01-protected-high-fidelity-workstation-design.md`; it explicitly preserves API, D1, migrations, domain models, Backup v1, single-select filters, ordered 2-4 reference comparison and existing accessibility/responsive contracts.
 - The approved TDD implementation plan is `docs/superpowers/plans/2026-08-01-protected-high-fidelity-workstation.md`; it contains ten independently verifiable tasks from layout migration and original category art through measured visual QA, independent review, merge and deployment.
-- The user selected Subagent-Driven execution. Implementation is isolated at `.worktrees/round-15-protected-a` on `codex/round-15-protected-a`; the clean baseline passes 39 test files / 422 tests.
-- Round 15 runtime work has begun on the isolated branch; Sites version 18 / `4ec8659` remains the stable production baseline.
+- The user selected Subagent-Driven execution. Round 15 was implemented on `codex/round-15-protected-a`, independently approved, fast-forward merged into `main`, and the isolated worktree and feature branch were removed after exact-HEAD and clean-state checks.
+- Merged `main` passes 44 test files / 463 tests, typecheck, lint, build, and the exact `6033f22233a559656ebbc329b858c049e152be43...83b31f5b39de5528f95129195782d4b1a389aee6` diff check. GitHub and Sites runtime source are synchronized to `83b31f5b39de5528f95129195782d4b1a389aee6`.
 - Task 1 is complete and independently approved: protected-A layout defaults/bounds, current/legacy preference migration, shared splitter bounds and Backup v1 compatibility pass 3 focused files / 99 tests plus typecheck; review found no Critical, Important or Minor issues.
 - Task 2 is complete and independently approved: all eight categories plus generic fallback have original SVG art, cards/dock share remote-first preview fallback, changed URLs retry, and 41 test files / 434 tests plus typecheck pass. Review found no Critical/Important issue and one non-blocking report byte-count Minor.
 - Task 3 is complete and independently approved: protected-A material tokens, visible graphite composition, presentational three-pane classes and flatter inspector surfaces pass 42 test files / 439 tests, typecheck, lint and detector. Review found no Critical/Important issue; one token/test maintainability Minor is carried into Task 4 CSS work.
@@ -34,6 +34,9 @@ It helps collect source links from game asset and game design sites, normalize t
 - Task 9 repair browser fixtures were created and deleted through the real UI. API and temporary SQLite readbacks are references/syntheses/relations `0/0/0`, prefix `0`, all 12 fixture IDs absent, browser console error `0`, broken image `0`, and tabs/viewport are finalized/reset.
 - Task 9 scoped re-review is independently approved at reviewed HEAD `9f9444c2d07898b170a9aeb70d820d9aaf3e90f7`. The reviewer operated read-only and limited scope to the original 3 Important findings, 1 Minor finding and newly introduced Critical/Important risk; all four findings are `ADDRESSED`, visual verdict and round verdict are `PASS`, and new Critical/Important count is `0`.
 - The independent reviewer freshly passed the six affected suites / 58 tests, typecheck and the exact `6033f22233a559656ebbc329b858c049e152be43...HEAD` diff gate, then cross-checked the triptych pixels and zero-residue process/temp probes. The reviewer explicitly did not rerun the full 463-test suite; the full test/lint/build/detector evidence remains the repair commit's audited gate chain.
+- Sites version 19 (`appgprj_6a246b271d848191b88b60d1633030c7~appgver_e505723944fc819180a44940dd9ed349`) was saved from exact source `83b31f5b39de5528f95129195782d4b1a389aee6` and privately deployed through `appgdep_6a6eb74ac79481918b29a0e1e41994a8` with status `succeeded`. Sites version 18 remains available as the documented rollback baseline.
+- Authenticated production QA confirms distinct original seed art, exact reset layout `220 / 892 / 352` at 1480px, center share `60.27%`, compact and comfortable 16:9 previews, comfortable reload persistence, final compact density, ordered seed `2 / 4`, the persisted-only disabled synthesis reason, broken images `0`, and desktop horizontal overflow `0`. No reference or synthesis write was performed.
+- Production 390px DOM metrics and page `dev.logs` could not be captured because the Chrome control bridge repeatedly stalled on its own Statsig requests; the attempted viewport was reset and tabs were finalized. This is recorded as a non-blocking production evidence boundary because the exact deployed source already passed real local 390px, 44px touch-target, overflow `0`, broken-image `0`, and application-console `0` browser QA.
 - Task 8 fix round 2 adds an auditable empty-D1 seed final-state record without changing runtime code: categories are `界面/HUD` and `材质`, the cards load distinct local `reference-ui-hud.svg` / `reference-material-texture.svg` assets, both preview rects are exactly `262.66668701171875 x 204.4791717529297`, all titles and three statuses are readable, and broken images are `0`.
 - The seed interaction boundary is now explicitly recorded: `开始对比 disabled=false`; after selecting both seeds the dock shows `已选择 2 / 4` while `进入综合稿 disabled=true`, preserving persisted-only synthesis handoff. Browser logs are `[]`, final temporary D1 counts remain `0/0/0`, and the 57358 process tree/listener are stopped at `0/0`.
 
@@ -281,4 +284,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Execute Task 10: merge the independently approved Round 15 branch, rerun the required gates on merged `main`, then perform an exact-source Sites deployment and production QA. Keep Sites version 18 as the stable production baseline until the new deployment is verified.
+Begin Round 16 with design confirmation and a written implementation plan before changing runtime code. Treat Sites version 19 / `83b31f5` as the stable production baseline and keep version 18 as the rollback reference.

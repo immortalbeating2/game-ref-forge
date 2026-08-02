@@ -1604,3 +1604,6 @@
 - Task 9 scoped 独立复审以只读模式审查 `9f9444c2d07898b170a9aeb70d820d9aaf3e90f7`，范围严格限定为首轮 3 项 Important、1 项 Minor 与修复新增的 Critical/Important 风险；I1/I2/I3/Minor 全部 `ADDRESSED`，视觉 verdict 与 round verdict 均为 `PASS`，新 Critical/Important 为 0。
 - reviewer fresh 运行 6 个受影响测试文件 / 58 项、typecheck 与精确 `git diff --check 6033f22233a559656ebbc329b858c049e152be43...HEAD` 均通过，并以只读像素探针确认三联图原始帧一致、以现场探针确认临时目录/57360 进程/监听均为 0。reviewer 明确未重复完整 463 项，完整 test/lint/build/detector 继续引用可审计修复门禁链。
 - 阶段更新为 `Round 15 locally approved; merge pending`。下一步 Task 10 先合并，再在 merged `main` 重跑门禁，随后执行 exact-source Sites 部署和生产 QA；Sites version 18 在新部署验证前继续作为稳定生产基线。
+- Round 15 批准分支 fast-forward 合并到 `main`；merged-main 通过 44 个测试文件 / 463 项、typecheck、lint、build 和精确 diff check。GitHub `main` 与 Sites source `main` 精确同步到 `83b31f5b39de5528f95129195782d4b1a389aee6`，隔离 worktree 与本地 feature branch 在 HEAD 等同和干净检查后移除。
+- 保存 Sites version 19 `appgprj_6a246b271d848191b88b60d1633030c7~appgver_e505723944fc819180a44940dd9ed349`，deployment `appgdep_6a6eb74ac79481918b29a0e1e41994a8` 以 owner-only 私有模式发布成功；version 18 保留为回滚参考。
+- 认证生产只读 QA 通过 distinct seed art、1480px 默认 `220/892/352`、中心 `60.27%`、紧凑/舒适 16:9、舒适刷新保持、最终紧凑、seed `2/4` persisted-only 原因、broken image `0` 和 desktop overflow `0`；无业务写入。390px DOM 与页面 dev.logs 因 browser-client/沙箱边界未取得，精确来源的本地 390px/console `0` 证据继续覆盖该层。阶段更新为 `Round 15 complete; Round 16 design-ready`。
