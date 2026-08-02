@@ -1616,3 +1616,4 @@
 - Sites source `main` 精确回读 `be442557c25a8e6482d099b6a47ae7fd5e6fc64f`。首次推送命令因服务端响应延迟在本地超时，但只读远端检查证明提交已成功接收，未重复创建项目或版本。
 - 新账号 Sites version 1 私有部署成功，入口为 `https://game-ref-forge.ping819376526729888.chatgpt.site`；访问策略为 custom owner-only，无额外用户、外部访客、群组或自定义域名。
 - 新 D1 `/api/backup` 回读 schema `1` 与 `0/0/0`；Backup v1 预览摘要匹配本地 SHA-256，正式恢复返回 `restored: true`，恢复后再导出仍为 `0/0/0`，Worker error 事件为 `0`。
+- 新账号迁移分支 fast-forward 合并到 `main`；分支与 merged main 均 fresh 通过 44 文件 / 463 测试，merged main 的 typecheck、lint、build 通过。嵌套 worktree 构建产物导致的首次主仓库 lint 噪声在 worktree 安全清理后消失；本地 feature branch 与 worktree 已移除。
