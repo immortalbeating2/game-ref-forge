@@ -598,17 +598,17 @@ label {
 
 .reference-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(214px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(214px, 1fr));
   gap: 12px;
 }
 
 .workspace--density-compact .reference-grid {
-  grid-template-columns: repeat(auto-fit, minmax(204px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(204px, 1fr));
   gap: 10px;
 }
 
 .workspace--density-comfortable .reference-grid {
-  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
   gap: 14px;
 }
 

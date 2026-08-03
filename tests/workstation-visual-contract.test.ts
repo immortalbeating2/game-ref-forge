@@ -47,12 +47,12 @@ describe("protected-A workstation shell", () => {
     );
   });
 
-  it("uses the image-wall grid targets for both density modes", () => {
+  it("preserves image-wall tracks when the seed set has fewer cards", () => {
     expect(cssRule(".workspace--density-compact .reference-grid")).toMatch(
-      /grid-template-columns:\s*repeat\(auto-fit, minmax\(204px, 1fr\)\)/,
+      /grid-template-columns:\s*repeat\(auto-fill, minmax\(204px, 1fr\)\)/,
     );
     expect(cssRule(".workspace--density-comfortable .reference-grid")).toMatch(
-      /grid-template-columns:\s*repeat\(auto-fit, minmax\(272px, 1fr\)\)/,
+      /grid-template-columns:\s*repeat\(auto-fill, minmax\(272px, 1fr\)\)/,
     );
   });
 

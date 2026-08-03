@@ -1,6 +1,6 @@
 # Project Status
 
-Updated: 2026-08-02
+Updated: 2026-08-04
 
 ## Current Stage
 
@@ -16,6 +16,7 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Current Implementation Status
 
+- 2026-08-04 在新账号站点的两条 seed reference 截图中复现低数据量网格空洞：根因是 `auto-fit + 1fr` 在只有两卡时折叠空轨道并撑宽剩余轨道，而卡片最大宽度限制留下大面积空白。修复分支 `codex/fix-seed-grid-gap` 将参考网格改为 `auto-fill`，保留宽屏目标轨道并让两张卡连续排列；新增视觉合同后 44 个测试文件 / 463 项测试、typecheck、定向 lint、build 与 diff check 通过，尚未合并或部署。
 - 2026-08-03 新 OpenAI 账号迁移已完成：新 Sites 项目使用独立 project ID、D1 binding `DB` 和三份既有 migration；version 1 已 owner-only 私有部署到 `https://game-ref-forge.ping819376526729888.chatgpt.site`，旧账号站点保留为回滚入口。
 - Backup v1 先预览后恢复成功，服务端返回 `restored: true`；恢复前后正式导出均为 schema `1`、references / syntheses / relations `0 / 0 / 0`，备份摘要与本地 SHA-256 一致，最近 30 分钟 Worker error 为 `0`。
 - 新项目访问策略为 `custom` owner-only，无额外用户、外部访客或群组，自定义域名为空。Sites source `main` 精确同步到 `be442557c25a8e6482d099b6a47ae7fd5e6fc64f`；`.openai/hosting.json` 已切换到新项目。

@@ -1617,3 +1617,9 @@
 - 新账号 Sites version 1 私有部署成功，入口为 `https://game-ref-forge.ping819376526729888.chatgpt.site`；访问策略为 custom owner-only，无额外用户、外部访客、群组或自定义域名。
 - 新 D1 `/api/backup` 回读 schema `1` 与 `0/0/0`；Backup v1 预览摘要匹配本地 SHA-256，正式恢复返回 `restored: true`，恢复后再导出仍为 `0/0/0`，Worker error 事件为 `0`。
 - 新账号迁移分支 fast-forward 合并到 `main`；分支与 merged main 均 fresh 通过 44 文件 / 463 测试，merged main 的 typecheck、lint、build 通过。嵌套 worktree 构建产物导致的首次主仓库 lint 噪声在 worktree 安全清理后消失；本地 feature branch 与 worktree 已移除。
+
+## 2026-08-04
+
+- 生产截图复现两条 seed reference 之间的大面积空白；确认不是数据缺失、预览加载或恢复失败，而是 `auto-fit + 1fr` 在低数据量下折叠空列并撑宽剩余列，结合参考卡 `max-width` 形成视觉空洞。
+- 创建 `codex/fix-seed-grid-gap`，先补红测再将基础、紧凑和舒适参考网格改为 `auto-fill`；移动端仍按最小卡宽自然降列，API、D1、Backup v1 和业务数据不变。
+- 修复后 44 个测试文件 / 463 项测试、typecheck、定向 ESLint（`app tests lib worker types tooling`）、build 和 `git diff --check` 通过；完整 `npm run lint` 在仓库历史 worktree 扫描上长时间无输出，已停止明确的 lint 子进程并以源码目录定向 lint 取代，待后续合并前再收口验证。
