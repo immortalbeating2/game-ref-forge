@@ -1632,7 +1632,7 @@
 - 按 systematic debugging 先追踪共用 CSS 规则与组件落点：根因是全局 `button` 只有最小高度，没有显式 `padding`、`font-size` 或 `line-height`，带标签按钮因此依赖浏览器默认内边距；图标按钮的既有 `padding: 0` 覆盖和移动端 `44px` 触控合同需要保留。
 - 在 `codex/fix-button-breathing` 先补红测锁定带标签按钮的 `7px 12px` 内边距、`0.9rem` 字号和 `1.2` 行高，确认旧实现按预期失败后写入统一全局规则，定向合同转绿。
 - 完整门禁通过 44 个测试文件 / 464 项测试、typecheck、lint、build、`git diff --check` 和 Impeccable detector；未修改 API、D1、migration、Backup v1、业务数据或域名配置。
-- 当前修复仍在功能分支，尚未合并或部署；Sites version 19 / `83b31f5` 继续作为生产基线。下一步是合并后决定是否生成下一版私有 Sites 发布，并在发布后复测截图中的四类按钮及移动触控尺寸。
+- 修复提交 `1285ccb` 已 fast-forward 合并到本地 `main`；合并后重新通过 44 个测试文件 / 464 项测试、typecheck、lint、build、`git diff --check` 和 Impeccable detector。尚未推送或部署，Sites version 19 / `83b31f5` 继续作为生产基线；下一步是决定是否生成下一版私有 Sites 发布，并在发布后复测截图中的四类按钮及移动触控尺寸。
 
 Delegation Log:
 
