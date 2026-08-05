@@ -16,7 +16,7 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Current Implementation Status
 
-- 2026-08-05 针对生产截图中“图标 + 中文标签”几乎贴满按钮的问题完成根因修复：删除参考、导出完整备份、取消对比和进入综合稿等带标签按钮共用的全局 `button` 规则此前依赖浏览器默认内边距，导致不同按钮的呼吸空间不稳定。分支 `codex/fix-button-breathing` 为带标签按钮统一增加 `7px 12px` 内边距、`0.9rem` 字号和 `1.2` 行高，同时保留图标按钮已有的 `padding: 0` 覆盖及移动端 `44px` 触控规则；新增视觉合同红测后转绿，完整门禁通过 44 个测试文件 / 464 项测试、typecheck、lint、build、diff check 和 Impeccable detector。提交 `1285ccb` 已 fast-forward 合并到本地 `main`，尚未发布，Sites version 19 / `83b31f5` 继续作为生产基线。
+- 2026-08-05 针对生产截图中“图标 + 中文标签”几乎贴满按钮的问题完成根因修复：删除参考、导出完整备份、取消对比和进入综合稿等带标签按钮共用的全局 `button` 规则此前依赖浏览器默认内边距，导致不同按钮的呼吸空间不稳定。分支 `codex/fix-button-breathing` 为带标签按钮统一增加 `7px 12px` 内边距、`0.9rem` 字号和 `1.2` 行高，同时保留图标按钮已有的 `padding: 0` 覆盖及移动端 `44px` 触控规则；新增视觉合同红测后转绿，完整门禁通过 44 个测试文件 / 464 项测试、typecheck、lint、build、diff check 和 Impeccable detector。提交 `1285ccb` 已 fast-forward 合并到本地 `main`，并以 exact source `da6b4fc4c427b2e39feeebe6d1e2f9e60eff5da9` 保存为 Sites version 3、通过 deployment `appgdep_6a72ed0f6ec88191a1028b13df21b0b7` owner-only 私有发布成功；线上入口为 `https://game-ref-forge.ping819376526729888.chatgpt.site`。
 - 2026-08-04 在新账号站点的两条 seed reference 截图中复现低数据量网格空洞：根因是 `auto-fit + 1fr` 在只有两卡时折叠空轨道并撑宽剩余轨道，而卡片最大宽度限制留下大面积空白。修复分支 `codex/fix-seed-grid-gap` 将参考网格改为 `auto-fill`，保留宽屏目标轨道并让两张卡连续排列；新增视觉合同后合并后的 `main` 通过 44 个测试文件 / 463 项测试、typecheck、lint、build 与 diff check，运行时代码提交 `e6b376ed087873c82be34242af7b80a7e2891781` 已保存为 Sites version 2 并 owner-only 私有部署成功。随后仅同步了部署留痕文档，未改变该生产运行时。
 - 2026-08-03 新 OpenAI 账号迁移已完成：新 Sites 项目使用独立 project ID、D1 binding `DB` 和三份既有 migration；version 1 已 owner-only 私有部署到 `https://game-ref-forge.ping819376526729888.chatgpt.site`，旧账号站点保留为回滚入口。
 - Backup v1 先预览后恢复成功，服务端返回 `restored: true`；恢复前后正式导出均为 schema `1`、references / syntheses / relations `0 / 0 / 0`，备份摘要与本地 SHA-256 一致，最近 30 分钟 Worker error 为 `0`。
@@ -291,4 +291,4 @@ It helps collect source links from game asset and game design sites, normalize t
 
 ## Next Suggested Step
 
-Decide whether to publish the locally merged button breathing-space repair as the next private Sites version. Until that release, treat Sites version 19 / `83b31f5` as the stable production baseline and keep version 18 as the rollback reference.
+继续以 Sites version 3 为当前稳定生产基线；后续 Round 16 仍需先完成设计确认和书面计划，再扩展运行时范围。Sites version 19 / `83b31f5` 保留为 Round 15 回滚参考。
