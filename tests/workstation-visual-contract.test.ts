@@ -47,6 +47,14 @@ describe("protected-A workstation shell", () => {
     );
   });
 
+  it("gives labeled buttons compact breathing room without relying on browser defaults", () => {
+    const buttonRule = cssRule("button");
+
+    expect(buttonRule).toMatch(/font-size:\s*0\.9rem/);
+    expect(buttonRule).toMatch(/line-height:\s*1\.2/);
+    expect(buttonRule).toMatch(/padding:\s*7px 12px/);
+  });
+
   it("preserves image-wall tracks when the seed set has fewer cards", () => {
     expect(cssRule(".workspace--density-compact .reference-grid")).toMatch(
       /grid-template-columns:\s*repeat\(auto-fill, minmax\(204px, 1fr\)\)/,

@@ -1625,3 +1625,15 @@
 - 修复后 44 个测试文件 / 463 项测试、typecheck、定向 ESLint（`app tests lib worker types tooling`）、build 和 `git diff --check` 通过；完整 `npm run lint` 在仓库历史 worktree 扫描上长时间无输出，已停止明确的 lint 子进程并以源码目录定向 lint 取代，待后续合并前再收口验证。
 - 合并后的 `main` fresh 通过 44 个测试文件 / 463 项测试、typecheck、lint、build 与 `git diff --check`；运行时代码提交 `e6b376ed087873c82be34242af7b80a7e2891781` 已推送 GitHub 与 Sites source，并作为部署依据。
 - 保存 Sites version 2 并以 owner-only 私有模式部署成功；生产入口仍为 `https://game-ref-forge.ping819376526729888.chatgpt.site`，未修改自定义域名、访问策略、D1 数据或 Backup v1。
+
+## 2026-08-05
+
+- 用户提供删除参考、导出完整备份、取消对比和进入综合稿按钮截图，指出图标与中文标签几乎占满按钮，要求立即排查并修正。
+- 按 systematic debugging 先追踪共用 CSS 规则与组件落点：根因是全局 `button` 只有最小高度，没有显式 `padding`、`font-size` 或 `line-height`，带标签按钮因此依赖浏览器默认内边距；图标按钮的既有 `padding: 0` 覆盖和移动端 `44px` 触控合同需要保留。
+- 在 `codex/fix-button-breathing` 先补红测锁定带标签按钮的 `7px 12px` 内边距、`0.9rem` 字号和 `1.2` 行高，确认旧实现按预期失败后写入统一全局规则，定向合同转绿。
+- 完整门禁通过 44 个测试文件 / 464 项测试、typecheck、lint、build、`git diff --check` 和 Impeccable detector；未修改 API、D1、migration、Backup v1、业务数据或域名配置。
+- 当前修复仍在功能分支，尚未合并或部署；Sites version 19 / `83b31f5` 继续作为生产基线。下一步是合并后决定是否生成下一版私有 Sites 发布，并在发布后复测截图中的四类按钮及移动触控尺寸。
+
+Delegation Log:
+
+- 本轮未启用 subagent/multi-agent；由主代理完成根因定位、TDD 红绿验证、全量门禁和文档留痕。
